@@ -1,6 +1,6 @@
 ## Welcome to The [Interplanetary Embassy](http://interplanetaryembassy.com) of Earth
 
-#### An immersive educational initiative from the [Blockchain Embassy of Asia](http://bce.asia)
+### An immersive educational initiative from the [Blockchain Embassy of Asia](http://bce.asia)
 
 Learn about blockchains by building, owning and transferring planets on the Ethereum network ...
 
