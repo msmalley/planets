@@ -263,6 +263,8 @@ $(document).ready(function()
             var y_cord = parseInt(y_coors);
             var z_cord = parseInt(z_coors);
             
+            $('#search-modal').modal('hide');
+            
             if(
                 x_cord > planet_contract_settings.coordinate_limits
                 || x_cord < 0
@@ -283,7 +285,6 @@ $(document).ready(function()
             }
             else
             {
-                $('#search-modal').modal('hide');
 
                 var abi = web3.eth.contract(unicorn_planet_abi);
                 var contract = abi.at(unicorn_planet_contract_address);
