@@ -88,6 +88,9 @@ var bloqverse = {
                 $(modal).find('.next-monarch').text(planet.rulers.female);
                 $(modal).find('.planet-dna').text(planet_dna);
                 $(modal).find('.planet-meta').text(planet_meta);
+                
+                $('#header').show();
+                $('#footer').show();
             }
             
         }

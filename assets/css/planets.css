@@ -65,8 +65,6 @@ RESETS
     position: fixed;
     z-index: 999;
     line-height: 22px !important;
-    background: #EEE;
-    border-bottom: 2px solid #000;
     text-align: center;
     font-family: sans-serif;
     width: 100%;
@@ -74,11 +72,12 @@ RESETS
     left: 0;
     height: 70px;
     padding-top: 4px;
-    color: #333;
+    color: #BBB;
 }
 #header h4.planet-name {
     padding-bottom: 5px;
     margin-bottom: 0;
+    color: #FFF;
 }
 
 #footer {
@@ -86,8 +85,6 @@ RESETS
     position: fixed;
     z-index: 999;
     line-height: 22px !important;
-    background: #EEE;
-    border-top: 2px solid #000;
     text-align: center;
     font-family: sans-serif;
     width: 100%;
@@ -95,7 +92,7 @@ RESETS
     left: 0;
     height: 70px;
     padding-top: 4px;
-    color: #333;
+    color: #BBB;
 }
 
 .biome-key {

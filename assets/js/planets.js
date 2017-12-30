@@ -155,9 +155,11 @@ $(document).ready(function()
             var cord_array = s[1].split(',');
             if(cord_array.length === 3)
             {
+                $('#header').hide();
+                $('#footer').hide();
                 get_eth_planet(cord_array[0], cord_array[1], cord_array[2], function(res)
                 {
-
+                    
                 });
             }
         }
@@ -222,10 +224,15 @@ $(document).ready(function()
         {
             $(form).find('button[type="submit"]').addClass('loading');
             $('#viewportFrame').find('canvas').hide();
+            $('#header').hide();
+            $('#footer').hide();
+            
             get_eth_planet(x, y, z, function(results)
             {
                 $('#viewportFrame').removeClass('loading'); 
                 $('#viewportFrame').find('canvas').show();
+                $('#header').show();
+                $('#footer').show();
                 $(form).show();
                 $(form).find('button[type="submit"]').removeClass('loading');
                 if($.isPlainObject(results))
