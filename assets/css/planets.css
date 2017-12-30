@@ -54,12 +54,6 @@ RESETS
     background: #FFF;
 }
 
-#splash-panel {
-    display: block;
-    position: absolute;
-    top: 100px;
-    width: 100%;
-}
 #header {
     display: block;
     position: fixed;
@@ -105,6 +99,7 @@ RESETS
 .biome-key i {
     font-style: normal;
 }
+
 form#search-coordinates {
     display: block;
     position: relative;

@@ -53,6 +53,7 @@ var bloqverse = {
                 var island_array = islands.split(' ');
                 var city_array = cities.split(' ');
                 var name_array = planet.name.split(' ');
+                var rulers_array = (planet.rulers.male + ' ' + planet.rulers.female).split(' ');
                 
                 var planet_dna = '' + planet.dna[0] + planet.dna[1] + planet.dna[2] + '';
                 
@@ -72,6 +73,10 @@ var bloqverse = {
                 $.each(animal_array, function(i)
                 {
                     planet_meta+= '' + animal_array[i].toLowerCase() + ', ';
+                });
+                $.each(rulers_array, function(i)
+                {
+                    planet_meta+= '' + rulers_array[i].toLowerCase() + ', ';
                 });
                 $.each(name_array, function(i)
                 {

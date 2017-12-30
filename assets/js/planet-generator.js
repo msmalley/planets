@@ -58,7 +58,7 @@ $(document).ready(function()
 {
     if(show_planet)
     {
-        $('#search-coordinates').hide();
+        $('#search-modal').modal('hide');
         init_planet();
     }
 });

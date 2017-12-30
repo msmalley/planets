@@ -146,6 +146,7 @@ function assign_new_planet(abi_options, contract_address, parameters, from_addre
 
 $(document).ready(function()
 {
+    var show_search = true;
     if(window.location.search)
     {
         var s = window.location.search.split('coords=');
@@ -157,6 +158,7 @@ $(document).ready(function()
             {
                 $('#header').hide();
                 $('#footer').hide();
+                show_search = false;
                 get_eth_planet(cord_array[0], cord_array[1], cord_array[2], function(res)
                 {
                     
@@ -164,6 +166,7 @@ $(document).ready(function()
             }
         }
     }
+    if(show_search === true) $('#search-modal').modal('show');
     $('body').on('submit', 'form#generate-new-planet', function(e)
     {
         e.preventDefault();
@@ -235,9 +238,9 @@ $(document).ready(function()
                 $('#footer').show();
                 $(form).show();
                 $(form).find('button[type="submit"]').removeClass('loading');
+                $('#search-modal').modal('show');
                 if($.isPlainObject(results))
                 {
-                
                     $('#search-coordinates alert.alert').html('We found a planet called ' + results.name + ' at these coorindates.<br />Would you like to <a href="?coords='+x+','+y+','+z+'"><code><strong>visit</strong></code></a> this planet?');
                 }
                 else
@@ -280,7 +283,7 @@ $(document).ready(function()
             }
             else
             {
-                $('#search-coordinates').hide();
+                $('#search-modal').modal('hide');
 
                 var abi = web3.eth.contract(unicorn_planet_abi);
                 var contract = abi.at(unicorn_planet_contract_address);
@@ -314,7 +317,7 @@ $(document).ready(function()
     $('body').on('click', '.search-again', function(e)
     {
         e.preventDefault();
-        $('#search-coordinates').toggle();
+        $('#search-modal').modal('toggle');
     });
     $('body').on('click', '.galactic-directory', function(e)
     {
@@ -471,7 +474,7 @@ function prepare_for_planet_creation(x_co, y_co, z_co, planet_name, planet_owner
 function get_eth_planet(x_cord, y_cord, z_cord, callback)
 {
     $('#viewportFrame').addClass('loading');
-    $('form#search-coordinates').hide();
+    $('#search-modal').modal('hide');
     $.fn.bloqpress.plugins.ethereum.contracts.get(unicorn_planet_contract_address, unicorn_planet_abi, function(contract)
     {
         var planet_exists = contract.exists(x_cord, y_cord, z_cord).toString();

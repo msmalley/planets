@@ -205,7 +205,7 @@
 
         <div id="footer">
             <div class="container" id="planet-footer">
-                <h4 class="planet-stats">Location: Unknown</h4>
+                <h4 class="planet-stats"><a href="#" class="btn btn-default btn-xs search-again" style="margin: -10px 0 5px;">search for life</a></h4>
             </div>
         </div>
 		
@@ -217,11 +217,31 @@
 			</div>
 		</div>
 
-        <div id="splash-panel">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-3"></div>
-                    <div class="col-md-6">
+        <div class="modal fade" id="default-modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title" id="myModalLabel"></h4>
+                    </div>
+                    <div class="modal-body"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="search-modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title" id="myModalLabel">Search the Universe</h4>
+                    </div>
+                    <div class="modal-body">
+                        
                         <form id="search-coordinates">
                             <alert class="alert alert-info alert-block">Search <a href="https://etherscan.io/address/0x83ebb03be2f5ac37a5ff28c685dcf2685e9d6e68" target="_blank">Universal</a> Coordinates:</alert>
                             <div class="row">
@@ -238,22 +258,8 @@
                             <hr>
                             <button type="submit" class="btn btn-primary btn-block">Search</button>
                         </form>
+                        
                     </div>
-                    <div class="col-md-3"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="default-modal" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        <h4 class="modal-title" id="myModalLabel"></h4>
-                    </div>
-                    <div class="modal-body"></div>
                 </div>
             </div>
         </div>
