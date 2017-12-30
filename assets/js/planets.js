@@ -221,9 +221,11 @@ $(document).ready(function()
         if(x && y && z)
         {
             $(form).find('button[type="submit"]').addClass('loading');
+            $('#viewportFrame').find('canvas').hide();
             get_eth_planet(x, y, z, function(results)
             {
                 $('#viewportFrame').removeClass('loading'); 
+                $('#viewportFrame').find('canvas').show();
                 $(form).show();
                 $(form).find('button[type="submit"]').removeClass('loading');
                 if($.isPlainObject(results))
