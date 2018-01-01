@@ -6,4 +6,6 @@ Learn about blockchains by building, owning and transferring planets on the Ethe
 
 ![The Planet Obviiious](https://raw.githubusercontent.com/msmalley/planets/master/assets/img/obviiious.png)
 
+![Other Examples](https://raw.githubusercontent.com/msmalley/planets/master/assets/img/planets.png)
+
 Powered by the [BloqPress](http://bloq.press) Framework
