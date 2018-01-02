@@ -190,31 +190,36 @@ contract PlanetToken is Ownable, BasicNFT
   mapping (uint => uint) public lifeD;
   mapping (uint => uint) public lifeN;
   mapping (uint => uint) public lifeA;    
-  mapping (string => string) private universe;
   mapping (uint => uint) public latestPing;
+  
+  string private universe;
+  uint private min_donation;
+  address private donation_address;
+  uint private coordinate_limit;
 
   event TokenPing(uint tokenId);
-    
-  address constant private donations = 0x1aFa7039c7c0c896E6e76e43E536E925b5Fc871d;
 
   function () public payable 
   {
-      donations.transfer(msg.value);
+      donation_address.transfer(msg.value);
   }
     
-  function PlanetToken(string UniverseName) 
+  function PlanetToken(string UniverseName, uint DonatedWeiRequired, uint CoordinateLimit, address DonationAddress) public
   {
       universe = UniverseName;
+      min_donation = DonatedWeiRequired;
+      coordinate_limit = CoordinateLimit;
+      donation_address = DonationAddress;
   }
 
   function assignNewPlanet(address beneficiary, uint x, uint y, uint z, string _planetName) public payable 
   {  
     // Check paramters
     require(tokenOwner[buildTokenId(x, y, z)] == 0);
-    require(msg.value >= 0.1 ether);
-    require(x < 10000);
-    require(y < 10000);
-    require(z < 10000);
+    require(msg.value >= min_donation);
+    require(x <= coordinate_limit);
+    require(y <= coordinate_limit);
+    require(z <= coordinate_limit);
      
     // Update token records
     latestPing[buildTokenId(x, y, z)] = now;
@@ -228,13 +233,13 @@ contract PlanetToken is Ownable, BasicNFT
     cordZ[buildTokenId(x, y, z)] = z;
 
     // Update DNA records
-    lifeD[buildTokenId(x, y, z)] = uint256(keccak256(x, '|x|', msg.sender, '|', universe)));
-    lifeN[buildTokenId(x, y, z)] = uint256(keccak256(y, '|y|', msg.sender, '|', universe)));
-    lifeA[buildTokenId(x, y, z)] = uint256(keccak256(z, '|z|', msg.sender, '|', universe)));
+    lifeD[buildTokenId(x, y, z)] = uint256(keccak256(x, '|x|', msg.sender, '|', universe));
+    lifeN[buildTokenId(x, y, z)] = uint256(keccak256(y, '|y|', msg.sender, '|', universe));
+    lifeA[buildTokenId(x, y, z)] = uint256(keccak256(z, '|z|', msg.sender, '|', universe));
 
     // Finalize process
     TokenCreated(buildTokenId(x, y, z), beneficiary, _planetName);  
-    donations.transfer(msg.value);
+    donation_address.transfer(msg.value);
   }
 
   function ping(uint tokenId) public 
@@ -244,7 +249,7 @@ contract PlanetToken is Ownable, BasicNFT
     TokenPing(tokenId);
   }
 
-  function buildTokenId(uint x, uint y, uint z) public pure returns (uint256) 
+  function buildTokenId(uint x, uint y, uint z) public view returns (uint256) 
   {
     return uint256(keccak256(x, '|', y, '|', z, '|', universe));
   }
