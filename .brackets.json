@@ -1,0 +1,7 @@
+{
+    "jscodehints.detectedExclusions": [
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/contracts/planets-v1.sol.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/xor.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/web3.min.js"
+    ]
+}

@@ -5,19 +5,23 @@ pragma solidity ^0.4.18;
  ROPSTEN WALLET = 0x7786d0aa2cba1857cf35425243c46cafe10f3e42
  Contract = 0x27728d9a0a4dEDA56d4eCF0CBBd4F473ae878e0A
  geth --testnet --rpc --rpcapi "db,eth,net,web3" --rpcport "8545" --rpccorsdomain "*"
+
+ PAYABLE VERSIONS
  
- // Directory of Planets ...?
- 01 = 0, 0, 0 = Genesis Prime
- 02 = 5, 3, 1979 = Smallville
- 03 = 6, 6, 6 = Helio 1
- 04 = 1, 2, 3 = Obviious
- 05 = 3, 5, 1979 = United States of Smallville
- 06 = 987654321, 123456789, 987654321 = Far Point 9
- 07 = 7, 5, 2 = NowNow
+ TESTNET
+ Contract = 0x2ee9275621cE22cb38B81Ff9a18fCD8C14e7a7AA
+ Donations = 0x1bD01CA039D65b9866B9f59f2310DA5944dfF609
  
- SOLO:
- TEST WALLET = 0xC43850B5Fc28b186dFCF958c6bE3A96Ff56ac6E0
- Account #2 = 0x29f4EAd040C3537449d992ae45d5D417B5452fDD
+ LIMIT = 99999999999999999999999999999999999999999999999999999999999999999999999999999
+ 
+ MAINNET
+ Contract = 0x83EbB03Be2f5AC37a5FF28c685dcf2685E9d6e68
+ Account 2 = 0x1E36e1d77b5c53adFf38b30C8CA0e6f680940Ef1
+ Donations = 0x1aFa7039c7c0c896E6e76e43E536E925b5Fc871d
+ 
+ -----------------------------------------------------------
+ ROPSTEN WALLET = 0x7786d0aa2cba1857cf35425243c46cafe10f3e42
+ Contract = 0x27728d9a0a4dEDA56d4eCF0CBBd4F473ae878e0A
 
  * @title Ownable
  * @dev The Ownable contract has an owner address, and provides basic authorization control
