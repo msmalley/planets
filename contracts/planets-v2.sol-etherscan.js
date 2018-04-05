@@ -1,28 +1,5 @@
 pragma solidity ^0.4.18;
 
-/*
-
-Interplanetary Embassy v0.2
-
-MIT LICENSE - http://bce.asia
-
-// Donation Address (private testnet)
-// 0x661aB529bd3b13f1b54665b5A67bC2098db333c1
-// Main Donation = 0xf725a9b6B83445105F14A60968410eC8000dc0c1
-// Main Contract = 0xcE85675eA91F8AFe2a67869A8b1F9136187DC772
-// Private Contract = 0x8Afb5Ab8ad241a0471197D6F968ab4892ec11Ec4
-// Private Atoms = 0x9aeB8a11B70893aAFa2e733F4dc9165c4487129A
-// Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
-// MS Personal = 0x7d0C58E478479c8f6f5A96C2424d6AE4F82980e0
-// Interval = 15120
-// Wei = 100000000000000
-// Ether = 0.0001
-
-// 714619270734888148942452441210186278198392605968513767655589983453453997021
-// 71461927073488814894245244121018627008198392605968513767655589983453453997021
-
-*/
-
 /**
  * @title Ownable
  * @dev The Ownable contract has an owner address, and provides basic authorization control

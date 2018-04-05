@@ -2,6 +2,25 @@
     "jscodehints.detectedExclusions": [
         "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/contracts/planets-v1.sol.js",
         "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/xor.js",
-        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/web3.min.js"
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/web3.min.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/words/names.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/words/animals.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/words/adjectives.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/universes/bce/names.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/universes/bce/animals.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/universes/bce/adjectives.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/tone.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/three.min.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/stats.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/sha3.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/qrcode.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/planets.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/planet-generator.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/original.ish.planet-generator.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/options.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/ipfs.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/contracts/planets-v2.sol.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/contracts/abi-planets-v2.sol.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/contracts/proxy.js"
     ]
 }
