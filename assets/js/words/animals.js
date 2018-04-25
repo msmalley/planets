@@ -1,5 +1,5 @@
 var interplanetary_animals = [
-  "Aardvarks",
+  "Aardvark",
   "Aard-Wolf",
   "Acorn-Barnacle",
   "Acorn-Woodpecker",

@@ -84,40 +84,52 @@ function random_planetary_life(seed)
     return dominent_species;
 }
 
-function assign_new_planet(abi_options, contract_address, parameters, from_address, from_key, amount, to_address, callback)
+function assign_new_planet(abi_options, contract_address, parameters, from_address, from_key, total_contract_cost, to_address, callback)
 {
     var abi = web3.eth.contract(abi_options);
     var contract = abi.at(contract_address);
     var data = contract['assignNewPlanet'].getData(parameters.owner, parameters.x, parameters.y, parameters.z, parameters.name, parameters.liason, parameters.url);
-    var ether_to_send = web3.fromDecimal(web3.toWei(amount), 'ether');
-    var wei_to_send = parseInt(web3.toWei(amount));
-    var gas_price = web3.eth.gasPrice;
-    console.log('gas_price', gas_price);
-    /*
+    
+    //var ether_to_send = web3.fromDecimal(web3.toWei(amount), 'ether');
+    //var wei_to_send = parseInt(web3.toWei(amount));
+    //var gas_price = web3.eth.gasPrice;
+    /**/
     var estimated_gas = web3.eth.estimateGas({
         from: from_address,
         to: contract_address,
         data: data,
-        value: wei_to_send
+        value: parseInt(web3.toWei(parameters.min))
     });
-    */
+    
+    /*
     var settings = {
-        gas_price: gas_price.toNumber(),
-        //gas_limit: estimated_gas
-        gas_limit: 3000000
+        gas_price: parameters.gas_price,
+        gas_limit: estimated_gas
+        //gas_limit: 3000000
     }
+    */
+    
+    console.log('parameters.gas_price', parameters.gas_price);
+    
     var private_key = new Buffer(from_key, 'hex');
     var temp_nonce = web3.eth.getTransactionCount(from_address);
     var raw_tx = {
         nonce: temp_nonce,
-        gasPrice: settings.gas_price,
-        gasLimit: settings.gas_limit,
+        gasPrice: parameters.gas.toNumber(),
+        //gasLimit: 3000000,
+        gasLimit: estimated_gas,
         to: contract_address, 
-        value: ether_to_send,
+        //value: ether_to_send,
+        value: parseInt(web3.toWei(parameters.min)),
         data: data
     }
-    var total_fees = gas_price * estimated_gas;
-    var total_wei_required = total_fees + wei_to_send;
+    
+    console.log('raw_tx', raw_tx);
+    console.log('from_key', from_key);
+    
+    //var total_fees = paramerers.fees; // gas_price * estimated_gas;
+    //var total_wei_required = total_fees + wei_to_send;
+    
     var tx = new EthJS.Tx(raw_tx);
     tx.sign(private_key);
     var serialized_tx = tx.serialize();
@@ -358,8 +370,8 @@ $(document).ready(function()
                 var total_eth_required = web3.toDecimal(web3.fromWei(total_wei_required), 'ether');
 
                 var title = 'Generate New Planet';
-                var contents = '<alert class="alert alert-block alert-info">Only ' + blocks_left + ' Blocks Remain Before Minimum Donation Fee Increases<br />(when it is estimated to increase to ' + estimated_minimum + ' ether)</alert><p>Generate planet at X = '+x_coors+', Y = '+y_coors+', and Z = '+z_coors+' by giving it a name and making a minimum donation of ' + bloqverse_settings.universe.min_donation + ' Ether - whilst also paying the estimated gas price of '+total_fees+' - for a <strong>minimum total</strong> of at least <strong>'+total_eth_required+'</strong> Ether. Please note that as a registered non-profit - all donations received by the <a href="http://bce.asia" target="_blank">Blockchain Embassy</a> are used to help promote blockchain technology awareness throughout asia.</p><p><strong>Simply fill out the form below to get started:</strong></p><hr>';
-                contents+= '<form id="generate-new-planet" data-x="'+x_coors+'" data-y="'+y_coors+'" data-z="'+z_coors+'" data-min="'+total_eth_required+'" data-fees="' + total_fees + '">';
+                var contents = '<alert class="alert alert-block alert-info">Only ' + blocks_left + ' Blocks Remain Before Minimum Donation Fee Increases<br />(when it is estimated to increase to ' + estimated_minimum + ' ether)</alert><p>Generate planet at X = '+x_coors+', Y = '+y_coors+', and Z = '+z_coors+' by giving it a name and making a minimum donation of ' + bloqverse_settings.universe.min_donation + ' Ether - whilst also paying the estimated gas price of '+total_fees+' - for a <strong>minimum total</strong> of at least <strong>'+bloqverse.utils.round_up(total_eth_required)+'</strong> Ether. Please note that as a registered non-profit - all donations received by the <a href="http://bce.asia" target="_blank">Blockchain Embassy</a> are used to help promote blockchain technology awareness throughout asia.</p><p><strong>Simply fill out the form below to get started:</strong></p><hr>';
+                contents+= '<form id="generate-new-planet" data-x="'+x_coors+'" data-y="'+y_coors+'" data-z="'+z_coors+'" data-min="'+bloqverse.utils.round_up(total_eth_required)+'" data-fees="' + total_fees + '">';
                     contents+= '<input type="text" id="planet-name" class="form-control" autocomplete="off" placeholder="What would you like to call this planet...?" /><hr>';
                     contents+= '<input type="text" id="planet-owner" class="form-control" autocomplete="off" placeholder="Ethereum address to which ownership of the planet should be assigned...?" /><hr>';
                     contents+= '<input type="text" id="human-owner" class="form-control" autocomplete="off" placeholder="Human Liason on Earth...?" /><hr>';
@@ -430,15 +442,12 @@ function check_for_donations(check_count)
                         && obj.balance >= min_wei
                     ){
                         $(qr).removeClass('wait-for-donation');
-                        
-                        var min_donation = parseInt(parseFloat(bloqverse_settings.universe.min_donation) * 1000000000000000000);
                     
                         var abi = web3.eth.contract(unicorn_planet_abi);
                         var contract = abi.at(bloqverse_settings.universe.contract);
                         var data = contract['assignNewPlanet'].getData(owner, x_cord, y_cord, z_cord, name, liason, url);
 
                         var gas_price = web3.eth.gasPrice;
-                        console.log('gas_price1', gas_price);
                         
                         var new_contract_cost = web3.eth.estimateGas({
                             from: address,
@@ -447,7 +456,6 @@ function check_for_donations(check_count)
                             value: obj.balance
                         });
 
-                        console.log('new_contract_cost', new_contract_cost);
                         contract_cost = new_contract_cost * gas_price;
                         
                         var tx_value = obj.balance - contract_cost;
@@ -457,6 +465,7 @@ function check_for_donations(check_count)
                             x_cord, y_cord, z_cord, 
                             name, liason, url, owner, 
                             tx_eth_value, address, key, 
+                            bloqverse_settings.universe.min_donation, gas_price,
                             function(hash)
                             {
                                 var title = 'Error';
@@ -497,9 +506,9 @@ function check_for_donations(check_count)
     });
 }
 
-function prepare_for_planet_creation(x_co, y_co, z_co, planet_name, liason, url, planet_owner, tx_value, holding_address, holding_key, callback)
+function prepare_for_planet_creation(x_co, y_co, z_co, planet_name, liason, url, planet_owner, tx_value, holding_address, holding_key, min_donation, gas_price, callback)
 {
-    console.log('prepare');
+    console.log('min_donation', min_donation);
     assign_new_planet(
         unicorn_planet_abi, 
         bloqverse_settings.universe.contract, 
@@ -510,7 +519,9 @@ function prepare_for_planet_creation(x_co, y_co, z_co, planet_name, liason, url,
             name: planet_name,
             owner: planet_owner,
             liason: liason,
-            url: url
+            url: url,
+            min: min_donation,
+            gas: gas_price
         },
         holding_address, 
         holding_key, 

@@ -21,6 +21,8 @@
         "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/assets/js/ipfs.js",
         "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/contracts/planets-v2.sol.js",
         "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/contracts/abi-planets-v2.sol.js",
-        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/contracts/proxy.js"
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/contracts/proxy.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/contracts/planets-v0.3.sol.js",
+        "/Applications/XAMPP/xamppfiles/htdocs/neuroware/bce/planets/contracts/planets-v2.sol-etherscan.js"
     ]
 }

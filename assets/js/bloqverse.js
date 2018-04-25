@@ -163,13 +163,30 @@ var bloqverse = {
                 
                 var planet_intro = 'In that vast depths of ' + space + ' space the planet of ' + planet.name + ' orbits a nearby ' + sun + ' sun. On the planet surface ' + cities + ' cities have started developing on the islands of ' + islands + ' that lie scattered across a ' + ocean + ' ocean. Under the leadership of ' + ruling_family + '; these ' + species + ' have become the dominant species. The whispered rumours of a ' + next_species + ' rebellion by ' + next_in_line + ' brings the planet of ' + planet.name + ' to the brink of war.';
                 
+                var avatar_options = {
+                    foreground: [255, 255, 255, 255],
+                    background: [0, 0, 0, 255],
+                    margin: 0.2,
+                    size: 420,
+                    format: 'svg'
+                };
+                var avatar_hash = CryptoJS.SHA3(
+                    planet.url + '_' + planet.liason, 
+                    { outputLength: 512 }
+                ).toString();
+
+                // create a base64 encoded SVG
+                var avatar_data = new Identicon(avatar_hash, avatar_options).toString();
+                var planet_liason_avatar = '<br><div class="row"><div class="col-md-3"><img class="avatar img img-block img-responsive" src="data:image/svg+xml;base64,' + avatar_data + '"></div><div class="col-md-1"></div><div class="col-md-8"></div><br><a href="' + planet.url + '">' + planet.liason + '</a><br></div>';
+                
                 $(modal).find('.modal-title').text(planet.name);
                 $(modal).find('.universe-contract').text(bloqverse_settings.universe.contract);
                 $(modal).find('.primary-species').text(species);
                 $(modal).find('.next-species').text(next_species);
                 $(modal).find('.planet-owner').text(planet.owner);
-                $(modal).find('.human-liason').text(planet.liason);
-                $(modal).find('.human-liason').attr('href', planet.url);
+                $(modal).find('.human-liason').html(planet_liason_avatar);
+                //$(modal).find('.human-liason').text(planet.liason);
+                //$(modal).find('.human-liason').attr('href', planet.url);
                 $(modal).find('.universal-coordinates').text(coords);
                 $(modal).find('.ruling-monarch').text(ruling_family);
                 $(modal).find('.next-monarch').text(next_in_line);
@@ -197,6 +214,34 @@ var bloqverse = {
                 });
             }
             
+        }
+    },
+    utils: {
+        round_up: function(num)
+        {
+            var decimal_place = 0;
+            var new_num = '';
+            var decimal_string = num.toString();
+            if(decimal_string.indexOf('.') > -1)
+            {
+                var decimal_array = decimal_string.split('.');
+                var decimal_places = decimal_array[1];
+                new_num+= decimal_array[0] + '.';
+                var decimal_max = decimal_places.length;
+                for(i = 0; i < decimal_max; i++)
+                {
+                    new_num+= decimal_places[i];
+                    if(decimal_place < 1)
+                    {
+                        if(parseInt(decimal_places[i]) > 0)
+                        {
+                            new_num+= '9';
+                            return parseFloat(new_num).toFixed(i + 1);
+                        }
+                    }
+                }
+            }
+            return decimal_place;
         }
     }
 }
