@@ -150,33 +150,33 @@ contract BloqVerse is AbleToUtilizeStrings
     // Set data via string (bytes32 limit) keys ...
     function setAddress(bytes32 key, address value) public view returns(address);
     function setBool(bytes32 key, bool value) public view returns(bool);
-    function setString(bytes32 key, string value) public view returns(bytes32);
+    function setString(bytes32 key, bytes32 value) public view returns(bytes32);
     function setUint(bytes32 key, uint value) public view returns(uint);
     
     // Set data via uint256 keys ...
     function SetAddress(uint256 key, address value) public;
     function SetBool(uint256 key, bool value) public;
-    function SetString(uint256 key, string value) public;
+    function SetString(uint256 key, bytes32 value) public;
     function SetUint(uint256 key, uint value) public;
     
     // Set data via uint256 and string (bytes32 limit) combined keys ...
     function SetKeyedAddress(uint256 id, bytes32 key, address value) public;
     function SetKeyedBool(uint256 id, bytes32 key, bool value) public;
-    function SetKeyedString(uint256 id, bytes32 key, string value) public;
+    function SetKeyedString(uint256 id, bytes32 key, bytes32 value) public;
     function SetKeyedUint(uint256 id, bytes32 key, uint value) public;
     
     // Set addressed data via string (bytes32 limit) keys ...
     function setAddressedAddress(address addressIndex, bytes32 key, address value) public view returns(address);
     function setAddressedBool(address addressIndex, bytes32 key, bool value) public view returns(bool);
     function setAddressedString(address addressIndex, bytes32 key, bytes32 value) public view returns(bytes32);
-    function setAddressedRealString(address addressIndex, bytes32 key, string value) public view returns(string);
+    function setAddressedRealString(address addressIndex, bytes32 key, bytes32 value) public view returns(string);
     function setAddressedUint(address addressIndex, bytes32 key, uint value) public view returns(uint);
     
     // Set addressed data via uint256 keys ...
     function SetAddressedAddress(address addressIndex, uint256 key, address value) public view returns(address);
     function SetAddressedBool(address addressIndex, uint256 key, bool value) public view returns(bool);
     function SetAddressedString(address addressIndex, uint256 key, bytes32 value) public view returns(bytes32);
-    function SetAddressedRealString(address addressIndex, uint256 key, string value) public view returns(string);
+    function SetAddressedRealString(address addressIndex, uint256 key, bytes32 value) public view returns(string);
     function SetAddressedUint(address addressIndex, uint256 key, uint value) public view returns(uint);
     
     // Delete data via string (bytes32 limit) keys ...
@@ -225,7 +225,7 @@ contract BloqVerse is AbleToUtilizeStrings
     // Push an item to an array via string (bytes32 limit) key ...
     function pushAddress(bytes32 key, address value) public;
     function pushBool(bytes32 key, bool value) public;
-    function pushString(bytes32 key, string value) public;
+    function pushString(bytes32 key, bytes32 value) public;
     function pushUint(bytes32 key, uint value) public;
     
     // Get an item from an array via uint256 key and uint index ...
@@ -238,7 +238,7 @@ contract BloqVerse is AbleToUtilizeStrings
     // Push an item to an array via uint256 key ...
     function PushAddress(uint256 key, address value) public;
     function PushBool(uint256 key, bool value) public;
-    function PushString(uint256 key, string value) public;
+    function PushString(uint256 key, bytes32 value) public;
     function PushUint(uint256 key, uint value) public;
     
     // Get an item from an addressed array via string (bytes32 limit) key and uint index ...
@@ -251,7 +251,7 @@ contract BloqVerse is AbleToUtilizeStrings
     // Push an item to an addressed array via string (bytes32 limit) key ...
     function pushAddressedAddress(address addressIndex, bytes32 key, address value) public;
     function pushAddressedBool(address addressIndex, bytes32 key, bool value) public;
-    function pushAddressedString(address addressIndex, bytes32 key, string value) public;
+    function pushAddressedString(address addressIndex, bytes32 key, bytes32 value) public;
     function pushAddressedUint(address addressIndex, bytes32 key, uint value) public;
     
     // Get an item from an addressed array via uint256 key and uint index ...
@@ -264,7 +264,7 @@ contract BloqVerse is AbleToUtilizeStrings
     // Push an item to an addressed array via uint256 key ...
     function PushAddressedAddress(address addressIndex, uint256 key, address value) public;
     function PushAddressedBool(address addressIndex, uint256 key, bool value) public;
-    function PushAddressedString(address addressIndex, uint256 key, string value) public;
+    function PushAddressedString(address addressIndex, uint256 key, bytes32 value) public;
     function PushAddressedUint(address addressIndex, uint256 key, uint value) public;
     
     // Remove an item from an array via string (bytes32 limit) key and uint index ...
@@ -275,51 +275,52 @@ contract BloqVerse is AbleToUtilizeStrings
     function removeUint(bytes32 key, uint index) public;
     
     // Remove an item from an addressed array via string (bytes32 limit) key and uint index ...
-    function removeAddressedAddress(bytes32 key, uint index) public;
-    function removeAddressedBool(bytes32 key, uint index) public;
-    function removeAddressedString(bytes32 key, uint index) public;
-    function removeAddressedUint(bytes32 key, uint index) public;
+    function removeAddressedAddress(address addressIndex, bytes32 key, uint index) public;
+    function removeAddressedBool(address addressIndex, bytes32 key, uint index) public;
+    function removeAddressedString(address addressIndex, bytes32 key, uint index) public;
+    function removeAddressedUint(address addressIndex, bytes32 key, uint index) public;
     
     // Remove an item from an array via uint256 key and uint index ...
-    function RemoveAddress(bytes32 key, uint index) public;
-    function RemoveBool(bytes32 key, uint index) public;
-    function RemoveString(bytes32 key, uint index) public;
-    function RemoveUint(bytes32 key, uint index) public;
+    function RemoveAddress(uint256 key, uint index) public;
+    function RemoveBool(uint256 key, uint index) public;
+    function RemoveString(uint256 key, uint index) public;
+    function RemoveUint(uint256 key, uint index) public;
     
     // Remove an item from an addressed array via uint256 key and uint index ...
-    function RemoveAddressedAddress(bytes32 key, uint index) public;
-    function RemoveAddressedBool(bytes32 key, uint index) public;
-    function RemoveAddressedString(bytes32 key, uint index) public;
-    function RemoveAddressedUint(bytes32 key, uint index) public;
+    function RemoveAddressedAddress(address addressIndex, uint256 key, uint index) public;
+    function RemoveAddressedBool(address addressIndex, uint256 key, uint index) public;
+    function RemoveAddressedString(address addressIndex, uint256 key, uint index) public;
+    function RemoveAddressedUint(address addressIndex, uint256 key, uint index) public;
     
     // Update an item from an array via string (bytes32 limit) key and uint index ...
-    function pdateAddress(bytes32 key, uint index) public;
-    function updateBool(bytes32 key, uint index) public;
-    function updateString(bytes32 key, uint index) public;
-    function updateRealString(bytes32 key, uint index) public;
-    function updateUint(bytes32 key, uint index) public;
+    function updateAddress(bytes32 key, uint index, address value) public;
+    function updateBool(bytes32 key, uint index, bool value) public;
+    function updateString(bytes32 key, uint index, bytes32 value) public;
+    function updateUint(bytes32 key, uint index, uint value) public;
     
     // Update an item from an addressed array via string (bytes32 limit) key and uint index ...
-    function updateAddressedAddress(bytes32 key, uint index) public;
-    function updateAddressedBool(bytes32 key, uint index) public;
-    function updateAddressedString(bytes32 key, uint index) public;
-    function updateAddressedUint(bytes32 key, uint index) public;
+    function updateAddressedAddress(address addressIndex, bytes32 key, uint index, address value) public;
+    function updateAddressedBool(address addressIndex, bytes32 key, uint index, bool value) public;
+    function updateAddressedString(address addressIndex, bytes32 key, uint index, bytes32 value) public;
+    function updateAddressedUint(address addressIndex, bytes32 key, uint index, uint value) public;
     
     // Update an item from an array via uint256 key and uint index ...
-    function UpdateAddress(bytes32 key, uint index) public;
-    function UpdateBool(bytes32 key, uint index) public;
-    function UpdateString(bytes32 key, uint index) public;
-    function UpdateUint(bytes32 key, uint index) public;
+    function UpdateAddress(uint256 key, uint index, address value) public;
+    function UpdateBool(uint256 key, uint index, bool value) public;
+    function UpdateString(uint256 key, uint index, bytes32 value) public;
+    function UpdateUint(uint256 key, uint index, uint value) public;
     
     // Update an item from an addressed array via uint256 key and uint index ...
-    function UpdateAddressedAddress(bytes32 key, uint index) public;
-    function UpdateAddressedBool(bytes32 key, uint index) public;
-    function UpdateAddressedString(bytes32 key, uint index) public;
-    function UpdateAddressedUint(bytes32 key, uint index) public;
+    function UpdateAddressedAddress(address addressIndex, uint256 key, uint index, address value) public;
+    function UpdateAddressedBool(address addressIndex, uint256 key, uint index, bool value) public;
+    function UpdateAddressedString(address addressIndex, uint256 key, uint index, bytes32 vaue) public;
+    function UpdateAddressedUint(address addressIndex, uint256 key, uint index, uint value) public;
     
     /*
     
     TOP TEN COUNTS
+    
+    ORIGINALLY INSIDE PLANETS.js
     
     01 - addressCount
     02 - addressBytes32Count
@@ -347,10 +348,10 @@ contract BloqVerse is AbleToUtilizeStrings
     function UintCount() public view returns(uint);
     
     // 02) Basic base data type counts via bytes32 indexes ...
-    function getAddressCount(bytes32 index) public view returns(uint);
-    function getBoolCount(bytes32 index) public view returns(uint);
-    function getStringCount(bytes32 index) public view returns(uint);
-    function getUintCount(bytes32 index) public view returns(uint);
+    function getAddressCount(string index) public view returns(uint);
+    function getBoolCount(string index) public view returns(uint);
+    function getStringCount(string index) public view returns(uint);
+    function getUintCount(string index) public view returns(uint);
     
     // 03) Basic base data type counts via uint256 indexes ...
     function GetAddressCount(uint256 index) public view returns(uint);
@@ -359,16 +360,16 @@ contract BloqVerse is AbleToUtilizeStrings
     function GetUintCount(uint256 index) public view returns(uint);
     
     // 04) Basic base data type counts via keyed uint256 indexes ...
-    function GetKeyedAddressCount(uint256 index, bytes32 key) public view returns(uint);
-    function GetKeyedBoolCount(uint256 index, bytes32 key) public view returns(uint);
-    function GetKeyedStringCount(uint256 index, bytes32 key) public view returns(uint);
-    function GetKeyedUintCount(uint256 index, bytes32 key) public view returns(uint);
+    function GetKeyedAddressCount(uint256 index, string key) public view returns(uint);
+    function GetKeyedBoolCount(uint256 index, string key) public view returns(uint);
+    function GetKeyedStringCount(uint256 index, string key) public view returns(uint);
+    function GetKeyedUintCount(uint256 index, string key) public view returns(uint);
     
     // 05) Addressed data type counts via bytes32 indexes ...
-    function getAddressedAddressCount(address addressIndex, bytes32 key) public view returns(uint);
-    function getAddressedBoolCount(address addressIndex, bytes32 key) public view returns(uint);
-    function getAddressedStringCount(address addressIndex, bytes32 key) public view returns(uint);
-    function getAddressedUintCount(address addressIndex, bytes32 key) public view returns(uint);
+    function getAddressedAddressCount(address addressIndex, string key) public view returns(uint);
+    function getAddressedBoolCount(address addressIndex, string key) public view returns(uint);
+    function getAddressedStringCount(address addressIndex, string key) public view returns(uint);
+    function getAddressedUintCount(address addressIndex, string key) public view returns(uint);
     
     // 06) Addressed data type counts via uint256 indexes ...
     function GetAddressedAddressCount(address addressIndex, uint256 key) public view returns(uint);
@@ -377,16 +378,16 @@ contract BloqVerse is AbleToUtilizeStrings
     function GetAddressedUintCount(address addressIndex, uint256 key) public view returns(uint);
     
     // 07) Bytes32 array counts ...
-    function getArrayAddressCount(bytes32 index) public view returns(uint);
-    function getArrayBoolCount(bytes32 index) public view returns(uint);
-    function getArrayStringCount(bytes32 index) public view returns(uint);
-    function getArrayUintCount(bytes32 index) public view returns(uint);
+    function getArrayAddressCount(string index) public view returns(uint);
+    function getArrayBoolCount(string index) public view returns(uint);
+    function getArrayStringCount(string index) public view returns(uint);
+    function getArrayUintCount(string index) public view returns(uint);
     
     // 08) Addressed bytes32 array counts ...
-    function getAddressedArrayAddressCount(address addressIndex, bytes32 key) public view returns(uint);
-    function getAddressedArrayBoolCount(address addressIndex, bytes32 key) public view returns(uint);
-    function getAddressedArrayStringCount(address addressIndex, bytes32 key) public view returns(uint);
-    function getAddressedArrayUintCount(address addressIndex, bytes32 key) public view returns(uint);
+    function getAddressedArrayAddressCount(address addressIndex, string key) public view returns(uint);
+    function getAddressedArrayBoolCount(address addressIndex, string key) public view returns(uint);
+    function getAddressedArrayStringCount(address addressIndex, string key) public view returns(uint);
+    function getAddressedArrayUintCount(address addressIndex, string key) public view returns(uint);
     
     // 09) Uint256 array counts ...
     function GetArrayAddressCount(uint256 index) public view returns(uint);
@@ -462,42 +463,276 @@ contract Extensible is Upgradable
     
     */
     
-    function createAddress(
+    function create(
         address addressIndex, 
         string stringKey, 
         uint256 uintKey, 
-        address indexValue, 
-        address arrayValue,
+        address addressValue,
+        bool boolValue,
+        string stringValue,
+        uint uintValue,
+        string dataType,
         bool gotStringKey,
         bool gotUintKey,
         bool isArray
-    ) public {
+    ) 
+    public 
+    {
+        if(stringToBytes32(dataType) == stringToBytes32('address'))
+        {
+            if(addressIndex == 0)
+            {
+                if(gotStringKey && gotUintKey)
+                {
+                    // Set data via uint256 and string (bytes32 limit) combined keys ...
+                    db.SetKeyedAddress(uintKey, stringToBytes32(stringKey), addressValue);
+                }
+                else if(isArray && gotStringKey)
+                {
+                    // Push an item to an array via string (bytes32 limit) key ...
+                    db.pushAddress(stringToBytes32(stringKey), addressValue);
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Push an item to an array via uint256 key ...
+                    db.PushAddress(uintKey, addressValue);
+                }
+                else if(gotStringKey)
+                {
+                    // Set data via string (bytes32 limit) keys ...
+                    db.setAddress(stringToBytes32(stringKey), addressValue);
+                }
+                else if(gotUintKey)
+                {
+                    // Set data via uint256 keys ...
+                    db.SetAddress(uintKey, addressValue);
+                }
+            }
+            else
+            {
+                if(isArray && gotStringKey)
+                {
+                    // Push an item to an addressed array via string (bytes32 limit) key ...
+                    db.pushAddressedAddress(addressIndex, stringToBytes32(stringKey), addressValue);
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Push an item to an addressed array via uint256 key ...
+                    db.PushAddressedAddress(addressIndex, uintKey, addressValue);
+                }
+                else if(gotStringKey)
+                {
+                    // Set addressed data via string (bytes32 limit) keys ...
+                    db.setAddressedAddress(addressIndex, stringToBytes32(stringKey), addressValue);
+                }
+                else if(gotUintKey)
+                {
+                    // Set addressed data via uint256 keys ...
+                    db.SetAddressedAddress(addressIndex, uintKey, addressValue);
+                }
+            }
+        }
+        else if(stringToBytes32(dataType) == stringToBytes32('bool'))
+        {
+            if(addressIndex == 0)
+            {
+                if(gotStringKey && gotUintKey)
+                {
+                    // Set data via uint256 and string (bytes32 limit) combined keys ...
+                    db.SetKeyedBool(uintKey, stringToBytes32(stringKey), boolValue);
+                }
+                else if(isArray && gotStringKey)
+                {
+                    // Push an item to an array via string (bytes32 limit) key ...
+                    db.pushBool(stringToBytes32(stringKey), boolValue);
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Push an item to an array via uint256 key ...
+                    db.PushBool(uintKey, boolValue);
+                }
+                else if(gotStringKey)
+                {
+                    // Set data via string (bytes32 limit) keys ...
+                    db.setBool(stringToBytes32(stringKey), boolValue);
+                }
+                else if(gotUintKey)
+                {
+                    // Set data via uint256 keys ...
+                    db.SetBool(uintKey, boolValue);
+                }
+            }
+            else
+            {
+                if(isArray && gotStringKey)
+                {
+                    // Push an item to an addressed array via string (bytes32 limit) key ...
+                    db.pushAddressedBool(addressIndex, stringToBytes32(stringKey), boolValue);
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Push an item to an addressed array via uint256 key ...
+                    db.PushAddressedBool(addressIndex, uintKey, boolValue);
+                }
+                else if(gotStringKey)
+                {
+                    // Set addressed data via string (bytes32 limit) keys ...
+                    db.setAddressedBool(addressIndex, stringToBytes32(stringKey), boolValue);
+                }
+                else if(gotUintKey)
+                {
+                    // Set addressed data via uint256 keys ...
+                    db.SetAddressedBool(addressIndex, uintKey, boolValue);
+                }
+            }
+        }
+        else if(stringToBytes32(dataType) == stringToBytes32('string'))
+        {
+            if(addressIndex == 0)
+            {
+                if(gotStringKey && gotUintKey)
+                {
+                    // Set data via uint256 and string (bytes32 limit) combined keys ...
+                    db.SetKeyedString(uintKey, stringToBytes32(stringKey), stringToBytes32(stringValue));
+                }
+                else if(isArray && gotStringKey)
+                {
+                    // Push an item to an array via string (bytes32 limit) key ...
+                    db.pushString(stringToBytes32(stringKey), stringToBytes32(stringValue));
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Push an item to an array via uint256 key ...
+                    db.PushString(uintKey, stringToBytes32(stringValue));
+                }
+                else if(gotStringKey)
+                {
+                    // Set data via string (bytes32 limit) keys ...
+                    db.setString(stringToBytes32(stringKey), stringToBytes32(stringValue));
+                }
+                else if(gotUintKey)
+                {
+                    // Set data via uint256 keys ...
+                    db.SetString(uintKey, stringToBytes32(stringValue));
+                }
+            }
+            else
+            {
+                if(isArray && gotStringKey)
+                {
+                    // Push an item to an addressed array via string (bytes32 limit) key ...
+                    db.pushAddressedString(addressIndex, stringToBytes32(stringKey), stringToBytes32(stringValue));
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Push an item to an addressed array via uint256 key ...
+                    db.PushAddressedString(addressIndex, uintKey, stringToBytes32(stringValue));
+                }
+                else if(gotStringKey)
+                {
+                    // Set addressed data via string (bytes32 limit) keys ...
+                    db.setAddressedString(addressIndex, stringToBytes32(stringKey), stringToBytes32(stringValue));
+                }
+                else if(gotUintKey)
+                {
+                    // Set addressed data via uint256 keys ...
+                    db.SetAddressedString(addressIndex, uintKey, stringToBytes32(stringValue));
+                }
+            }
+        }
+        else if(stringToBytes32(dataType) == stringToBytes32('uint'))
+        {
+            if(addressIndex == 0)
+            {
+                if(gotStringKey && gotUintKey)
+                {
+                    // Set data via uint256 and string (bytes32 limit) combined keys ...
+                    db.SetKeyedUint(uintKey, stringToBytes32(stringKey), uintValue);
+                }
+                else if(isArray && gotStringKey)
+                {
+                    // Push an item to an array via string (bytes32 limit) key ...
+                    db.pushUint(stringToBytes32(stringKey), uintValue);
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Push an item to an array via uint256 key ...
+                    db.PushUint(uintKey, uintValue);
+                }
+                else if(gotStringKey)
+                {
+                    // Set data via string (bytes32 limit) keys ...
+                    db.setUint(stringToBytes32(stringKey), uintValue);
+                }
+                else if(gotUintKey)
+                {
+                    // Set data via uint256 keys ...
+                    db.SetUint(uintKey, uintValue);
+                }
+            }
+            else
+            {
+                if(isArray && gotStringKey)
+                {
+                    // Push an item to an addressed array via string (bytes32 limit) key ...
+                    db.pushAddressedUint(addressIndex, stringToBytes32(stringKey), uintValue);
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Push an item to an addressed array via uint256 key ...
+                    db.PushAddressedUint(addressIndex, uintKey, uintValue);
+                }
+                else if(gotStringKey)
+                {
+                    // Set addressed data via string (bytes32 limit) keys ...
+                    db.setAddressedUint(addressIndex, stringToBytes32(stringKey), uintValue);
+                }
+                else if(gotUintKey)
+                {
+                    // Set addressed data via uint256 keys ...
+                    db.SetAddressedUint(addressIndex, uintKey, uintValue);
+                }
+            }
+        }
+    }
+    
+    function readAddress(
+        address addressIndex, 
+        string stringKey, 
+        uint256 uintKey, 
+        bool gotStringKey,
+        bool gotUintKey,
+        bool isArray,
+        uint arrayIndex
+    ) 
+    public view returns(address)
+    {   
         if(addressIndex == 0)
         {
             if(gotStringKey && gotUintKey)
             {
                 // Set data via uint256 and string (bytes32 limit) combined keys ...
-                db.SetKeyedAddress(uintKey, stringToBytes32(stringKey), indexValue);
+                return db.GetKeyedAddress(uintKey, stringToBytes32(stringKey));
             }
             else if(isArray && gotStringKey)
             {
                 // Push an item to an array via string (bytes32 limit) key ...
-                db.pushAddress(stringToBytes32(stringKey), arrayValue);
+                return db.readAddress(stringToBytes32(stringKey), arrayIndex);
             }
             else if(isArray && gotUintKey)
             {
                 // Push an item to an array via uint256 key ...
-                db.PushAddress(uintKey, arrayValue);
+                return db.ReadAddress(uintKey, arrayIndex);
             }
             else if(gotStringKey)
             {
                 // Set data via string (bytes32 limit) keys ...
-                db.setAddress(stringToBytes32(stringKey), indexValue);
+                return db.getAddress(stringToBytes32(stringKey));
             }
             else if(gotUintKey)
             {
                 // Set data via uint256 keys ...
-                db.SetAddress(uintKey, indexValue);
+                return db.GetAddress(uintKey);
             }
         }
         else
@@ -505,22 +740,756 @@ contract Extensible is Upgradable
             if(isArray && gotStringKey)
             {
                 // Push an item to an addressed array via string (bytes32 limit) key ...
-                db.pushAddressedAddress(addressIndex, stringToBytes32(stringKey), arrayValue);
+                return db.readAddressedAddress(addressIndex, stringToBytes32(stringKey), arrayIndex);
             }
             else if(isArray && gotUintKey)
             {
                 // Push an item to an addressed array via uint256 key ...
-                db.PushAddressedAddress(addressIndex, uintKey, arrayValue);
+                return db.ReadAddressedAddress(addressIndex, uintKey, arrayIndex);
             }
             else if(gotStringKey)
             {
                 // Set addressed data via string (bytes32 limit) keys ...
-                db.setAddressedAddress(addressIndex, stringToBytes32(stringKey), indexValue);
+                return db.getAddressedAddress(addressIndex, stringToBytes32(stringKey));
             }
             else if(gotUintKey)
             {
                 // Set addressed data via uint256 keys ...
-                db.SetAddressedAddress(addressIndex, uintKey, indexValue);
+                return db.GetAddressedAddress(addressIndex, uintKey);
+            }
+        }
+    }
+    
+    function readBool(
+        address addressIndex, 
+        string stringKey, 
+        uint256 uintKey, 
+        bool gotStringKey,
+        bool gotUintKey,
+        bool isArray,
+        uint arrayIndex
+    ) 
+    public view returns(bool)
+    {   
+        if(addressIndex == 0)
+        {
+            if(gotStringKey && gotUintKey)
+            {
+                // Set data via uint256 and string (bytes32 limit) combined keys ...
+                return db.GetKeyedBool(uintKey, stringToBytes32(stringKey));
+            }
+            else if(isArray && gotStringKey)
+            {
+                // Push an item to an array via string (bytes32 limit) key ...
+                return db.readBool(stringToBytes32(stringKey), arrayIndex);
+            }
+            else if(isArray && gotUintKey)
+            {
+                // Push an item to an array via uint256 key ...
+                return db.ReadBool(uintKey, arrayIndex);
+            }
+            else if(gotStringKey)
+            {
+                // Set data via string (bytes32 limit) keys ...
+                return db.getBool(stringToBytes32(stringKey));
+            }
+            else if(gotUintKey)
+            {
+                // Set data via uint256 keys ...
+                return db.GetBool(uintKey);
+            }
+        }
+        else
+        {
+            if(isArray && gotStringKey)
+            {
+                // Push an item to an addressed array via string (bytes32 limit) key ...
+                return db.readAddressedBool(addressIndex, stringToBytes32(stringKey), arrayIndex);
+            }
+            else if(isArray && gotUintKey)
+            {
+                // Push an item to an addressed array via uint256 key ...
+                return db.ReadAddressedBool(addressIndex, uintKey, arrayIndex);
+            }
+            else if(gotStringKey)
+            {
+                // Set addressed data via string (bytes32 limit) keys ...
+                return db.getAddressedBool(addressIndex, stringToBytes32(stringKey));
+            }
+            else if(gotUintKey)
+            {
+                // Set addressed data via uint256 keys ...
+                return db.GetAddressedBool(addressIndex, uintKey);
+            }
+        }
+    }
+    
+    function readString(
+        address addressIndex, 
+        string stringKey, 
+        uint256 uintKey, 
+        bool gotStringKey,
+        bool gotUintKey,
+        bool isArray,
+        uint arrayIndex
+    ) 
+    public view returns(bytes32)
+    {   
+        if(addressIndex == 0)
+        {
+            if(gotStringKey && gotUintKey)
+            {
+                // Set data via uint256 and string (bytes32 limit) combined keys ...
+                return db.GetKeyedString(uintKey, stringToBytes32(stringKey));
+            }
+            else if(isArray && gotStringKey)
+            {
+                // Push an item to an array via string (bytes32 limit) key ...
+                return db.readString(stringToBytes32(stringKey), arrayIndex);
+            }
+            else if(isArray && gotUintKey)
+            {
+                // Push an item to an array via uint256 key ...
+                return db.ReadString(uintKey, arrayIndex);
+            }
+            else if(gotStringKey)
+            {
+                // Set data via string (bytes32 limit) keys ...
+                return db.getString(stringToBytes32(stringKey));
+            }
+            else if(gotUintKey)
+            {
+                // Set data via uint256 keys ...
+                return db.GetString(uintKey);
+            }
+        }
+        else
+        {
+            if(isArray && gotStringKey)
+            {
+                // Push an item to an addressed array via string (bytes32 limit) key ...
+                return db.readAddressedString(addressIndex, stringToBytes32(stringKey), arrayIndex);
+            }
+            else if(isArray && gotUintKey)
+            {
+                // Push an item to an addressed array via uint256 key ...
+                return db.ReadAddressedString(addressIndex, uintKey, arrayIndex);
+            }
+            else if(gotStringKey)
+            {
+                // Set addressed data via string (bytes32 limit) keys ...
+                return db.getAddressedString(addressIndex, stringToBytes32(stringKey));
+            }
+            else if(gotUintKey)
+            {
+                // Set addressed data via uint256 keys ...
+                return db.GetAddressedString(addressIndex, uintKey);
+            }
+        }
+    }
+    
+    function readUint(
+        address addressIndex, 
+        string stringKey, 
+        uint256 uintKey, 
+        bool gotStringKey,
+        bool gotUintKey,
+        bool isArray,
+        uint arrayIndex
+    ) 
+    public view returns(uint)
+    {   
+        if(addressIndex == 0)
+        {
+            if(gotStringKey && gotUintKey)
+            {
+                // Set data via uint256 and string (bytes32 limit) combined keys ...
+                return db.GetKeyedUint(uintKey, stringToBytes32(stringKey));
+            }
+            else if(isArray && gotStringKey)
+            {
+                // Push an item to an array via string (bytes32 limit) key ...
+                return db.readUint(stringToBytes32(stringKey), arrayIndex);
+            }
+            else if(isArray && gotUintKey)
+            {
+                // Push an item to an array via uint256 key ...
+                return db.ReadUint(uintKey, arrayIndex);
+            }
+            else if(gotStringKey)
+            {
+                // Set data via string (bytes32 limit) keys ...
+                return db.getUint(stringToBytes32(stringKey));
+            }
+            else if(gotUintKey)
+            {
+                // Set data via uint256 keys ...
+                return db.GetUint(uintKey);
+            }
+        }
+        else
+        {
+            if(isArray && gotStringKey)
+            {
+                // Push an item to an addressed array via string (bytes32 limit) key ...
+                return db.readAddressedUint(addressIndex, stringToBytes32(stringKey), arrayIndex);
+            }
+            else if(isArray && gotUintKey)
+            {
+                // Push an item to an addressed array via uint256 key ...
+                return db.ReadAddressedUint(addressIndex, uintKey, arrayIndex);
+            }
+            else if(gotStringKey)
+            {
+                // Set addressed data via string (bytes32 limit) keys ...
+                return db.getAddressedUint(addressIndex, stringToBytes32(stringKey));
+            }
+            else if(gotUintKey)
+            {
+                // Set addressed data via uint256 keys ...
+                return db.GetAddressedUint(addressIndex, uintKey);
+            }
+        }
+    }
+    
+    function read(
+        address addressIndex, 
+        string dataType,
+        string stringKey, 
+        uint256 uintKey, 
+        bool gotStringKey,
+        bool gotUintKey,
+        bool isArray,
+        uint arrayIndex
+    ) 
+    public view returns(
+        address addressValue,
+        bool boolValue,
+        bytes32 stringValue,
+        uint uintValue
+    ){   
+        if(stringToBytes32(dataType) == stringToBytes32('address'))
+        {
+            addressValue = readAddress(
+                addressIndex, 
+                stringKey, 
+                uintKey, 
+                gotStringKey,
+                gotUintKey,
+                isArray,
+                arrayIndex
+            );
+        }
+        else if(stringToBytes32(dataType) == stringToBytes32('bool'))
+        {
+            boolValue = readBool(
+                addressIndex, 
+                stringKey, 
+                uintKey, 
+                gotStringKey,
+                gotUintKey,
+                isArray,
+                arrayIndex
+            );
+        }
+        else if(stringToBytes32(dataType) == stringToBytes32('string'))
+        {
+            stringValue = readString(
+                addressIndex, 
+                stringKey, 
+                uintKey, 
+                gotStringKey,
+                gotUintKey,
+                isArray,
+                arrayIndex
+            );
+        }
+        else if(stringToBytes32(dataType) == stringToBytes32('uint'))
+        {
+            uintValue = readUint(
+                addressIndex, 
+                stringKey, 
+                uintKey, 
+                gotStringKey,
+                gotUintKey,
+                isArray,
+                arrayIndex
+            );
+        }
+        return(
+            addressValue,
+            boolValue,
+            stringValue,
+            uintValue
+        );
+    }
+    
+    function update(
+        address addressIndex, 
+        string stringKey, 
+        uint256 uintKey, 
+        address addressValue,
+        bool boolValue,
+        string stringValue,
+        uint uintValue,
+        string dataType,
+        bool gotStringKey,
+        bool gotUintKey,
+        bool isArray,
+        uint arrayIndex
+    ) 
+    public 
+    {
+        
+        // NEED TO EDIT
+        
+        if(stringToBytes32(dataType) == stringToBytes32('address'))
+        {
+            if(addressIndex == 0)
+            {
+                if(gotStringKey && gotUintKey)
+                {
+                    // Set data via uint256 and string (bytes32 limit) combined keys ...
+                    db.SetKeyedAddress(uintKey, stringToBytes32(stringKey), addressValue);
+                }
+                else if(isArray && gotStringKey)
+                {
+                    // Push an item to an array via string (bytes32 limit) key ...
+                    db.updateAddress(stringToBytes32(stringKey), arrayIndex, addressValue);
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Push an item to an array via uint256 key ...
+                    db.UpdateAddress(uintKey, arrayIndex, addressValue);
+                }
+                else if(gotStringKey)
+                {
+                    // Set data via string (bytes32 limit) keys ...
+                    db.setAddress(stringToBytes32(stringKey), addressValue);
+                }
+                else if(gotUintKey)
+                {
+                    // Set data via uint256 keys ...
+                    db.SetAddress(uintKey, addressValue);
+                }
+            }
+            else
+            {
+                if(isArray && gotStringKey)
+                {
+                    // Push an item to an addressed array via string (bytes32 limit) key ...
+                    db.updateAddressedAddress(addressIndex, stringToBytes32(stringKey), arrayIndex, addressValue);
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Push an item to an addressed array via uint256 key ...
+                    db.UpdateAddressedAddress(addressIndex, uintKey, arrayIndex, addressValue);
+                }
+                else if(gotStringKey)
+                {
+                    // Set addressed data via string (bytes32 limit) keys ...
+                    db.setAddressedAddress(addressIndex, stringToBytes32(stringKey), addressValue);
+                }
+                else if(gotUintKey)
+                {
+                    // Set addressed data via uint256 keys ...
+                    db.SetAddressedAddress(addressIndex, uintKey, addressValue);
+                }
+            }
+        }
+        else if(stringToBytes32(dataType) == stringToBytes32('bool'))
+        {
+            if(addressIndex == 0)
+            {
+                if(gotStringKey && gotUintKey)
+                {
+                    // Set data via uint256 and string (bytes32 limit) combined keys ...
+                    db.SetKeyedBool(uintKey, stringToBytes32(stringKey), boolValue);
+                }
+                else if(isArray && gotStringKey)
+                {
+                    // Push an item to an array via string (bytes32 limit) key ...
+                    db.updateBool(stringToBytes32(stringKey), arrayIndex, boolValue);
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Push an item to an array via uint256 key ...
+                    db.UpdateBool(uintKey, arrayIndex, boolValue);
+                }
+                else if(gotStringKey)
+                {
+                    // Set data via string (bytes32 limit) keys ...
+                    db.setBool(stringToBytes32(stringKey), boolValue);
+                }
+                else if(gotUintKey)
+                {
+                    // Set data via uint256 keys ...
+                    db.SetBool(uintKey, boolValue);
+                }
+            }
+            else
+            {
+                if(isArray && gotStringKey)
+                {
+                    // Push an item to an addressed array via string (bytes32 limit) key ...
+                    db.updateAddressedBool(addressIndex, stringToBytes32(stringKey), arrayIndex, boolValue);
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Push an item to an addressed array via uint256 key ...
+                    db.UpdateAddressedBool(addressIndex, uintKey, arrayIndex, boolValue);
+                }
+                else if(gotStringKey)
+                {
+                    // Set addressed data via string (bytes32 limit) keys ...
+                    db.setAddressedBool(addressIndex, stringToBytes32(stringKey), boolValue);
+                }
+                else if(gotUintKey)
+                {
+                    // Set addressed data via uint256 keys ...
+                    db.SetAddressedBool(addressIndex, uintKey, boolValue);
+                }
+            }
+        }
+        else if(stringToBytes32(dataType) == stringToBytes32('string'))
+        {
+            if(addressIndex == 0)
+            {
+                if(gotStringKey && gotUintKey)
+                {
+                    // Set data via uint256 and string (bytes32 limit) combined keys ...
+                    db.SetKeyedString(uintKey, stringToBytes32(stringKey), stringToBytes32(stringValue));
+                }
+                else if(isArray && gotStringKey)
+                {
+                    // Push an item to an array via string (bytes32 limit) key ...
+                    db.updateString(stringToBytes32(stringKey), arrayIndex, stringToBytes32(stringValue));
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Push an item to an array via uint256 key ...
+                    db.UpdateString(uintKey, arrayIndex, stringToBytes32(stringValue));
+                }
+                else if(gotStringKey)
+                {
+                    // Set data via string (bytes32 limit) keys ...
+                    db.setString(stringToBytes32(stringKey), stringToBytes32(stringValue));
+                }
+                else if(gotUintKey)
+                {
+                    // Set data via uint256 keys ...
+                    db.SetString(uintKey, stringToBytes32(stringValue));
+                }
+            }
+            else
+            {
+                if(isArray && gotStringKey)
+                {
+                    // Push an item to an addressed array via string (bytes32 limit) key ...
+                    db.updateAddressedString(addressIndex, stringToBytes32(stringKey), arrayIndex, stringToBytes32(stringValue));
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Push an item to an addressed array via uint256 key ...
+                    db.UpdateAddressedString(addressIndex, uintKey, arrayIndex, stringToBytes32(stringValue));
+                }
+                else if(gotStringKey)
+                {
+                    // Set addressed data via string (bytes32 limit) keys ...
+                    db.setAddressedString(addressIndex, stringToBytes32(stringKey), stringToBytes32(stringValue));
+                }
+                else if(gotUintKey)
+                {
+                    // Set addressed data via uint256 keys ...
+                    db.SetAddressedString(addressIndex, uintKey, stringToBytes32(stringValue));
+                }
+            }
+        }
+        else if(stringToBytes32(dataType) == stringToBytes32('uint'))
+        {
+            if(addressIndex == 0)
+            {
+                if(gotStringKey && gotUintKey)
+                {
+                    // Set data via uint256 and string (bytes32 limit) combined keys ...
+                    db.SetKeyedUint(uintKey, stringToBytes32(stringKey), uintValue);
+                }
+                else if(isArray && gotStringKey)
+                {
+                    // Push an item to an array via string (bytes32 limit) key ...
+                    db.updateUint(stringToBytes32(stringKey), arrayIndex, uintValue);
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Push an item to an array via uint256 key ...
+                    db.UpdateUint(uintKey, arrayIndex, uintValue);
+                }
+                else if(gotStringKey)
+                {
+                    // Set data via string (bytes32 limit) keys ...
+                    db.setUint(stringToBytes32(stringKey), uintValue);
+                }
+                else if(gotUintKey)
+                {
+                    // Set data via uint256 keys ...
+                    db.SetUint(uintKey, uintValue);
+                }
+            }
+            else
+            {
+                if(isArray && gotStringKey)
+                {
+                    // Push an item to an addressed array via string (bytes32 limit) key ...
+                    db.updateAddressedUint(addressIndex, stringToBytes32(stringKey), arrayIndex, uintValue);
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Push an item to an addressed array via uint256 key ...
+                    db.UpdateAddressedUint(addressIndex, uintKey, arrayIndex, uintValue);
+                }
+                else if(gotStringKey)
+                {
+                    // Set addressed data via string (bytes32 limit) keys ...
+                    db.setAddressedUint(addressIndex, stringToBytes32(stringKey), uintValue);
+                }
+                else if(gotUintKey)
+                {
+                    // Set addressed data via uint256 keys ...
+                    db.SetAddressedUint(addressIndex, uintKey, uintValue);
+                }
+            }
+        }
+    }
+    
+    function destroy(
+        address addressIndex, 
+        string stringKey, 
+        uint256 uintKey, 
+        string dataType,
+        bool gotStringKey,
+        bool gotUintKey,
+        bool isArray,
+        uint arrayIndex
+    ) 
+    public 
+    {
+        
+        // NEED TO EDIT
+        
+        if(stringToBytes32(dataType) == stringToBytes32('address'))
+        {
+            if(addressIndex == 0)
+            {
+                if(gotStringKey && gotUintKey)
+                {
+                    // Remove data via uint256 and string (bytes32 limit) combined keys ...
+                    db.DeleteKeyedAddress(uintKey, stringToBytes32(stringKey));
+                }
+                else if(isArray && gotStringKey)
+                {
+                    // Remove an item to an array via string (bytes32 limit) key ...
+                    db.removeAddress(stringToBytes32(stringKey), arrayIndex);
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Remove an item to an array via uint256 key ...
+                    db.RemoveAddress(uintKey, arrayIndex);
+                }
+                else if(gotStringKey)
+                {
+                    // Remove data via string (bytes32 limit) keys ...
+                    db.deleteAddress(stringToBytes32(stringKey));
+                }
+                else if(gotUintKey)
+                {
+                    // Remove data via uint256 keys ...
+                    db.DeleteAddress(uintKey);
+                }
+            }
+            else
+            {
+                if(isArray && gotStringKey)
+                {
+                    // Remove an item to an addressed array via string (bytes32 limit) key ...
+                    db.removeAddressedAddress(addressIndex, stringToBytes32(stringKey), arrayIndex);
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Remove an item to an addressed array via uint256 key ...
+                    db.RemoveAddressedAddress(addressIndex, uintKey, arrayIndex);
+                }
+                else if(gotStringKey)
+                {
+                    // Set addressed data via string (bytes32 limit) keys ...
+                    db.deleteAddressedAddress(addressIndex, stringToBytes32(stringKey));
+                }
+                else if(gotUintKey)
+                {
+                    // Remove addressed data via uint256 keys ...
+                    db.DeleteAddressedAddress(addressIndex, uintKey);
+                }
+            }
+        }
+        else if(stringToBytes32(dataType) == stringToBytes32('bool'))
+        {
+            if(addressIndex == 0)
+            {
+                if(gotStringKey && gotUintKey)
+                {
+                    // Remove data via uint256 and string (bytes32 limit) combined keys ...
+                    db.DeleteKeyedBool(uintKey, stringToBytes32(stringKey));
+                }
+                else if(isArray && gotStringKey)
+                {
+                    // Remove an item to an array via string (bytes32 limit) key ...
+                    db.removeBool(stringToBytes32(stringKey), arrayIndex);
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Remove an item to an array via uint256 key ...
+                    db.RemoveBool(uintKey, arrayIndex);
+                }
+                else if(gotStringKey)
+                {
+                    // Remove data via string (bytes32 limit) keys ...
+                    db.deleteBool(stringToBytes32(stringKey));
+                }
+                else if(gotUintKey)
+                {
+                    // Remove data via uint256 keys ...
+                    db.DeleteBool(uintKey);
+                }
+            }
+            else
+            {
+                if(isArray && gotStringKey)
+                {
+                    // Remove an item to an addressed array via string (bytes32 limit) key ...
+                    db.removeAddressedBool(addressIndex, stringToBytes32(stringKey), arrayIndex);
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Remove an item to an addressed array via uint256 key ...
+                    db.RemoveAddressedBool(addressIndex, uintKey, arrayIndex);
+                }
+                else if(gotStringKey)
+                {
+                    // Remove addressed data via string (bytes32 limit) keys ...
+                    db.deleteAddressedBool(addressIndex, stringToBytes32(stringKey));
+                }
+                else if(gotUintKey)
+                {
+                    // Remove addressed data via uint256 keys ...
+                    db.DeleteAddressedBool(addressIndex, uintKey);
+                }
+            }
+        }
+        else if(stringToBytes32(dataType) == stringToBytes32('string'))
+        {
+            if(addressIndex == 0)
+            {
+                if(gotStringKey && gotUintKey)
+                {
+                    // Remove data via uint256 and string (bytes32 limit) combined keys ...
+                    db.DeleteKeyedString(uintKey, stringToBytes32(stringKey));
+                }
+                else if(isArray && gotStringKey)
+                {
+                    // Remove an item to an array via string (bytes32 limit) key ...
+                    db.removeString(stringToBytes32(stringKey), arrayIndex);
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Remove an item to an array via uint256 key ...
+                    db.RemoveString(uintKey, arrayIndex);
+                }
+                else if(gotStringKey)
+                {
+                    // Remove data via string (bytes32 limit) keys ...
+                    db.deleteString(stringToBytes32(stringKey));
+                }
+                else if(gotUintKey)
+                {
+                    // Remove data via uint256 keys ...
+                    db.DeleteString(uintKey);
+                }
+            }
+            else
+            {
+                if(isArray && gotStringKey)
+                {
+                    // Remove an item to an addressed array via string (bytes32 limit) key ...
+                    db.removeAddressedString(addressIndex, stringToBytes32(stringKey), arrayIndex);
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Remove an item to an addressed array via uint256 key ...
+                    db.RemoveAddressedString(addressIndex, uintKey, arrayIndex);
+                }
+                else if(gotStringKey)
+                {
+                    // Remove addressed data via string (bytes32 limit) keys ...
+                    db.deleteAddressedString(addressIndex, stringToBytes32(stringKey));
+                }
+                else if(gotUintKey)
+                {
+                    // Remove addressed data via uint256 keys ...
+                    db.DeleteAddressedString(addressIndex, uintKey);
+                }
+            }
+        }
+        else if(stringToBytes32(dataType) == stringToBytes32('uint'))
+        {
+            if(addressIndex == 0)
+            {
+                if(gotStringKey && gotUintKey)
+                {
+                    // Remove data via uint256 and string (bytes32 limit) combined keys ...
+                    db.DeleteKeyedUint(uintKey, stringToBytes32(stringKey));
+                }
+                else if(isArray && gotStringKey)
+                {
+                    // Remove an item to an array via string (bytes32 limit) key ...
+                    db.removeUint(stringToBytes32(stringKey), arrayIndex);
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Remove an item to an array via uint256 key ...
+                    db.RemoveUint(uintKey, arrayIndex);
+                }
+                else if(gotStringKey)
+                {
+                    // Remove data via string (bytes32 limit) keys ...
+                    db.deleteUint(stringToBytes32(stringKey));
+                }
+                else if(gotUintKey)
+                {
+                    // Remove data via uint256 keys ...
+                    db.DeleteUint(uintKey);
+                }
+            }
+            else
+            {
+                if(isArray && gotStringKey)
+                {
+                    // Remove an item to an addressed array via string (bytes32 limit) key ...
+                    db.removeAddressedUint(addressIndex, stringToBytes32(stringKey), arrayIndex);
+                }
+                else if(isArray && gotUintKey)
+                {
+                    // Remove an item to an addressed array via uint256 key ...
+                    db.RemoveAddressedUint(addressIndex, uintKey, arrayIndex);
+                }
+                else if(gotStringKey)
+                {
+                    // Remove addressed data via string (bytes32 limit) keys ...
+                    db.deleteAddressedUint(addressIndex, stringToBytes32(stringKey));
+                }
+                else if(gotUintKey)
+                {
+                    // Remove addressed data via uint256 keys ...
+                    db.DeleteAddressedUint(addressIndex, uintKey);
+                }
             }
         }
     }

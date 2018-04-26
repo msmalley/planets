@@ -174,293 +174,70 @@ Extensible Wallet Interface
 */
 contract Extensible is ERC721WalletInterface
 {
-    // Get data via string (bytes32 limit) keys ...
-    function getAddress(string key) public view returns(address);
-    function getBool(string key) public view returns(bool);
-    function getString(string key) public view returns(bytes32);
-    function getRealString(string key) public view returns(string);
-    function getUint(string key) public view returns(uint);
-    
-    // Get data via uint256 keys ...
-    function GetAddress(uint256 key) public view returns(address);
-    function GetBool(uint256 key) public view returns(bool);
-    function GetString(uint256 key) public view returns(bytes32);
-    function GetRealString(uint256 key) public view returns(string);
-    function GetUint(uint256 key) public view returns(uint);
-    
-    // Get data via uint256 and string (bytes32 limit) combined keys ...
-    function GetKeyedAddress(uint256 id, string key) public view returns(address);
-    function GetKeyedBool(uint256 id, string key) public view returns(bool);
-    function GetKeyedString(uint256 id, string key) public view returns(bytes32);
-    function GetKeyedRealString(uint256 id, string key) public view returns(string);
-    function GetKeyedUint(uint256 id, string key) public view returns(uint);
-    
-    // Get addressed data via string (bytes32 limit) keys ...
-    function getAddressedAddress(address addressIndex, string key) public view returns(address);
-    function getAddressedBool(address addressIndex, string key) public view returns(bool);
-    function getAddressedString(address addressIndex, string key) public view returns(bytes32);
-    function getAddressedRealString(address addressIndex, string key) public view returns(string);
-    function getAddressedUint(address addressIndex, string key) public view returns(uint);
-    
-    // Get addressed data via uint256 keys ...
-    function GetAddressedAddress(address addressIndex, uint256 key) public view returns(address);
-    function GetAddressedBool(address addressIndex, uint256 key) public view returns(bool);
-    function GetAddressedString(address addressIndex, uint256 key) public view returns(bytes32);
-    function GetAddressedRealString(address addressIndex, uint256 key) public view returns(string);
-    function GetAddressedUint(address addressIndex, uint256 key) public view returns(uint);
-    
-    // Set data via string (bytes32 limit) keys ...
-    function setAddress(string key, address value) public view returns(address);
-    function setBool(string key, bool value) public view returns(bool);
-    function setString(string key, string value) public view returns(bytes32);
-    function setUint(string key, uint value) public view returns(uint);
-    
-    // Set data via uint256 keys ...
-    function SetAddress(uint256 key, address value) public;
-    function SetBool(uint256 key, bool value) public;
-    function SetString(uint256 key, string value) public;
-    function SetUint(uint256 key, uint value) public;
-    
-    // Set data via uint256 and string (bytes32 limit) combined keys ...
-    function SetKeyedAddress(uint256 id, string key, address value) public;
-    function SetKeyedBool(uint256 id, string key, bool value) public;
-    function SetKeyedString(uint256 id, string key, string value) public;
-    function SetKeyedUint(uint256 id, string key, uint value) public;
-    
-    // Set addressed data via string (bytes32 limit) keys ...
-    function setAddressedAddress(address addressIndex, string key, address value) public view returns(address);
-    function setAddressedBool(address addressIndex, string key, bool value) public view returns(bool);
-    function setAddressedString(address addressIndex, string key, bytes32 value) public view returns(bytes32);
-    function setAddressedRealString(address addressIndex, string key, string value) public view returns(string);
-    function setAddressedUint(address addressIndex, string key, uint value) public view returns(uint);
-    
-    // Set addressed data via uint256 keys ...
-    function SetAddressedAddress(address addressIndex, uint256 key, address value) public view returns(address);
-    function SetAddressedBool(address addressIndex, uint256 key, bool value) public view returns(bool);
-    function SetAddressedString(address addressIndex, uint256 key, bytes32 value) public view returns(bytes32);
-    function SetAddressedRealString(address addressIndex, uint256 key, string value) public view returns(string);
-    function SetAddressedUint(address addressIndex, uint256 key, uint value) public view returns(uint);
-    
-    // Delete data via string (bytes32 limit) keys ...
-    function deleteAddress(string key) public;
-    function deleteBool(string key) public;
-    function deleteString(string key) public;
-    function deleteUint(string key) public;
-    
-    // Delete data via uint256 keys ... ADD UNIQUE COUNT ?
-    function DeleteAddress(uint256 key) public;
-    function DeleteBool(uint256 key) public;
-    function DeleteString(uint256 key) public;
-    function DeleteUint(uint256 key) public;
-    
-    // Delete data via uint256 and string (bytes32 limit) combined keys ...
-    function DeleteKeyedAddress(uint256 id, string key) public;
-    function DeleteKeyedBool(uint256 id, string key) public;
-    function DeleteKeyedString(uint256 id, string key) public;
-    function DeleteKeyedUint(uint256 id, string key) public;
-    
-    // Delete addressed data via string (bytes32 limit) keys ...
-    function deleteAddressedAddress(address addressIndex, string key) public;
-    function deleteAddressedBool(address addressIndex, string key) public;
-    function deleteAddressedString(address addressIndex, string key) public;
-    function deleteAddressedUint(address addressIndex, string key) public;
-    
-    // Delete addressed data via uint256 keys ...
-    function DeleteAddressedAddress(address addressIndex, uint256 key) public;
-    function DeleteAddressedBool(address addressIndex, uint256 key) public;
-    function DeleteAddressedString(address addressIndex, uint256 key) public;
-    function DeleteAddressedUint(address addressIndex, uint256 key) public;
-    
     /*
     
-    ARRAYS
+    CRUD SYNTAX
     
     */
+    function create(
+        address addressIndex, 
+        string stringKey, 
+        uint256 uintKey, 
+        address addressValue,
+        bool boolValue,
+        string stringValue,
+        uint uintValue,
+        string dataType,
+        bool gotStringKey,
+        bool gotUintKey,
+        bool isArray
+    ) 
+    public;
     
-    // Get an item from an array via string (bytes32 limit) key and uint index ...
-    function readAddress(string key, uint index) public view returns(address);
-    function readBool(string key, uint index) public view returns(bool);
-    function readString(string key, uint index) public view returns(bytes32);
-    function readRealString(string key, uint index) public view returns(string);
-    function readUint(string key, uint index) public view returns(uint);
+    function read(
+        address addressIndex, 
+        string dataType,
+        string stringKey, 
+        uint256 uintKey, 
+        bool gotStringKey,
+        bool gotUintKey,
+        bool isArray,
+        uint arrayIndex
+    ) 
+    public view returns(
+        address addressValue,
+        bool boolValue,
+        bytes32 stringValue,
+        uint uintValue
+    );
     
-    // Push an item to an array via string (bytes32 limit) key ...
-    function pushAddress(string key, address value) public;
-    function pushBool(string key, bool value) public;
-    function pushString(string key, string value) public;
-    function pushUint(string key, uint value) public;
+    function update(
+        address addressIndex, 
+        string stringKey, 
+        uint256 uintKey, 
+        address addressValue,
+        bool boolValue,
+        string stringValue,
+        uint uintValue,
+        string dataType,
+        bool gotStringKey,
+        bool gotUintKey,
+        bool isArray,
+        uint arrayIndex
+    ) 
+    public;
     
-    // Get an item from an array via uint256 key and uint index ...
-    function ReadAddress(uint256 key, uint index) public view returns(address);
-    function ReadBool(uint256 key, uint index) public view returns(bool);
-    function ReadString(uint256 key, uint index) public view returns(bytes32);
-    function ReadRealString(uint256 key, uint index) public view returns(string);
-    function ReadUint(uint256 key, uint index) public view returns(uint);
-    
-    // Push an item to an array via uint256 key ...
-    function PushAddress(uint256 key, address value) public;
-    function PushBool(uint256 key, bool value) public;
-    function PushString(uint256 key, string value) public;
-    function PushUint(uint256 key, uint value) public;
-    
-    // Get an item from an addressed array via string (bytes32 limit) key and uint index ...
-    function readAddressedAddress(address addressIndex, string key, uint index) public view returns(address);
-    function readAddressedBool(address addressIndex, string key, uint index) public view returns(bool);
-    function readAddressedString(address addressIndex, string key, uint index) public view returns(bytes32);
-    function readAddressedRealString(address addressIndex, string key, uint index) public view returns(string);
-    function readAddressedUint(address addressIndex, string key, uint index) public view returns(uint);
-    
-    // Push an item to an addressed array via string (bytes32 limit) key ...
-    function pushAddressedAddress(address addressIndex, string key, address value) public;
-    function pushAddressedBool(address addressIndex, string key, bool value) public;
-    function pushAddressedString(address addressIndex, string key, string value) public;
-    function pushAddressedUint(address addressIndex, string key, uint value) public;
-    
-    // Get an item from an addressed array via uint256 key and uint index ...
-    function ReadAddressedAddress(address addressIndex, uint256 key, uint index) public view returns(address);
-    function ReadAddressedBool(address addressIndex, uint256 key, uint index) public view returns(bool);
-    function ReadAddressedString(address addressIndex, uint256 key, uint index) public view returns(bytes32);
-    function ReadAddressedRealString(address addressIndex, uint256 key, uint index) public view returns(string);
-    function ReadAddressedUint(address addressIndex, uint256 key, uint index) public view returns(uint);
-    
-    // Push an item to an addressed array via uint256 key ...
-    function PushAddressedAddress(address addressIndex, uint256 key, address value) public;
-    function PushAddressedBool(address addressIndex, uint256 key, bool value) public;
-    function PushAddressedString(address addressIndex, uint256 key, string value) public;
-    function PushAddressedUint(address addressIndex, uint256 key, uint value) public;
-    
-    // Remove an item from an array via string (bytes32 limit) key and uint index ...
-    function removeAddress(string key, uint index) public;
-    function removeBool(string key, uint index) public;
-    function removeString(string key, uint index) public;
-    function removeRealString(string key, uint index) public;
-    function removeUint(string key, uint index) public;
-    
-    // Remove an item from an addressed array via string (bytes32 limit) key and uint index ...
-    function removeAddressedAddress(string key, uint index) public;
-    function removeAddressedBool(string key, uint index) public;
-    function removeAddressedString(string key, uint index) public;
-    function removeAddressedUint(string key, uint index) public;
-    
-    // Remove an item from an array via uint256 key and uint index ...
-    function RemoveAddress(string key, uint index) public;
-    function RemoveBool(string key, uint index) public;
-    function RemoveString(string key, uint index) public;
-    function RemoveUint(string key, uint index) public;
-    
-    // Remove an item from an addressed array via uint256 key and uint index ...
-    function RemoveAddressedAddress(string key, uint index) public;
-    function RemoveAddressedBool(string key, uint index) public;
-    function RemoveAddressedString(string key, uint index) public;
-    function RemoveAddressedUint(string key, uint index) public;
-    
-    // Update an item from an array via string (bytes32 limit) key and uint index ...
-    function pdateAddress(string key, uint index) public;
-    function updateBool(string key, uint index) public;
-    function updateString(string key, uint index) public;
-    function updateRealString(string key, uint index) public;
-    function updateUint(string key, uint index) public;
-    
-    // Update an item from an addressed array via string (bytes32 limit) key and uint index ...
-    function updateAddressedAddress(string key, uint index) public;
-    function updateAddressedBool(string key, uint index) public;
-    function updateAddressedString(string key, uint index) public;
-    function updateAddressedUint(string key, uint index) public;
-    
-    // Update an item from an array via uint256 key and uint index ...
-    function UpdateAddress(string key, uint index) public;
-    function UpdateBool(string key, uint index) public;
-    function UpdateString(string key, uint index) public;
-    function UpdateUint(string key, uint index) public;
-    
-    // Update an item from an addressed array via uint256 key and uint index ...
-    function UpdateAddressedAddress(string key, uint index) public;
-    function UpdateAddressedBool(string key, uint index) public;
-    function UpdateAddressedString(string key, uint index) public;
-    function UpdateAddressedUint(string key, uint index) public;
-    
-    /*
-    
-    TOP TEN COUNTS
-    
-    01 - addressCount
-    02 - addressBytes32Count
-    03 - addressUint256Count
-    04 - addressUint256KeyedCount
-
-    05 - addressedAddressBytes32Count
-    06 - addressedAddressUint256Count
-    
-    07 - addressBytes32ArrayCount
-    08 - addressUint256ArrayCount
-    09 - addressedBytes32AddressArrayCount
-    10 - addressedUint256AddressArrayCount
-    
-    ?? - What about addressed combos?
-    ?? - What about array count combos?
-    ?? - Proxy / master K/V need contract specific counts too?
-    
-    */
-    
-    // 01) Basic base data type counts combined ...
-    function AddressCount() public view returns(uint);
-    function BoolCount() public view returns(uint);
-    function StringCount() public view returns(uint);
-    function UintCount() public view returns(uint);
-    
-    // 02) Basic base data type counts via bytes32 indexes ...
-    function getAddressCount(string index) public view returns(uint);
-    function getBoolCount(string index) public view returns(uint);
-    function getStringCount(string index) public view returns(uint);
-    function getUintCount(string index) public view returns(uint);
-    
-    // 03) Basic base data type counts via uint256 indexes ...
-    function GetAddressCount(uint256 index) public view returns(uint);
-    function GetBoolCount(uint256 index) public view returns(uint);
-    function GetStringCount(uint256 index) public view returns(uint);
-    function GetUintCount(uint256 index) public view returns(uint);
-    
-    // 04) Basic base data type counts via keyed uint256 indexes ...
-    function GetKeyedAddressCount(uint256 index, string key) public view returns(uint);
-    function GetKeyedBoolCount(uint256 index, string key) public view returns(uint);
-    function GetKeyedStringCount(uint256 index, string key) public view returns(uint);
-    function GetKeyedUintCount(uint256 index, string key) public view returns(uint);
-    
-    // 05) Addressed data type counts via bytes32 indexes ...
-    function getAddressedAddressCount(address addressIndex, string key) public view returns(uint);
-    function getAddressedBoolCount(address addressIndex, string key) public view returns(uint);
-    function getAddressedStringCount(address addressIndex, string key) public view returns(uint);
-    function getAddressedUintCount(address addressIndex, string key) public view returns(uint);
-    
-    // 06) Addressed data type counts via uint256 indexes ...
-    function GetAddressedAddressCount(address addressIndex, uint256 key) public view returns(uint);
-    function GetAddressedBoolCount(address addressIndex, uint256 key) public view returns(uint);
-    function GetAddressedStringCount(address addressIndex, uint256 key) public view returns(uint);
-    function GetAddressedUintCount(address addressIndex, uint256 key) public view returns(uint);
-    
-    // 07) Bytes32 array counts ...
-    function getArrayAddressCount(string index) public view returns(uint);
-    function getArrayBoolCount(string index) public view returns(uint);
-    function getArrayStringCount(string index) public view returns(uint);
-    function getArrayUintCount(string index) public view returns(uint);
-    
-    // 08) Addressed bytes32 array counts ...
-    function getAddressedArrayAddressCount(address addressIndex, string key) public view returns(uint);
-    function getAddressedArrayBoolCount(address addressIndex, string key) public view returns(uint);
-    function getAddressedArrayStringCount(address addressIndex, string key) public view returns(uint);
-    function getAddressedArrayUintCount(address addressIndex, string key) public view returns(uint);
-    
-    // 09) Uint256 array counts ...
-    function GetArrayAddressCount(uint256 index) public view returns(uint);
-    function GetArrayBoolCount(uint256 index) public view returns(uint);
-    function GetArrayStringCount(uint256 index) public view returns(uint);
-    function GetArrayUintCount(uint256 index) public view returns(uint);
-    
-    // 10) Addressed uint256 array counts ...
-    function GetAddressedArrayAddressCount(address addressIndex, uint256 key) public view returns(uint);
-    function GetAddressedArrayBoolCount(address addressIndex, uint256 key) public view returns(uint);
-    function GetAddressedArrayStringCount(address addressIndex, uint256 key) public view returns(uint);
-    function GetAddressedArrayUintCount(address addressIndex, uint256 key) public view returns(uint);
+    function destroy(
+        address addressIndex, 
+        string stringKey, 
+        uint256 uintKey, 
+        string dataType,
+        bool gotStringKey,
+        bool gotUintKey,
+        bool isArray,
+        uint arrayIndex
+    ) 
+    public;
 }
 
 contract InterplanetaryEmbassy is Extensible
@@ -534,6 +311,8 @@ contract InterplanetaryEmbassy is Extensible
     /* 
     
     Basic ERC721 Functionality
+    
+    -- NOW NEED TO ACCOUNT FOR NEW CRUD SYNTAX
     
     */
     function totalSupply() public constant returns (uint) 
