@@ -398,6 +398,7 @@ contract Extensible is ERC721WalletInterface
     
     ?? - What about addressed combos?
     ?? - What about array count combos?
+    ?? - Proxy / master K/V need contract specific counts too?
     
     */
     
@@ -408,10 +409,10 @@ contract Extensible is ERC721WalletInterface
     function UintCount() public view returns(uint);
     
     // 02) Basic base data type counts via bytes32 indexes ...
-    function getAddressCount(bytes32 index) public view returns(uint);
-    function getBoolCount(bytes32 index) public view returns(uint);
-    function getStringCount(bytes32 index) public view returns(uint);
-    function getUintCount(bytes32 index) public view returns(uint);
+    function getAddressCount(string index) public view returns(uint);
+    function getBoolCount(string index) public view returns(uint);
+    function getStringCount(string index) public view returns(uint);
+    function getUintCount(string index) public view returns(uint);
     
     // 03) Basic base data type counts via uint256 indexes ...
     function GetAddressCount(uint256 index) public view returns(uint);
@@ -420,16 +421,16 @@ contract Extensible is ERC721WalletInterface
     function GetUintCount(uint256 index) public view returns(uint);
     
     // 04) Basic base data type counts via keyed uint256 indexes ...
-    function GetKeyedAddressCount(uint256 index, bytes32 key) public view returns(uint);
-    function GetKeyedBoolCount(uint256 index, bytes32 key) public view returns(uint);
-    function GetKeyedStringCount(uint256 index, bytes32 key) public view returns(uint);
-    function GetKeyedUintCount(uint256 index, bytes32 key) public view returns(uint);
+    function GetKeyedAddressCount(uint256 index, string key) public view returns(uint);
+    function GetKeyedBoolCount(uint256 index, string key) public view returns(uint);
+    function GetKeyedStringCount(uint256 index, string key) public view returns(uint);
+    function GetKeyedUintCount(uint256 index, string key) public view returns(uint);
     
     // 05) Addressed data type counts via bytes32 indexes ...
-    function getAddressedAddressCount(address addressIndex, bytes32 key) public view returns(uint);
-    function getAddressedBoolCount(address addressIndex, bytes32 key) public view returns(uint);
-    function getAddressedStringCount(address addressIndex, bytes32 key) public view returns(uint);
-    function getAddressedUintCount(address addressIndex, bytes32 key) public view returns(uint);
+    function getAddressedAddressCount(address addressIndex, string key) public view returns(uint);
+    function getAddressedBoolCount(address addressIndex, string key) public view returns(uint);
+    function getAddressedStringCount(address addressIndex, string key) public view returns(uint);
+    function getAddressedUintCount(address addressIndex, string key) public view returns(uint);
     
     // 06) Addressed data type counts via uint256 indexes ...
     function GetAddressedAddressCount(address addressIndex, uint256 key) public view returns(uint);
@@ -438,16 +439,16 @@ contract Extensible is ERC721WalletInterface
     function GetAddressedUintCount(address addressIndex, uint256 key) public view returns(uint);
     
     // 07) Bytes32 array counts ...
-    function getArrayAddressCount(bytes32 index) public view returns(uint);
-    function getArrayBoolCount(bytes32 index) public view returns(uint);
-    function getArrayStringCount(bytes32 index) public view returns(uint);
-    function getArrayUintCount(bytes32 index) public view returns(uint);
+    function getArrayAddressCount(string index) public view returns(uint);
+    function getArrayBoolCount(string index) public view returns(uint);
+    function getArrayStringCount(string index) public view returns(uint);
+    function getArrayUintCount(string index) public view returns(uint);
     
     // 08) Addressed bytes32 array counts ...
-    function getAddressedArrayAddressCount(address addressIndex, bytes32 key) public view returns(uint);
-    function getAddressedArrayBoolCount(address addressIndex, bytes32 key) public view returns(uint);
-    function getAddressedArrayStringCount(address addressIndex, bytes32 key) public view returns(uint);
-    function getAddressedArrayUintCount(address addressIndex, bytes32 key) public view returns(uint);
+    function getAddressedArrayAddressCount(address addressIndex, string key) public view returns(uint);
+    function getAddressedArrayBoolCount(address addressIndex, string key) public view returns(uint);
+    function getAddressedArrayStringCount(address addressIndex, string key) public view returns(uint);
+    function getAddressedArrayUintCount(address addressIndex, string key) public view returns(uint);
     
     // 09) Uint256 array counts ...
     function GetArrayAddressCount(uint256 index) public view returns(uint);

@@ -261,10 +261,10 @@ contract BloqVerse is AbleToUtilizeStrings
     mapping(address => mapping(address => mapping(bytes32 => bytes32[]))) addressedBytes32StringArrays;
     mapping(address => mapping(address => mapping(bytes32 => uint256[]))) addressedBytes32UintArrays;
     
-    mapping(address => mapping(address => mapping(bytes32 => address[]))) addressedUint256AddressArrays;
-    mapping(address => mapping(address => mapping(bytes32 => bool[]))) addressedUint256BoolArrays;
-    mapping(address => mapping(address => mapping(bytes32 => bytes32[]))) addressedUint256StringArrays;
-    mapping(address => mapping(address => mapping(bytes32 => uint256[]))) addressedUint256UintArrays;
+    mapping(address => mapping(address => mapping(uint256 => address[]))) addressedUint256AddressArrays;
+    mapping(address => mapping(address => mapping(uint256 => bool[]))) addressedUint256BoolArrays;
+    mapping(address => mapping(address => mapping(uint256 => bytes32[]))) addressedUint256StringArrays;
+    mapping(address => mapping(address => mapping(uint256 => uint256[]))) addressedUint256UintArrays;
     
     /* ADDRESSED ARRAY COUNTS */
     uint addressedBytes32AddressArrayCount;
@@ -371,11 +371,6 @@ contract BloqVerse is AbleToUtilizeStrings
     function GetUint(uint256 key) public view returns (uint) 
     {
         return uintUint256Records[msg.sender][key];
-    }
-    
-    function GetAddress(uint256 key) public view returns (address) 
-    {
-        return addressUint256Records[msg.sender][key];
     }
     
     // Keyed Uint Indexes - for TokenID meta ...
@@ -676,7 +671,7 @@ contract BloqVerse is AbleToUtilizeStrings
         stringBytes32ArrayCounts[msg.sender][key]++;
     }
     
-    function pushUint(bytes32 key, uint value) publc
+    function pushUint(bytes32 key, uint value) public
     {
         uintBytes32Arrays[msg.sender][key].push(value);
         uintBytes32ArrayCount++;
@@ -769,42 +764,42 @@ contract BloqVerse is AbleToUtilizeStrings
     
     */
     
-    function readAddress(bytes32 key, uint index) public returns(address value)
+    function readAddress(bytes32 key, uint index) public view returns(address value)
     {
         return addressBytes32Arrays[msg.sender][key][index];
     }
     
-    function readBool(bytes32 key, uint index) public returns(bool value)
+    function readBool(bytes32 key, uint index) public view returns(bool value)
     {
         return boolBytes32Arrays[msg.sender][key][index];
     }
     
-    function readString(bytes32 key, uint index) public returns(bytes32 value)
+    function readString(bytes32 key, uint index) public view returns(bytes32 value)
     {
         return stringBytes32Arrays[msg.sender][key][index];
     }
     
-    function readUint(bytes32 key, uint index) public returns(uint value)
+    function readUint(bytes32 key, uint index) public view returns(uint value)
     {
         return uintBytes32Arrays[msg.sender][key][index];
     }
     
-    function ReadAddress(uint256 key, uint index) public returns(address value)
+    function ReadAddress(uint256 key, uint index) public view returns(address value)
     {
         return addressUint256Arrays[msg.sender][key][index];
     }
     
-    function ReadBool(uint256 key, uint index) public returns(bool value)
+    function ReadBool(uint256 key, uint index) public view returns(bool value)
     {
         return boolUint256Arrays[msg.sender][key][index];
     }
     
-    function ReadString(uint256 key, uint index) public returns(bytes32 value)
+    function ReadString(uint256 key, uint index) public view returns(bytes32 value)
     {
         return stringUint256Arrays[msg.sender][key][index];
     }
     
-    function ReadUint(uint256 key, uint index) public returns(uint value)
+    function ReadUint(uint256 key, uint index) public view returns(uint value)
     {
         return uintUint256Arrays[msg.sender][key][index];
     }
@@ -919,50 +914,50 @@ contract BloqVerse is AbleToUtilizeStrings
     addressedAddressBytes32Counts;
     
     */
-    function getAddressedAddress(bytes32 key) public view returns (address) 
+    function getAddressedAddress(address addressIndex, bytes32 key) public view returns (address) 
     {
-        return addressedAddressBytes32Records[msg.sender][key];
+        return addressedAddressBytes32Records[msg.sender][addressIndex][key];
     }
     
-    function getAddressedBool(bytes32 key) public view returns (bool) 
+    function getAddressedBool(address addressIndex, bytes32 key) public view returns (bool) 
     {
-        return addressedBoolBytes32Records[msg.sender][key];
+        return addressedBoolBytes32Records[msg.sender][addressIndex][key];
     }
     
-    function getAddressedString(bytes32 key) public view returns (bytes32) 
+    function getAddressedString(address addressIndex, bytes32 key) public view returns (bytes32) 
     {
-        return addressedStringBytes32Records[msg.sender][key];
+        return addressedStringBytes32Records[msg.sender][addressIndex][key];
     }
     
-    function getAddressedRealString(bytes32 key) public view returns (string) 
+    function getAddressedRealString(address addressIndex, bytes32 key) public view returns (string) 
     {
-        return bytes32ToString(addressedStringBytes32Records[msg.sender][key]);
+        return bytes32ToString(addressedStringBytes32Records[msg.sender][addressIndex][key]);
     }
 
-    function getAddressedUint(bytes32 key) public view returns (uint) 
+    function getAddressedUint(address addressIndex, bytes32 key) public view returns (uint) 
     {
-        return addressedUintBytes32Records[msg.sender][key];
+        return addressedUintBytes32Records[msg.sender][addressIndex][key];
     }
     
     // Counts
-    function getAddressedAddressCount() public view returns (uint)
+    function getAddressedAddressCount(address addressIndex) public view returns (uint)
     {
-        return addressedAddressBytes32Count;
+        return addressedAddressBytes32Counts[msg.sender][addressIndex];
     }
     
-    function getAddressedBoolCount() public view returns (uint)
+    function getAddressedBoolCount(address addressIndex) public view returns (uint)
     {
-        return addressedBoolBytes32Count;
+        return addressedBoolBytes32Counts[msg.sender][addressIndex];
     }
     
-    function getAddressedStringCount() public view returns (uint)
+    function getAddressedStringCount(address addressIndex) public view returns (uint)
     {
-        return addressedStringBytes32Count;
+        return addressedStringBytes32Counts[msg.sender][addressIndex];
     }
     
-    function getAddressedUintCount() public view returns (uint)
+    function getAddressedUintCount(address addressIndex) public view returns (uint)
     {
-        return addressedUintBytes32Count;
+        return addressedUintBytes32Counts[msg.sender][addressIndex];
     }
     
     /*
@@ -972,50 +967,50 @@ contract BloqVerse is AbleToUtilizeStrings
     -- USES A BIG "G"
     
     */
-    function GetAddressedAddress(uint256 key) public view returns (address) 
+    function GetAddressedAddress(address addressIndex, uint256 key) public view returns (address) 
     {
-        return addressedAddressUint256Records[msg.sender][key];
+        return addressedAddressUint256Records[msg.sender][addressIndex][key];
     }
     
-    function GetAddressedBool(uint256 key) public view returns (bool) 
+    function GetAddressedBool(address addressIndex, uint256 key) public view returns (bool) 
     {
-        return addressedBoolUint256Records[msg.sender][key];
+        return addressedBoolUint256Records[msg.sender][addressIndex][key];
     }
     
-    function GetAddressedString(uint256 key) public view returns (bytes32) 
+    function GetAddressedString(address addressIndex, uint256 key) public view returns (bytes32) 
     {
-        return addressedStringUint256Records[msg.sender][key];
+        return addressedStringUint256Records[msg.sender][addressIndex][key];
     }
     
-    function GetAddressedRealString(uint256 key) public view returns (string) 
+    function GetAddressedRealString(address addressIndex, uint256 key) public view returns (string) 
     {
-        return bytes32ToString(addressedStringUint256Records[msg.sender][key]);
+        return bytes32ToString(addressedStringUint256Records[msg.sender][addressIndex][key]);
     }
 
-    function GetAddressedUint(uint256 key) public view returns (uint) 
+    function GetAddressedUint(address addressIndex, uint256 key) public view returns (uint) 
     {
-        return addressedUintUint256Records[msg.sender][key];
+        return addressedUintUint256Records[msg.sender][addressIndex][key];
     }
     
     // ADDRESSED Counts
-    function GetAddressedAddressCount() public view returns (uint)
+    function GetAddressedAddressCount(address addressIndex) public view returns (uint)
     {
-        return addressedAddressUint256Count;
+        return addressedAddressUint256Counts[msg.sender][addressIndex];
     }
     
-    function GetAddressedBoolCount() public view returns (uint)
+    function GetAddressedBoolCount(address addressIndex) public view returns (uint)
     {
-        return addressedBoolUint256Count;
+        return addressedBoolUint256Counts[msg.sender][addressIndex];
     }
     
-    function GetAddressedStringCount() public view returns (uint)
+    function GetAddressedStringCount(address addressIndex) public view returns (uint)
     {
-        return addressedStringUint256Count;
+        return addressedStringUint256Counts[msg.sender][addressIndex];
     }
     
-    function GetAddressedUintCount() public view returns (uint)
+    function GetAddressedUintCount(address addressIndex) public view returns (uint)
     {
-        return addressedUintUint256Count;
+        return addressedUintUint256Counts[msg.sender][addressIndex];
     }
     
     /*
@@ -1026,31 +1021,31 @@ contract BloqVerse is AbleToUtilizeStrings
     
     */
     
-    function setAddressedAddress(bytes32 key, address value) public 
+    function setAddressedAddress(address addressIndex, bytes32 key, address value) public 
     {
-        addressedAddressBytes32Records[msg.sender][key] = value;
-        addressedAddressBytes32Counts[msg.sender]++;
+        addressedAddressBytes32Records[msg.sender][addressIndex][key] = value;
+        addressedAddressBytes32Counts[msg.sender][addressIndex]++;
         addressedAddressBytes32Count++;
     }
     
-    function setAddressedBool(bytes32 key, bool value) public 
+    function setAddressedBool(address addressIndex, bytes32 key, bool value) public 
     {
-        addressedBoolBytes32Records[msg.sender][key] = value;
-        addressedBoolBytes32Counts[msg.sender]++;
+        addressedBoolBytes32Records[msg.sender][addressIndex][key] = value;
+        addressedBoolBytes32Counts[msg.sender][addressIndex]++;
         addressedBoolBytes32Count++;
     }
     
-    function setAddressedString(bytes32 key, bytes32 value) public 
+    function setAddressedString(address addressIndex, bytes32 key, bytes32 value) public 
     {
-        addressedStringBytes32Records[msg.sender][key] = value;
-        addressedStringBytes32Counts[msg.sender]++;
+        addressedStringBytes32Records[msg.sender][addressIndex][key] = value;
+        addressedStringBytes32Counts[msg.sender][addressIndex]++;
         addressedStringBytes32Count++;
     }
 
-    function setAddressedUint(bytes32 key, uint value) public 
+    function setAddressedUint(address addressIndex, bytes32 key, uint value) public 
     {
-        addressedUintBytes32Records[msg.sender][key] = value;
-        addressedUintBytes32Counts[msg.sender]++;
+        addressedUintBytes32Records[msg.sender][addressIndex][key] = value;
+        addressedUintBytes32Counts[msg.sender][addressIndex]++;
         addressedUintBytes32Count++;
     }
     
@@ -1062,32 +1057,32 @@ contract BloqVerse is AbleToUtilizeStrings
     
     */
     
-    function SetAddressedAddress(uint256 key, address value) public 
+    function SetAddressedAddress(address addressIndex, uint256 key, address value) public 
     {
-        addressedAddressBytes32Records[msg.sender][key] = value;
-        addressedAddressBytes32Counts[msg.sender]++;
-        addressedAddressBytes32Count++;
+        addressedAddressUint256Records[msg.sender][addressIndex][key] = value;
+        addressedAddressUint256Counts[msg.sender][addressIndex]++;
+        addressedAddressUint256Count++;
     }
     
-    function SetAddressedBool(uint256 key, bool value) public 
+    function SetAddressedBool(address addressIndex, uint256 key, bool value) public 
     {
-        addressedBoolBytes32Records[msg.sender][key] = value;
-        addressedBoolBytes32Counts[msg.sender]++;
-        addressedBoolBytes32Count++;
+        addressedBoolUint256Records[msg.sender][addressIndex][key] = value;
+        addressedBoolUint256Counts[msg.sender][addressIndex]++;
+        addressedBoolUint256Count++;
     }
     
-    function SetAddressedString(uint256 key, bytes32 value) public 
+    function SetAddressedString(address addressIndex, uint256 key, bytes32 value) public 
     {
-        addressedStringBytes32Records[msg.sender][key] = value;
-        addressedStringBytes32Counts[msg.sender]++;
-        addressedStringBytes32Count++;
+        addressedStringUint256Records[msg.sender][addressIndex][key] = value;
+        addressedStringUint256Counts[msg.sender][addressIndex]++;
+        addressedStringUint256Count++;
     }
 
-    function SetAddressedUint(uint256 key, uint value) public 
+    function SetAddressedUint(address addressIndex, uint256 key, uint value) public 
     {
-        addressedUintBytes32Records[msg.sender][key] = value;
-        addressedUintBytes32Counts[msg.sender]++;
-        addressedUintBytes32Count++;
+        addressedUintUint256Records[msg.sender][addressIndex][key] = value;
+        addressedUintUint256Counts[msg.sender][addressIndex]++;
+        addressedUintUint256Count++;
     }
     
     /*
@@ -1098,31 +1093,31 @@ contract BloqVerse is AbleToUtilizeStrings
     
     */
     
-    function deleteAddressedAddress(bytes32 key) public 
+    function deleteAddressedAddress(address addressIndex, bytes32 key) public 
     {
-        delete addressedAddressBytes32Records[msg.sender][key];
-        addressedAddressBytes32Counts[msg.sender]--;
+        delete addressedAddressBytes32Records[msg.sender][addressIndex][key];
+        addressedAddressBytes32Counts[msg.sender][addressIndex]--;
         addressedAddressBytes32Count--;
     }
     
-    function deleteAddressedBool(bytes32 key) public 
+    function deleteAddressedBool(address addressIndex, bytes32 key) public 
     {
-        delete addressedBoolBytes32Records[msg.sender][key];
-        addressedBoolBytes32Counts[msg.sender]--;
+        delete addressedBoolBytes32Records[msg.sender][addressIndex][key];
+        addressedBoolBytes32Counts[msg.sender][addressIndex]--;
         addressedBoolBytes32Count--;
     }
     
-    function deleteAddressedString(bytes32 key) public 
+    function deleteAddressedString(address addressIndex, bytes32 key) public 
     {
-        delete addressedStringBytes32Records[msg.sender][key];
-        addressedStringBytes32Counts[msg.sender]--;
+        delete addressedStringBytes32Records[msg.sender][addressIndex][key];
+        addressedStringBytes32Counts[msg.sender][addressIndex]--;
         addressedStringBytes32Count--;
     }
 
-    function deleteAddressedUint(bytes32 key) public 
+    function deleteAddressedUint(address addressIndex, bytes32 key) public 
     {
-        delete addressedUintBytes32Records[msg.sender][key];
-        addressedUintBytes32Counts[msg.sender]--;
+        delete addressedUintBytes32Records[msg.sender][addressIndex][key];
+        addressedUintBytes32Counts[msg.sender][addressIndex]--;
         addressedUintBytes32Count--;
     }
     
@@ -1134,31 +1129,31 @@ contract BloqVerse is AbleToUtilizeStrings
     
     */
     
-    function DeleteAddressedAddress(uint256 key) public 
+    function DeleteAddressedAddress(address addressIndex, uint256 key) public 
     {
-        delete addressedAddressUint256Records[msg.sender][key];
-        addressedAddressUint256Counts[msg.sender]--;
+        delete addressedAddressUint256Records[msg.sender][addressIndex][key];
+        addressedAddressUint256Counts[msg.sender][addressIndex]--;
         addressedAddressUint256Count--;
     }
     
-    function DeleteAddressedBool(uint256 key) public 
+    function DeleteAddressedBool(address addressIndex, uint256 key) public 
     {
-        delete addressedBoolUint256Records[msg.sender][key];
-        addressedBoolUint256Counts[msg.sender]--;
+        delete addressedBoolUint256Records[msg.sender][addressIndex][key];
+        addressedBoolUint256Counts[msg.sender][addressIndex]--;
         addressedBoolUint256Count--;
     }
     
-    function DeleteAddressedString(uint256 key) public 
+    function DeleteAddressedString(address addressIndex, uint256 key) public 
     {
-        delete addressedStringUint256Records[msg.sender][key];
-        addressedStringUint256Counts[msg.sender]--;
+        delete addressedStringUint256Records[msg.sender][addressIndex][key];
+        addressedStringUint256Counts[msg.sender][addressIndex]--;
         addressedStringUint256Count--;
     }
 
-    function DeleteAddressedUint(uint256 key) public 
+    function DeleteAddressedUint(address addressIndex, uint256 key) public 
     {
-        delete addressedUintUint256Records[msg.sender][key];
-        addressedUintUint256Counts[msg.sender]--;
+        delete addressedUintUint256Records[msg.sender][addressIndex][key];
+        addressedUintUint256Counts[msg.sender][addressIndex]--;
         addressedUintUint256Count--;
     }
     
@@ -1171,60 +1166,60 @@ contract BloqVerse is AbleToUtilizeStrings
     
     */
     
-    function pushAddressedAddress(bytes32 key, address value) public
+    function pushAddressedAddress(address addressIndex, bytes32 key, address value) public
     {
-        addressedAddressBytes32Arrays[msg.sender][key].push(value);
-        addressedAddressBytes32ArrayCount++;
-        addressedAddressBytes32ArrayCounts[msg.sender][key]++;
+        addressedBytes32AddressArrays[msg.sender][addressIndex][key].push(value);
+        addressedBytes32AddressArrayCount++;
+        addressedBytes32AddressArrayCounts[msg.sender][addressIndex][key]++;
     }
     
-    function pushAddressedBool(bytes32 key, bool value) public
+    function pushAddressedBool(address addressIndex, bytes32 key, bool value) public
     {
-        addressedBoolBytes32Arrays[msg.sender][key].push(value);
-        addressedBoolBytes32ArrayCount++;
-        addressedBoolBytes32ArrayCounts[msg.sender][key]++;
+        addressedBytes32BoolArrays[msg.sender][addressIndex][key].push(value);
+        addressedBytes32BoolArrayCount++;
+        addressedBytes32BoolArrayCounts[msg.sender][addressIndex][key]++;
     }
     
-    function pushAddressedString(bytes32 key, bytes32 value) public
+    function pushAddressedString(address addressIndex, bytes32 key, bytes32 value) public
     {
-        addressedStringBytes32Arrays[msg.sender][key].push(value);
-        addressedStringBytes32ArrayCount++;
-        addressedStringBytes32ArrayCounts[msg.sender][key]++;
+        addressedBytes32StringArrays[msg.sender][addressIndex][key].push(value);
+        addressedBytes32StringArrayCount++;
+        addressedBytes32StringArrayCounts[msg.sender][addressIndex][key]++;
     }
     
-    function pushAddressedUint(bytes32 key, uint value) publc
+    function pushAddressedUint(address addressIndex, bytes32 key, uint value) public
     {
-        addressedUintBytes32Arrays[msg.sender][key].push(value);
-        addressedUintBytes32ArrayCount++;
-        addressedUintBytes32ArrayCounts[msg.sender][key]++;
+        addressedBytes32UintArrays[msg.sender][addressIndex][key].push(value);
+        addressedBytes32UintArrayCount++;
+        addressedBytes32UintArrayCounts[msg.sender][addressIndex][key]++;
     }
     
-    function PushAddressedAddress(uint256 key, address value) public
+    function PushAddressedAddress(address addressIndex, uint256 key, address value) public
     {
-        addressedAddressUint256Arrays[msg.sender][key].push(value);
-        addressedAddressUint256ArrayCount++;
-        addressedAddressUint256ArrayCounts[msg.sender][key]++;
+        addressedUint256AddressArrays[msg.sender][addressIndex][key].push(value);
+        addressedUint256AddressArrayCount++;
+        addressedUint256AddressArrayCounts[msg.sender][addressIndex][key]++;
     }
     
-    function PushAddressedBool(uint256 key, bool value) public
+    function PushAddressedBool(address addressIndex, uint256 key, bool value) public
     {
-        addressedBoolUint256Arrays[msg.sender][key].push(value);
-        addressedBoolUint256ArrayCount++;
-        addressedBoolUint256ArrayCounts[msg.sender][key]++;
+        addressedUint256BoolArrays[msg.sender][addressIndex][key].push(value);
+        addressedUint256BoolArrayCount++;
+        addressedUint256BoolArrayCounts[msg.sender][addressIndex][key]++;
     }
     
-    function PushAddressedString(uint256 key, bytes32 value) public
+    function PushAddressedString(address addressIndex, uint256 key, bytes32 value) public
     {
-        addressedStringUint256Arrays[msg.sender][key].push(value);
-        addressedStringUint256ArrayCount++;
-        addressedStringUint256ArrayCounts[msg.sender][key]++;
+        addressedUint256StringArrays[msg.sender][addressIndex][key].push(value);
+        addressedUint256StringArrayCount++;
+        addressedUint256StringArrayCounts[msg.sender][addressIndex][key]++;
     }
     
-    function PushAddressedUint(uint256 key, uint value) public
+    function PushAddressedUint(address addressIndex, uint256 key, uint value) public
     {
-        addressedUintUint256Arrays[msg.sender][key].push(value);
-        addressedUintUint256ArrayCount++;
-        addressedUintUint256ArrayCounts[msg.sender][key]++;
+        addressedUint256UintArrays[msg.sender][addressIndex][key].push(value);
+        addressedUint256UintArrayCount++;
+        addressedUint256UintArrayCounts[msg.sender][addressIndex][key]++;
     }
     
     /*
@@ -1236,44 +1231,44 @@ contract BloqVerse is AbleToUtilizeStrings
     
     */
     
-    function updateAddressedAddress(bytes32 key, uint index, address value) public
+    function updateAddressedAddress(address addressIndex, bytes32 key, uint index, address value) public
     {
-        addressedAddressBytes32Arrays[msg.sender][key][index] = value;
+        addressedBytes32AddressArrays[msg.sender][addressIndex][key][index] = value;
     }
     
-    function updateAddressedBool(bytes32 key, uint index, bool value) public
+    function updateAddressedBool(address addressIndex, bytes32 key, uint index, bool value) public
     {
-        addressedBoolBytes32Arrays[msg.sender][key][index] = value;
+        addressedBytes32BoolArrays[msg.sender][addressIndex][key][index] = value;
     }
     
-    function updateAddressedString(bytes32 key, uint index, bytes32 value) public
+    function updateAddressedString(address addressIndex, bytes32 key, uint index, bytes32 value) public
     {
-        addressedStringBytes32Arrays[msg.sender][key][index] = value;
+        addressedBytes32StringArrays[msg.sender][addressIndex][key][index] = value;
     }
     
-    function updateAddressedUint(bytes32 key, uint index, uint value) public
+    function updateAddressedUint(address addressIndex, bytes32 key, uint index, uint value) public
     {
-        addressedUintBytes32Arrays[msg.sender][key][index] = value;
+        addressedBytes32UintArrays[msg.sender][addressIndex][key][index] = value;
     }
     
-    function UpdateAddressedAddress(uint256 key, uint index, address value) public
+    function UpdateAddressedAddress(address addressIndex, uint256 key, uint index, address value) public
     {
-        addressedAddressUint256Arrays[msg.sender][key][index] = value;
+        addressedUint256AddressArrays[msg.sender][addressIndex][key][index] = value;
     }
     
-    function UpdateAddressedBool(uint256 key, uint index, bool value) public
+    function UpdateAddressedBool(address addressIndex, uint256 key, uint index, bool value) public
     {
-        addressedBoolUint256Arrays[msg.sender][key][index] = value;
+        addressedUint256BoolArrays[msg.sender][addressIndex][key][index] = value;
     }
     
-    function UpdateAddressedString(uint256 key, uint index, bytes32 value) public
+    function UpdateAddressedString(address addressIndex, uint256 key, uint index, bytes32 value) public
     {
-        addressedStringUint256Arrays[msg.sender][key][index] = value;
+        addressedUint256StringArrays[msg.sender][addressIndex][key][index] = value;
     }
     
-    function UpdateAddressedUint(uint256 key, uint index, uint value) public
+    function UpdateAddressedUint(address addressIndex, uint256 key, uint index, uint value) public
     {
-        addressedUintUint256Arrays[msg.sender][key][index] = value;
+        addressedUint256UintArrays[msg.sender][addressIndex][key][index] = value;
     }
     
     /*
@@ -1285,44 +1280,44 @@ contract BloqVerse is AbleToUtilizeStrings
     
     */
     
-    function readAddressedAddress(address _address, bytes32 key, uint index) public returns(address value)
+    function readAddressedAddress(address addressIndex, bytes32 key, uint index) public view returns(address value)
     {
-        return addressedAddressBytes32Arrays[msg.sender][_address][key][index];
+        return addressedBytes32AddressArrays[msg.sender][addressIndex][key][index];
     }
     
-    function readAddressedBool(address _address, bytes32 key, uint index) public returns(bool value)
+    function readAddressedBool(address addressIndex, bytes32 key, uint index) public view returns(bool value)
     {
-        return addressedBoolBytes32Arrays[msg.sender][_address][key][index];
+        return addressedBytes32BoolArrays[msg.sender][addressIndex][key][index];
     }
     
-    function readAddressedString(address _address, bytes32 key, uint index) public returns(bytes32 value)
+    function readAddressedString(address addressIndex, bytes32 key, uint index) public view returns(bytes32 value)
     {
-        return addressedStringBytes32Arrays[msg.sender][_address][key][index];
+        return addressedBytes32StringArrays[msg.sender][addressIndex][key][index];
     }
     
-    function readAddressedUint(address _address, bytes32 key, uint index) public returns(uint value)
+    function readAddressedUint(address addressIndex, bytes32 key, uint index) public view returns(uint value)
     {
-        return addressedUintBytes32Arrays[msg.sender][_address][key][index];
+        return addressedBytes32UintArrays[msg.sender][addressIndex][key][index];
     }
     
-    function ReadAddressedAddress(address _address, uint256 key, uint index) public returns(address value)
+    function ReadAddressedAddress(address addressIndex, uint256 key, uint index) public view returns(address value)
     {
-        return addressedAddressUint256Arrays[msg.sender][_address][key][index];
+        return addressedUint256AddressArrays[msg.sender][addressIndex][key][index];
     }
     
-    function ReadAddressedBool(address _address, uint256 key, uint index) public returns(bool value)
+    function ReadAddressedBool(address addressIndex, uint256 key, uint index) public view returns(bool value)
     {
-        return addressedBoolUint256Arrays[msg.sender][_address][key][index];
+        return addressedUint256BoolArrays[msg.sender][addressIndex][key][index];
     }
     
-    function ReadAddressedString(address _address, uint256 key, uint index) public returns(bytes32 value)
+    function ReadAddressedString(address addressIndex, uint256 key, uint index) public view returns(bytes32 value)
     {
-        return addressedStringUint256Arrays[msg.sender][_address][key][index];
+        return addressedUint256StringArrays[msg.sender][addressIndex][key][index];
     }
     
-    function ReadAddressedUint(address _address, uint256 key, uint index) public returns(uint value)
+    function ReadAddressedUint(address addressIndex, uint256 key, uint index) public view returns(uint value)
     {
-        return addressedUintUint256Arrays[msg.sender][_address][key][index];
+        return addressedUint256UintArrays[msg.sender][addressIndex][key][index];
     }
     
     /*
@@ -1334,83 +1329,93 @@ contract BloqVerse is AbleToUtilizeStrings
     
     */
     
-    function removeAddressedAddress(bytes32 key, uint index) public
+    function removeAddressedAddress(address addressIndex, bytes32 key, uint index) public
     {
-        uint lastIndex = addressedAddressBytes32ArrayCounts[msg.sender][key] - 1;
-        address poppedItem = addressedAddressBytes32Arrays[msg.sender][key][lastIndex];
-        addressedAddressBytes32Arrays[msg.sender][key][index] = poppedItem;
-        addressedAddressBytes32Arrays[msg.sender][key].length--;
-        addressedAddressBytes32ArrayCount--;
-        addressedAddressBytes32ArrayCounts[msg.sender][key]--;
+        uint lastIndex = addressedBytes32AddressArrayCounts[msg.sender][addressIndex][key] - 1;
+        address poppedItem = addressedBytes32AddressArrays[msg.sender][addressIndex][key][lastIndex];
+        addressedBytes32AddressArrays[msg.sender][addressIndex][key][index] = poppedItem;
+        addressedBytes32AddressArrays[msg.sender][addressIndex][key].length--;
+        addressedBytes32AddressArrayCount--;
+        addressedBytes32AddressArrayCounts[msg.sender][addressIndex][key]--;
     }
     
-    function removeAddressedBool(bytes32 key, uint index) public
+    function removeAddressedBool(address addressIndex, bytes32 key, uint index) public
     {
-        uint lastIndex = addressedBoolBytes32ArrayCounts[msg.sender][key] - 1;
-        bool poppedItem = addressedBoolBytes32Arrays[msg.sender][key][lastIndex];
-        addressedBoolBytes32Arrays[msg.sender][key][index] = poppedItem;
-        addressedBoolBytes32Arrays[msg.sender][key].length--;
-        addressedBoolBytes32ArrayCount--;
-        addressedBoolBytes32ArrayCounts[msg.sender][key]--;
+        uint lastIndex = addressedBytes32BoolArrayCounts[msg.sender][addressIndex][key] - 1;
+        bool poppedItem = addressedBytes32BoolArrays[msg.sender][addressIndex][key][lastIndex];
+        addressedBytes32BoolArrays[msg.sender][addressIndex][key][index] = poppedItem;
+        addressedBytes32BoolArrays[msg.sender][addressIndex][key].length--;
+        addressedBytes32BoolArrayCount--;
+        addressedBytes32BoolArrayCounts[msg.sender][addressIndex][key]--;
     }
     
-    function removeAddressedString(bytes32 key, uint index) public
+    function removeAddressedString(address addressIndex, bytes32 key, uint index) public
     {
-        uint lastIndex = addressedStringBytes32ArrayCounts[msg.sender][key] - 1;
-        bytes32 poppedItem = addressedStringBytes32Arrays[msg.sender][key][lastIndex];
-        addressedStringBytes32Arrays[msg.sender][key][index] = poppedItem;
-        addressedStringBytes32Arrays[msg.sender][key].length--;
-        addressedStringBytes32ArrayCount--;
-        addressedStringBytes32ArrayCounts[msg.sender][key]--;
+        uint lastIndex = addressedBytes32StringArrayCounts[msg.sender][addressIndex][key] - 1;
+        bytes32 poppedItem = addressedBytes32StringArrays[msg.sender][addressIndex][key][lastIndex];
+        addressedBytes32StringArrays[msg.sender][addressIndex][key][index] = poppedItem;
+        addressedBytes32StringArrays[msg.sender][addressIndex][key].length--;
+        addressedBytes32StringArrayCount--;
+        addressedBytes32StringArrayCounts[msg.sender][addressIndex][key]--;
     }
     
-    function removeAddressedUint(bytes32 key, uint index) public
+    function removeAddressedUint(address addressIndex, bytes32 key, uint index) public
     {
-        uint lastIndex = addressedUintBytes32ArrayCounts[msg.sender][key] - 1;
-        uint poppedItem = addressedUintBytes32Arrays[msg.sender][key][lastIndex];
-        addressedUintBytes32Arrays[msg.sender][key][index] = poppedItem;
-        addressedUintBytes32Arrays[msg.sender][key].length--;
-        addressedUintBytes32ArrayCount--;
-        addressedUintBytes32ArrayCounts[msg.sender][key]--;
+        uint lastIndex = addressedBytes32UintArrayCounts[msg.sender][addressIndex][key] - 1;
+        uint poppedItem = addressedBytes32UintArrays[msg.sender][addressIndex][key][lastIndex];
+        addressedBytes32UintArrays[msg.sender][addressIndex][key][index] = poppedItem;
+        addressedBytes32UintArrays[msg.sender][addressIndex][key].length--;
+        addressedBytes32UintArrayCount--;
+        addressedBytes32UintArrayCounts[msg.sender][addressIndex][key]--;
     }
     
-    function RemoveAddressedAddress(uint256 key, uint index) public
+    function RemoveAddressedAddress(address addressIndex, uint256 key, uint index) public
     {
-        uint lastIndex = addressedAddressUint256ArrayCounts[msg.sender][key] - 1;
-        address poppedItem = addressedAddressUint256Arrays[msg.sender][key][lastIndex];
-        addressedAddressUint256Arrays[msg.sender][key][index] = poppedItem;
-        addressedAddressUint256Arrays[msg.sender][key].length--;
-        addressedAddressUint256ArrayCount--;
-        addressedAddressUint256ArrayCounts[msg.sender][key]--;
+        uint lastIndex = addressedUint256AddressArrayCounts[msg.sender][addressIndex][key] - 1;
+        address poppedItem = addressedUint256AddressArrays[msg.sender][addressIndex][key][lastIndex];
+        addressedUint256AddressArrays[msg.sender][addressIndex][key][index] = poppedItem;
+        addressedUint256AddressArrays[msg.sender][addressIndex][key].length--;
+        addressedUint256AddressArrayCount--;
+        addressedUint256AddressArrayCounts[msg.sender][addressIndex][key]--;
     }
     
-    function RemoveAddressedBool(uint256 key, uint index) public
+    function RemoveAddressedBool(address addressIndex, uint256 key, uint index) public
     {
-        uint lastIndex = addressedBoolUint256ArrayCounts[msg.sender][key] - 1;
-        bool poppedItem = addressedBoolUint256Arrays[msg.sender][key][lastIndex];
-        addressedBoolUint256Arrays[msg.sender][key][index] = poppedItem;
-        addressedBoolUint256Arrays[msg.sender][key].length--;
-        addressedBoolUint256ArrayCount--;
-        addressedBoolUint256ArrayCounts[msg.sender][key]--;
+        uint lastIndex = addressedUint256BoolArrayCounts[msg.sender][addressIndex][key] - 1;
+        bool poppedItem = addressedUint256BoolArrays[msg.sender][addressIndex][key][lastIndex];
+        addressedUint256BoolArrays[msg.sender][addressIndex][key][index] = poppedItem;
+        addressedUint256BoolArrays[msg.sender][addressIndex][key].length--;
+        addressedUint256BoolArrayCount--;
+        addressedUint256BoolArrayCounts[msg.sender][addressIndex][key]--;
     }
     
-    function RemoveAddressedString(uint256 key, uint index) public
+    function RemoveAddressedString(address addressIndex, uint256 key, uint index) public
     {
-        uint lastIndex = addressedStringUint256ArrayCounts[msg.sender][key] - 1;
-        bytes32 poppedItem = addressedStringUint256Arrays[msg.sender][key][lastIndex];
-        addressedStringUint256Arrays[msg.sender][key][index] = poppedItem;
-        addressedStringUint256Arrays[msg.sender][key].length--;
-        addressedStringUint256ArrayCount--;
-        addressedStringUint256ArrayCounts[msg.sender][key]--;
+        uint lastIndex = addressedUint256StringArrayCounts[msg.sender][addressIndex][key] - 1;
+        bytes32 poppedItem = addressedUint256StringArrays[msg.sender][addressIndex][key][lastIndex];
+        addressedUint256StringArrays[msg.sender][addressIndex][key][index] = poppedItem;
+        addressedUint256StringArrays[msg.sender][addressIndex][key].length--;
+        addressedUint256StringArrayCount--;
+        addressedUint256StringArrayCounts[msg.sender][addressIndex][key]--;
     }
     
-    function RemoveAddressedUint(uint256 key, uint index) public
+    function RemoveAddressedUint(address addressIndex, uint256 key, uint index) public
     {
-        uint lastIndex = addressedUintUint256ArrayCounts[msg.sender][key] - 1;
-        uint poppedItem = addressedUintUint256Arrays[msg.sender][key][lastIndex];
-        addressedUintUint256Arrays[msg.sender][key][index] = poppedItem;
-        addressedUintUint256Arrays[msg.sender][key].length--;
-        addressedUintUint256ArrayCount--;
-        addressedUintUint256ArrayCounts[msg.sender][key]--;
+        uint lastIndex = addressedUint256UintArrayCounts[msg.sender][addressIndex][key] - 1;
+        uint poppedItem = addressedUint256UintArrays[msg.sender][addressIndex][key][lastIndex];
+        addressedUint256UintArrays[msg.sender][addressIndex][key][index] = poppedItem;
+        addressedUint256UintArrays[msg.sender][addressIndex][key].length--;
+        addressedUint256UintArrayCount--;
+        addressedUint256UintArrayCounts[msg.sender][addressIndex][key]--;
     }
+    
+    /*
+
+    WHAT ABOUT ADMINISTRATIVE ACCESS ???
+    
+    -- Should it be optional?
+    -- Can it at least be read only?
+    -- And then ???
+    
+    */
 }
