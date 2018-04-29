@@ -314,7 +314,28 @@ contract InterplanetaryEmbassy is Extensible
     
     -- NOW NEED TO ACCOUNT FOR NEW CRUD SYNTAX
     
+    -- create(address addressIndex, string stringKey, uint256 uintKey, address addressValue, bool boolValue, string stringValue, uint uintValue, string dataType, bool gotStringKey, bool gotUintKey, bool isArray);
+    
+    -- read(address addressIndex, string dataType, string stringKey, uint256 uintKey, bool gotStringKey, bool gotUintKey, bool isArray, uint arrayIndex);
+    -- returns (address addressValue, bool boolValue, bytes32 stringValue, uint uintValue);
+    
+    -- update(address addressIndex, string stringKey, uint256 uintKey, address addressValue, bool boolValue, string stringValue, uint uintValue, string dataType, bool gotStringKey, bool gotUintKey, bool isArray, uint arrayIndex);
+    
+    -- destroy(address addressIndex, string stringKey, uint256 uintKey, string dataType, bool gotStringKey, bool gotUintKey, bool isArray, uint arrayIndex);
+    
+    >> TROUBLE IS - NOW THE FUNCTIONS HAVE TOO MANY VARIABLES <<
+    
+    -- BETTER TO ABSTRACT AS CLASSES ??? IE :- 
+    
+    -- Address.Id.Create()
+    -- Bool.Id.Read()
+    -- String.Key.Array.Update()
+    -- Uint.Key.Array.Destroy();
+    
+    ...???
+    
     */
+    
     function totalSupply() public constant returns (uint) 
     {
         return db.getUint('total');
