@@ -1145,72 +1145,72 @@ contract AddressesDB is Upgradable
     mapping(address => mapping(address => mapping(bytes32 => mapping(uint256 => mapping(bytes32 => address))))) AddressKeys;
     
     // KEY COUNTS
-    uint AddressBytes32Counts;
-    uint AddressUint256Counts;
-    uint AddressBytes32ArraysCounts;
-    uint AddressUint256ArraysCounts;
-    uint AddressKeysCounts;
+    mapping(address => uint) AddressBytes32Counts;
+    mapping(address => uint) AddressUint256Counts;
+    mapping(address => uint) AddressBytes32ArraysCounts;
+    mapping(address => uint) AddressUint256ArraysCounts;
+    mapping(address => uint) AddressKeysCounts;
     
     // Bytes32 Keys
     //function create(string key, address value, address addressNull) public;
     function _create(address addressIndex, bytes32 version, bytes32 key, address value, address addressNull) public
     {
-        require(AddressBytes32[msg.sender][version][key] == addressNull);
-        AddressBytes32[msg.sender][version][key] = value;
-        AddressBytes32Count++;
+        require(AddressBytes32[msg.sender][addressIndex][version][key] == addressNull);
+        AddressBytes32[msg.sender][addressIndex][version][key] = value;
+        AddressBytes32Counts[addressIndex]++;
     }
     
     //function read(string key, address addressNull) public returns(address);
     function _read(address addressIndex, bytes32 version, bytes32 key, address addressNull) public view returns(address)
     {
-        require(AddressBytes32[msg.sender][version][key] != addressNull);
-        return AddressBytes32[msg.sender][version][key];
+        require(AddressBytes32[msg.sender][addressIndex][version][key] != addressNull);
+        return AddressBytes32[msg.sender][addressIndex][version][key];
     }
     
     //function update(string key, address value, address addressNull) public;
     function _update(address addressIndex, bytes32 version, bytes32 key, address value, address addressNull) public
     {
-        require(AddressBytes32[msg.sender][version][key] != addressNull);
-        AddressBytes32[msg.sender][version][key] = value;
+        require(AddressBytes32[msg.sender][addressIndex][version][key] != addressNull);
+        AddressBytes32[msg.sender][addressIndex][version][key] = value;
     }
     
     //function destroy(string key, address addressNull) public;
     function _destroy(address addressIndex, bytes32 version, bytes32 key, address addressNull) public
     {
-        require(AddressBytes32[msg.sender][version][key] != addressNull);
-        delete AddressBytes32[msg.sender][version][key];
-        AddressBytes32Count--;
+        require(AddressBytes32[msg.sender][addressIndex][version][key] != addressNull);
+        delete AddressBytes32[msg.sender][addressIndex][version][key];
+        AddressBytes32Counts[addressIndex]--;
     }
     
     // Uint256 Keys
     //function Create(uint256 key, address value, address addressNull) public;
     function _Create(address addressIndex, bytes32 version, uint256 key, address value, address addressNull) public
     {
-        require(AddressUint256[msg.sender][version][key] == addressNull);
-        AddressUint256[msg.sender][version][key] = value;
-        AddressUint256Count++;
+        require(AddressUint256[msg.sender][addressIndex][version][key] == addressNull);
+        AddressUint256[msg.sender][addressIndex][version][key] = value;
+        AddressUint256Counts[addressIndex]++;
     }
     
     //function Read(uint256 key, address addressNull) public returns(address);
     function _Read(address addressIndex, bytes32 version, uint256 key, address addressNull) public view returns(address)
     {
-        require(AddressUint256[msg.sender][version][key] != addressNull);
-        return AddressUint256[msg.sender][version][key];
+        require(AddressUint256[msg.sender][addressIndex][version][key] != addressNull);
+        return AddressUint256[msg.sender][addressIndex][version][key];
     }
     
     //function Update(uint256 key, address value, address addressNull) public;
     function _Update(address addressIndex, bytes32 version, uint256 key, address value, address addressNull) public
     {
-        require(AddressUint256[msg.sender][version][key] != addressNull);
-        AddressUint256[msg.sender][version][key] = value;
+        require(AddressUint256[msg.sender][addressIndex][version][key] != addressNull);
+        AddressUint256[msg.sender][addressIndex][version][key] = value;
     }
     
     //function Destroy(uint256 key, address addressNull) public;
     function _Destroy(address addressIndex, bytes32 version, uint256 key, address addressNull) public
     {
-        require(AddressUint256[msg.sender][version][key] != addressNull);
-        delete AddressUint256[msg.sender][version][key];
-        AddressUint256Count--;
+        require(AddressUint256[msg.sender][addressIndex][version][key] != addressNull);
+        delete AddressUint256[msg.sender][addressIndex][version][key];
+        AddressUint256Counts[addressIndex]--;
     }
     
     // Bytes32 Arrays
@@ -1219,38 +1219,38 @@ contract AddressesDB is Upgradable
     {
         if(value != addressNull)
         {
-            AddressBytes32Arrays[msg.sender][version][key].push(value);
+            AddressBytes32Arrays[msg.sender][addressIndex][version][key].push(value);
         }
         else
         {
-            AddressBytes32Arrays[msg.sender][version][key].push(addressNull);
+            AddressBytes32Arrays[msg.sender][addressIndex][version][key].push(addressNull);
         }
-        AddressBytes32ArraysCount++;
+        AddressBytes32ArraysCounts[addressIndex]++;
     }
     
     //function pull(string key, uint index, address addressNull) public returns(address);
     function _pull(address addressIndex, bytes32 version, bytes32 key, uint index, address addressNull) public view returns(address)
     {
-        require(AddressBytes32Arrays[msg.sender][version][key][index] != addressNull);
-        return AddressBytes32Arrays[msg.sender][version][key][index];
+        require(AddressBytes32Arrays[msg.sender][addressIndex][version][key][index] != addressNull);
+        return AddressBytes32Arrays[msg.sender][addressIndex][version][key][index];
     }
     
     //function edit(string key, uint index, address value, address addressNull) public;
     function _edit(address addressIndex, bytes32 version, bytes32 key, uint index, address value, address addressNull) public
     {
-        require(AddressBytes32Arrays[msg.sender][version][key][index] != addressNull);
-        AddressBytes32Arrays[msg.sender][version][key][index] = value;
+        require(AddressBytes32Arrays[msg.sender][addressIndex][version][key][index] != addressNull);
+        AddressBytes32Arrays[msg.sender][addressIndex][version][key][index] = value;
     }
     
     //function remove(string key, uint index, address addressNull) public;
     function _remove(address addressIndex, bytes32 version, bytes32 key, uint index, address addressNull) public
     {
-        require(AddressBytes32Arrays[msg.sender][version][key][index] != addressNull);
-        uint len = AddressBytes32Arrays[msg.sender][version][key].length;
-        address swapped = AddressBytes32Arrays[msg.sender][version][key][len - 1];
-        AddressBytes32Arrays[msg.sender][version][key][index] = swapped;
-        AddressBytes32Arrays[msg.sender][version][key].length--;
-        AddressBytes32ArraysCount--;
+        require(AddressBytes32Arrays[msg.sender][addressIndex][version][key][index] != addressNull);
+        uint len = AddressBytes32Arrays[msg.sender][addressIndex][version][key].length;
+        address swapped = AddressBytes32Arrays[msg.sender][addressIndex][version][key][len - 1];
+        AddressBytes32Arrays[msg.sender][addressIndex][version][key][index] = swapped;
+        AddressBytes32Arrays[msg.sender][addressIndex][version][key].length--;
+        AddressBytes32ArraysCounts[addressIndex]--;
     }
     
     // Uint256 Arrays
@@ -1259,38 +1259,38 @@ contract AddressesDB is Upgradable
     {
         if(value != addressNull)
         {
-            AddressUint256Arrays[msg.sender][version][key].push(value);
+            AddressUint256Arrays[msg.sender][addressIndex][version][key].push(value);
         }
         else
         {
-            AddressUint256Arrays[msg.sender][version][key].push(addressNull);
+            AddressUint256Arrays[msg.sender][addressIndex][version][key].push(addressNull);
         }
-        AddressUint256ArraysCount++;
+        AddressUint256ArraysCounts[addressIndex]++;
     }
     
     //function Pull(uint256 key, uint index, address addressNull) public returns(address);
     function _Pull(address addressIndex, bytes32 version, uint256 key, uint index, address addressNull) public view returns(address)
     {
-        require(AddressUint256Arrays[msg.sender][version][key][index] != addressNull);
-        return AddressUint256Arrays[msg.sender][version][key][index];
+        require(AddressUint256Arrays[msg.sender][addressIndex][version][key][index] != addressNull);
+        return AddressUint256Arrays[msg.sender][addressIndex][version][key][index];
     }
     
     //function Edit(uint256 key, uint index, address value, address addressNull) public;
     function _Edit(address addressIndex, bytes32 version, uint256 key, uint index, address value, address addressNull) public
     {
-        require(AddressUint256Arrays[msg.sender][version][key][index] != addressNull);
-        AddressUint256Arrays[msg.sender][version][key][index] = value;
+        require(AddressUint256Arrays[msg.sender][addressIndex][version][key][index] != addressNull);
+        AddressUint256Arrays[msg.sender][addressIndex][version][key][index] = value;
     }
     
     //function Remove(uint256 key, uint index, address addressNull) public;
     function _Remove(address addressIndex, bytes32 version, uint256 key, uint index, address addressNull) public
     {
-        require(AddressUint256Arrays[msg.sender][version][key][index] != addressNull);
-        uint len = AddressUint256Arrays[msg.sender][version][key].length;
-        address swapped = AddressUint256Arrays[msg.sender][version][key][len - 1];
-        AddressUint256Arrays[msg.sender][version][key][index] = swapped;
-        AddressUint256Arrays[msg.sender][version][key].length--;
-        AddressUint256ArraysCount--;
+        require(AddressUint256Arrays[msg.sender][addressIndex][version][key][index] != addressNull);
+        uint len = AddressUint256Arrays[msg.sender][addressIndex][version][key].length;
+        address swapped = AddressUint256Arrays[msg.sender][addressIndex][version][key][len - 1];
+        AddressUint256Arrays[msg.sender][addressIndex][version][key][index] = swapped;
+        AddressUint256Arrays[msg.sender][addressIndex][version][key].length--;
+        AddressUint256ArraysCounts[addressIndex]--;
     }
     
     // "set" Bytes32 Keys & "Set" Uint256 Keys
@@ -1303,13 +1303,13 @@ contract AddressesDB is Upgradable
     {
         if(value != addressNull)
         {
-            AddressBytes32[msg.sender][version][key] = value;
+            AddressBytes32[msg.sender][addressIndex][version][key] = value;
         }
         else
         {
-            AddressBytes32[msg.sender][version][key] = addressNull;
+            AddressBytes32[msg.sender][addressIndex][version][key] = addressNull;
         }
-        AddressBytes32Count++;
+        AddressBytes32Counts[addressIndex]++;
     }
     
     //function Set(uint256 key, address value, address addressNull) public;
@@ -1317,13 +1317,13 @@ contract AddressesDB is Upgradable
     {
         if(value != addressNull)
         {
-            AddressUint256[msg.sender][version][key] = value;
+            AddressUint256[msg.sender][addressIndex][version][key] = value;
         }
         else
         {
-            AddressUint256[msg.sender][version][key] = addressNull;
+            AddressUint256[msg.sender][addressIndex][version][key] = addressNull;
         }
-        AddressUint256Count++;
+        AddressUint256Counts[addressIndex]++;
     }
     
     //function Sets(uint256 key, string index, address value, address addressNull) public;
@@ -1331,28 +1331,28 @@ contract AddressesDB is Upgradable
     {
         if(value != addressNull)
         {
-            AddressKeys[msg.sender][version][key][index] = value;
+            AddressKeys[msg.sender][addressIndex][version][key][index] = value;
         }
         else
         {
-            AddressKeys[msg.sender][version][key][index] = addressNull;
+            AddressKeys[msg.sender][addressIndex][version][key][index] = addressNull;
         }
-        AddressKeysCount++;
+        AddressKeysCounts[addressIndex]++;
     }
     
     //function Reads(uint256 key, string index, address addressNull) public returns(address);
     function _Reads(address addressIndex, bytes32 version, uint256 key, bytes32 index, address addressNull) public view returns(address)
     {
-        require(AddressKeys[msg.sender][version][key][index] != addressNull);
-        return AddressKeys[msg.sender][version][key][index];
+        require(AddressKeys[msg.sender][addressIndex][version][key][index] != addressNull);
+        return AddressKeys[msg.sender][addressIndex][version][key][index];
     }
     
     //function Removes(uint256 key, string index, address addressNull) public;
     function _Removes(address addressIndex, bytes32 version, uint256 key, bytes32 index, address addressNull) public
     {
-        require(AddressKeys[msg.sender][version][key][index] != addressNull);
-        delete AddressKeys[msg.sender][version][key][index];
-        AddressKeysCount--;
+        require(AddressKeys[msg.sender][addressIndex][version][key][index] != addressNull);
+        delete AddressKeys[msg.sender][addressIndex][version][key][index];
+        AddressKeysCounts[addressIndex]--;
     }
     
     /*
@@ -1362,23 +1362,23 @@ contract AddressesDB is Upgradable
     */
     function addressBytes32Counts(address addressIndex) public view returns(uint)
     {
-        return AddressBytes32Counts;
+        return AddressBytes32Counts[addressIndex];
     }
     function addressUint256Counts(address addressIndex) public view returns(uint)
     {
-        return AddressUint256Counts;
+        return AddressUint256Counts[addressIndex];
     }
     function addressBytes32ArrayCounts(address addressIndex) public view returns(uint)
     {
-        return AddressBytes32ArraysCounts;
+        return AddressBytes32ArraysCounts[addressIndex];
     }
     function addressUint256ArrayCount(address addressIndex) public view returns(uint)
     {
-        return AddressUint256ArraysCounts;
+        return AddressUint256ArraysCounts[addressIndex];
     }
     function addressKeyCounts(address addressIndex) public view returns(uint)
     {
-        return AddressKeysCounts;
+        return AddressKeysCounts[addressIndex];
     }
 }
 
@@ -1392,72 +1392,72 @@ contract BoolsDB is Upgradable
     mapping(address => mapping(address => mapping(bytes32 => mapping(uint256 => mapping(bytes32 => bool))))) BoolKeys;
     
     // KEY COUNTS
-    uint BoolBytes32Counts;
-    uint BoolUint256Counts;
-    uint BoolBytes32ArraysCounts;
-    uint BoolUint256ArraysCounts;
-    uint BoolKeysCounts;
+    mapping(address => uint) BoolBytes32Counts;
+    mapping(address => uint) BoolUint256Counts;
+    mapping(address => uint) BoolBytes32ArraysCounts;
+    mapping(address => uint) BoolUint256ArraysCounts;
+    mapping(address => uint) BoolKeysCounts;
     
     // Bytes32 Keys
     //function create(string key, address value, address addressNull) public;
     function _create(address addressIndex, bytes32 version, bytes32 key, bool value, bool boolNull) public
     {
-        require(BoolBytes32[msg.sender][version][key] == boolNull);
-        BoolBytes32[msg.sender][version][key] = value;
-        BoolBytes32Count++;
+        require(BoolBytes32[msg.sender][addressIndex][version][key] == boolNull);
+        BoolBytes32[msg.sender][addressIndex][version][key] = value;
+        BoolBytes32Counts[addressIndex]++;
     }
     
     //function read(string key, address addressNull) public returns(address);
     function _read(address addressIndex, bytes32 version, bytes32 key, bool boolNull) public view returns(bool)
     {
-        require(BoolBytes32[msg.sender][version][key] != boolNull);
-        return BoolBytes32[msg.sender][version][key];
+        require(BoolBytes32[msg.sender][addressIndex][version][key] != boolNull);
+        return BoolBytes32[msg.sender][addressIndex][version][key];
     }
     
     //function update(string key, address value, address addressNull) public;
     function _update(address addressIndex, bytes32 version, bytes32 key, bool value, bool boolNull) public
     {
-        require(BoolBytes32[msg.sender][version][key] != boolNull);
-        BoolBytes32[msg.sender][version][key] = value;
+        require(BoolBytes32[msg.sender][addressIndex][version][key] != boolNull);
+        BoolBytes32[msg.sender][addressIndex][version][key] = value;
     }
     
     //function destroy(string key, address addressNull) public;
     function _destroy(address addressIndex, bytes32 version, bytes32 key, bool boolNull) public
     {
-        require(BoolBytes32[msg.sender][version][key] != boolNull);
-        delete BoolBytes32[msg.sender][version][key];
-        BoolBytes32Count--;
+        require(BoolBytes32[msg.sender][addressIndex][version][key] != boolNull);
+        delete BoolBytes32[msg.sender][addressIndex][version][key];
+        BoolBytes32Counts[addressIndex]--;
     }
     
     // Uint256 Keys
     //function Create(uint256 key, address value, address addressNull) public;
     function _Create(address addressIndex, bytes32 version, uint256 key, bool value, bool boolNull) public
     {
-        require(BoolUint256[msg.sender][version][key] == boolNull);
-        BoolUint256[msg.sender][version][key] = value;
-        BoolUint256Count++;
+        require(BoolUint256[msg.sender][addressIndex][version][key] == boolNull);
+        BoolUint256[msg.sender][addressIndex][version][key] = value;
+        BoolUint256Counts[addressIndex]++;
     }
     
     //function Read(uint256 key, address addressNull) public returns(address);
     function _Read(address addressIndex, bytes32 version, uint256 key, bool boolNull) public view returns(bool)
     {
-        require(BoolUint256[msg.sender][version][key] != boolNull);
-        return BoolUint256[msg.sender][version][key];
+        require(BoolUint256[msg.sender][addressIndex][version][key] != boolNull);
+        return BoolUint256[msg.sender][addressIndex][version][key];
     }
     
     //function Update(uint256 key, address value, address addressNull) public;
     function _Update(address addressIndex, bytes32 version, uint256 key, bool value, bool boolNull) public
     {
-        require(BoolUint256[msg.sender][version][key] != boolNull);
-        BoolUint256[msg.sender][version][key] = value;
+        require(BoolUint256[msg.sender][addressIndex][version][key] != boolNull);
+        BoolUint256[msg.sender][addressIndex][version][key] = value;
     }
     
     //function Destroy(uint256 key, address addressNull) public;
     function _Destroy(address addressIndex, bytes32 version, uint256 key, bool boolNull) public
     {
-        require(BoolUint256[msg.sender][version][key] != boolNull);
-        delete BoolUint256[msg.sender][version][key];
-        BoolUint256Count--;
+        require(BoolUint256[msg.sender][addressIndex][version][key] != boolNull);
+        delete BoolUint256[msg.sender][addressIndex][version][key];
+        BoolUint256Counts[addressIndex]--;
     }
     
     // Bytes32 Arrays
@@ -1466,33 +1466,33 @@ contract BoolsDB is Upgradable
     {
         if(value != boolNull)
         {
-            BoolBytes32Arrays[msg.sender][version][key].push(value);
+            BoolBytes32Arrays[msg.sender][addressIndex][version][key].push(value);
         }
         else
         {
-            BoolBytes32Arrays[msg.sender][version][key].push(boolNull);
+            BoolBytes32Arrays[msg.sender][addressIndex][version][key].push(boolNull);
         }
-        BoolBytes32ArraysCount++;
+        BoolBytes32ArraysCounts[addressIndex]++;
     }
     
     //function pull(string key, uint index, address addressNull) public returns(address);
     function _pull(address addressIndex, bytes32 version, bytes32 key, uint index, bool boolNull) public view returns(bool)
     {
-        require(BoolBytes32Arrays[msg.sender][version][key][index] != boolNull);
-        return BoolBytes32Arrays[msg.sender][version][key][index];
+        require(BoolBytes32Arrays[msg.sender][addressIndex][version][key][index] != boolNull);
+        return BoolBytes32Arrays[msg.sender][addressIndex][version][key][index];
     }
     
     //function edit(string key, uint index, address value, address addressNull) public;
     function _edit(address addressIndex, bytes32 version, bytes32 key, uint index, bool value, bool boolNull) public
     {
-        require(BoolBytes32Arrays[msg.sender][version][key][index] != boolNull);
-        BoolBytes32Arrays[msg.sender][version][key][index] = value;
+        require(BoolBytes32Arrays[msg.sender][addressIndex][version][key][index] != boolNull);
+        BoolBytes32Arrays[msg.sender][addressIndex][version][key][index] = value;
     }
     
     //function remove(string key, uint index, address addressNull) public;
     function _remove(address addressIndex, bytes32 version, bytes32 key, uint index, bool boolNull) public
     {
-        uint len = BoolBytes32Arrays[msg.sender][version][key].length;
+        uint len = BoolBytes32Arrays[msg.sender][addressIndex][version][key].length;
         bool gotItems;
         if(len > 0)
         {
@@ -1500,10 +1500,10 @@ contract BoolsDB is Upgradable
         }
         if(gotItems > boolNull)
         {
-            bool swapped = BoolBytes32Arrays[msg.sender][version][key][len - 1];
-            BoolBytes32Arrays[msg.sender][version][key][index] = swapped;
-            BoolBytes32Arrays[msg.sender][version][key].length--;
-            BoolBytes32ArraysCount--;
+            bool swapped = BoolBytes32Arrays[msg.sender][addressIndex][version][key][len - 1];
+            BoolBytes32Arrays[msg.sender][addressIndex][version][key][index] = swapped;
+            BoolBytes32Arrays[msg.sender][addressIndex][version][key].length--;
+            BoolBytes32ArraysCounts[addressIndex]--;
         }
     }
     
@@ -1513,33 +1513,33 @@ contract BoolsDB is Upgradable
     {
         if(value != boolNull)
         {
-            BoolUint256Arrays[msg.sender][version][key].push(value);
+            BoolUint256Arrays[msg.sender][addressIndex][version][key].push(value);
         }
         else
         {
-            BoolUint256Arrays[msg.sender][version][key].push(boolNull);
+            BoolUint256Arrays[msg.sender][addressIndex][version][key].push(boolNull);
         }
-        BoolUint256ArraysCount++;
+        BoolUint256ArraysCounts[addressIndex]++;
     }
     
     //function Pull(uint256 key, uint index, address addressNull) public returns(address);
     function _Pull(address addressIndex, bytes32 version, uint256 key, uint index, bool boolNull) public view returns(bool)
     {
-        require(BoolUint256Arrays[msg.sender][version][key][index] != boolNull);
-        return BoolUint256Arrays[msg.sender][version][key][index];
+        require(BoolUint256Arrays[msg.sender][addressIndex][version][key][index] != boolNull);
+        return BoolUint256Arrays[msg.sender][addressIndex][version][key][index];
     }
     
     //function Edit(uint256 key, uint index, address value, address addressNull) public;
     function _Edit(address addressIndex, bytes32 version, uint256 key, uint index, bool value, bool boolNull) public
     {
-        require(BoolUint256Arrays[msg.sender][version][key][index] != boolNull);
-        BoolUint256Arrays[msg.sender][version][key][index] = value;
+        require(BoolUint256Arrays[msg.sender][addressIndex][version][key][index] != boolNull);
+        BoolUint256Arrays[msg.sender][addressIndex][version][key][index] = value;
     }
     
     //function Remove(uint256 key, uint index, address addressNull) public;
     function _Remove(address addressIndex, bytes32 version, uint256 key, uint index, bool boolNull) public
     {
-        uint len = BoolUint256Arrays[msg.sender][version][key].length;
+        uint len = BoolUint256Arrays[msg.sender][addressIndex][version][key].length;
         bool gotItems;
         if(len > 0)
         {
@@ -1547,10 +1547,10 @@ contract BoolsDB is Upgradable
         }
         if(gotItems > boolNull)
         {
-            bool swapped = BoolUint256Arrays[msg.sender][version][key][len - 1];
-            BoolUint256Arrays[msg.sender][version][key][index] = swapped;
-            BoolUint256Arrays[msg.sender][version][key].length--;
-            BoolUint256ArraysCount--;
+            bool swapped = BoolUint256Arrays[msg.sender][addressIndex][version][key][len - 1];
+            BoolUint256Arrays[msg.sender][addressIndex][version][key][index] = swapped;
+            BoolUint256Arrays[msg.sender][addressIndex][version][key].length--;
+            BoolUint256ArraysCounts[addressIndex]--;
         }
     }
     
@@ -1564,13 +1564,13 @@ contract BoolsDB is Upgradable
     {
         if(value != boolNull)
         {
-            BoolBytes32[msg.sender][version][key] = value;
+            BoolBytes32[msg.sender][addressIndex][version][key] = value;
         }
         else
         {
-            BoolBytes32[msg.sender][version][key] = boolNull;
+            BoolBytes32[msg.sender][addressIndex][version][key] = boolNull;
         }
-        BoolBytes32Count++;
+        BoolBytes32Counts[addressIndex]++;
     }
     
     //function Set(uint256 key, address value, address addressNull) public;
@@ -1578,13 +1578,13 @@ contract BoolsDB is Upgradable
     {
         if(value != boolNull)
         {
-            BoolUint256[msg.sender][version][key] = value;
+            BoolUint256[msg.sender][addressIndex][version][key] = value;
         }
         else
         {
-            BoolUint256[msg.sender][version][key] = boolNull;
+            BoolUint256[msg.sender][addressIndex][version][key] = boolNull;
         }
-        BoolUint256Count++;
+        BoolUint256Counts[addressIndex]++;
     }
     
     //function Sets(uint256 key, string index, address value, address addressNull) public;
@@ -1592,28 +1592,28 @@ contract BoolsDB is Upgradable
     {
         if(value != boolNull)
         {
-            BoolKeys[msg.sender][version][key][index] = value;
+            BoolKeys[msg.sender][addressIndex][version][key][index] = value;
         }
         else
         {
-            BoolKeys[msg.sender][version][key][index] = boolNull;
+            BoolKeys[msg.sender][addressIndex][version][key][index] = boolNull;
         }
-        BoolKeysCount++;
+        BoolKeysCounts[addressIndex]++;
     }
     
     //function Reads(uint256 key, string index, address addressNull) public returns(address);
     function _Reads(address addressIndex, bytes32 version, uint256 key, bytes32 index, bool boolNull) public view returns(bool)
     {
-        require(BoolKeys[msg.sender][version][key][index] != boolNull);
-        return BoolKeys[msg.sender][version][key][index];
+        require(BoolKeys[msg.sender][addressIndex][version][key][index] != boolNull);
+        return BoolKeys[msg.sender][addressIndex][version][key][index];
     }
     
     //function Removes(uint256 key, string index, address addressNull) public;
     function _Removes(address addressIndex, bytes32 version, uint256 key, bytes32 index, bool boolNull) public
     {
-        require(BoolKeys[msg.sender][version][key][index] != boolNull);
-        delete BoolKeys[msg.sender][version][key][index];
-        BoolKeysCount--;
+        require(BoolKeys[msg.sender][addressIndex][version][key][index] != boolNull);
+        delete BoolKeys[msg.sender][addressIndex][version][key][index];
+        BoolKeysCounts[addressIndex]--;
     }
     
     /*
@@ -1623,23 +1623,23 @@ contract BoolsDB is Upgradable
     */
     function boolBytes32Counts(address addressIndex) public view returns(uint)
     {
-        return BoolBytes32Counts;
+        return BoolBytes32Counts[addressIndex];
     }
     function boolUint256Counts(address addressIndex) public view returns(uint)
     {
-        return BoolUint256Counts;
+        return BoolUint256Counts[addressIndex];
     }
     function boolBytes32ArrayCounts(address addressIndex) public view returns(uint)
     {
-        return BoolBytes32ArraysCounts;
+        return BoolBytes32ArraysCounts[addressIndex];
     }
     function boolUint256ArrayCounts(address addressIndex) public view returns(uint)
     {
-        return BoolUint256ArraysCounts;
+        return BoolUint256ArraysCounts[addressIndex];
     }
     function boolKeyCounts(address addressIndex) public view returns(uint)
     {
-        return BoolKeysCounts;
+        return BoolKeysCounts[addressIndex];
     }
 }
 
@@ -1653,72 +1653,72 @@ contract StringsDB is Upgradable
     mapping(address => mapping(address => mapping(bytes32 => mapping(uint256 => mapping(bytes32 => bytes32))))) StringKeys;
     
     // KEY COUNTS
-    uint StringBytes32Counts;
-    uint StringUint256Counts;
-    uint StringBytes32ArraysCounts;
-    uint StringUint256ArraysCounts;
-    uint StringKeysCounts;
+    mapping(address => uint) StringBytes32Counts;
+    mapping(address => uint) StringUint256Counts;
+    mapping(address => uint) StringBytes32ArraysCounts;
+    mapping(address => uint) StringUint256ArraysCounts;
+    mapping(address => uint) StringKeysCounts;
     
     // Bytes32 Keys
     //function create(string key, address value, address addressNull) public;
     function _create(address addressIndex, bytes32 version, bytes32 key, bytes32 value, string stringNull) public
     {
         require(value == stringToBytes32(stringNull));
-        StringBytes32[msg.sender][version][key] = value;
-        StringBytes32Count++;
+        StringBytes32[msg.sender][addressIndex][version][key] = value;
+        StringBytes32Counts[addressIndex]++;
     }
     
     //function read(string key, address addressNull) public returns(address);
     function _read(address addressIndex, bytes32 version, bytes32 key, string stringNull) public view returns(bytes32)
     {
-        require(StringBytes32[msg.sender][version][key] != stringToBytes32(stringNull));
-        return StringBytes32[msg.sender][version][key];
+        require(StringBytes32[msg.sender][addressIndex][version][key] != stringToBytes32(stringNull));
+        return StringBytes32[msg.sender][addressIndex][version][key];
     }
     
     //function update(string key, address value, address addressNull) public;
     function _update(address addressIndex, bytes32 version, bytes32 key, bytes32 value, string stringNull) public
     {
-        require(StringBytes32[msg.sender][version][key] != stringToBytes32(stringNull));
-        StringBytes32[msg.sender][version][key] = value;
+        require(StringBytes32[msg.sender][addressIndex][version][key] != stringToBytes32(stringNull));
+        StringBytes32[msg.sender][addressIndex][version][key] = value;
     }
     
     //function destroy(string key, address addressNull) public;
     function _destroy(address addressIndex, bytes32 version, bytes32 key, string stringNull) public
     {
-        require(StringBytes32[msg.sender][version][key] != stringToBytes32(stringNull));
-        delete StringBytes32[msg.sender][version][key];
-        StringBytes32Count--;
+        require(StringBytes32[msg.sender][addressIndex][version][key] != stringToBytes32(stringNull));
+        delete StringBytes32[msg.sender][addressIndex][version][key];
+        StringBytes32Counts[addressIndex]--;
     }
     
     // Uint256 Keys
     //function Create(uint256 key, address value, address addressNull) public;
     function _Create(address addressIndex, bytes32 version, uint256 key, bytes32 value, string stringNull) public
     {
-        require(StringUint256[msg.sender][version][key] == stringToBytes32(stringNull));
-        StringUint256[msg.sender][version][key] = value;
-        StringUint256Count++;
+        require(StringUint256[msg.sender][addressIndex][version][key] == stringToBytes32(stringNull));
+        StringUint256[msg.sender][addressIndex][version][key] = value;
+        StringUint256Counts[addressIndex]++;
     }
     
     //function Read(uint256 key, address addressNull) public returns(address);
     function _Read(address addressIndex, bytes32 version, uint256 key, string stringNull) public view returns(bytes32)
     {
-        require(StringUint256[msg.sender][version][key] != stringToBytes32(stringNull));
-        return StringUint256[msg.sender][version][key];
+        require(StringUint256[msg.sender][addressIndex][version][key] != stringToBytes32(stringNull));
+        return StringUint256[msg.sender][addressIndex][version][key];
     }
     
     //function Update(uint256 key, address value, address addressNull) public;
     function _Update(address addressIndex, bytes32 version, uint256 key, bytes32 value, string stringNull) public
     {
-        require(StringUint256[msg.sender][version][key] != stringToBytes32(stringNull));
-        StringUint256[msg.sender][version][key] = value;
+        require(StringUint256[msg.sender][addressIndex][version][key] != stringToBytes32(stringNull));
+        StringUint256[msg.sender][addressIndex][version][key] = value;
     }
     
     //function Destroy(uint256 key, address addressNull) public;
     function _Destroy(address addressIndex, bytes32 version, uint256 key, string stringNull) public
     {
-        require(StringUint256[msg.sender][version][key] != stringToBytes32(stringNull));
-        delete StringUint256[msg.sender][version][key];
-        StringUint256Count--;
+        require(StringUint256[msg.sender][addressIndex][version][key] != stringToBytes32(stringNull));
+        delete StringUint256[msg.sender][addressIndex][version][key];
+        StringUint256Counts[addressIndex]--;
     }
     
     // Bytes32 Arrays
@@ -1727,38 +1727,38 @@ contract StringsDB is Upgradable
     {
         if(value != stringToBytes32(stringNull))
         {
-            StringBytes32Arrays[msg.sender][version][key].push(value);
+            StringBytes32Arrays[msg.sender][addressIndex][version][key].push(value);
         }
         else
         {
-            StringBytes32Arrays[msg.sender][version][key].push(stringToBytes32(stringNull));
+            StringBytes32Arrays[msg.sender][addressIndex][version][key].push(stringToBytes32(stringNull));
         }
-        StringBytes32ArraysCount++;
+        StringBytes32ArraysCounts[addressIndex]++;
     }
     
     //function pull(string key, uint index, address addressNull) public returns(address);
     function _pull(address addressIndex, bytes32 version, bytes32 key, uint index, string stringNull) public view returns(bytes32)
     {
-        require(StringBytes32Arrays[msg.sender][version][key][index] != stringToBytes32(stringNull));
-        return StringBytes32Arrays[msg.sender][version][key][index];
+        require(StringBytes32Arrays[msg.sender][addressIndex][version][key][index] != stringToBytes32(stringNull));
+        return StringBytes32Arrays[msg.sender][addressIndex][version][key][index];
     }
     
     //function edit(string key, uint index, address value, address addressNull) public;
     function _edit(address addressIndex, bytes32 version, bytes32 key, uint index, bytes32 value, string stringNull) public
     {
-        require(StringBytes32Arrays[msg.sender][version][key][index] != stringToBytes32(stringNull));
-        StringBytes32Arrays[msg.sender][version][key][index] = value;
+        require(StringBytes32Arrays[msg.sender][addressIndex][version][key][index] != stringToBytes32(stringNull));
+        StringBytes32Arrays[msg.sender][addressIndex][version][key][index] = value;
     }
     
     //function remove(string key, uint index, address addressNull) public;
     function _remove(address addressIndex, bytes32 version, bytes32 key, uint index, string stringNull) public
     {
-        require(StringBytes32Arrays[msg.sender][version][key][index] != stringToBytes32(stringNull));
-        uint len = StringBytes32Arrays[msg.sender][version][key].length;
-        bytes32 swapped = StringBytes32Arrays[msg.sender][version][key][len - 1];
-        StringBytes32Arrays[msg.sender][version][key][index] = swapped;
-        StringBytes32Arrays[msg.sender][version][key].length--;
-        StringBytes32ArraysCount--;
+        require(StringBytes32Arrays[msg.sender][addressIndex][version][key][index] != stringToBytes32(stringNull));
+        uint len = StringBytes32Arrays[msg.sender][addressIndex][version][key].length;
+        bytes32 swapped = StringBytes32Arrays[msg.sender][addressIndex][version][key][len - 1];
+        StringBytes32Arrays[msg.sender][addressIndex][version][key][index] = swapped;
+        StringBytes32Arrays[msg.sender][addressIndex][version][key].length--;
+        StringBytes32ArraysCounts[addressIndex]--;
     }
     
     // Uint256 Arrays
@@ -1767,38 +1767,38 @@ contract StringsDB is Upgradable
     {
         if(value != stringToBytes32(stringNull))
         {
-            StringUint256Arrays[msg.sender][version][key].push(value);
+            StringUint256Arrays[msg.sender][addressIndex][version][key].push(value);
         }
         else
         {
-            StringUint256Arrays[msg.sender][version][key].push(stringToBytes32(stringNull));
+            StringUint256Arrays[msg.sender][addressIndex][version][key].push(stringToBytes32(stringNull));
         }
-        StringUint256ArraysCount++;
+        StringUint256ArraysCounts[addressIndex]++;
     }
     
     //function Pull(uint256 key, uint index, address addressNull) public returns(address);
     function _Pull(address addressIndex, bytes32 version, uint256 key, uint index, string stringNull) public view returns(bytes32)
     {
-        require(StringUint256Arrays[msg.sender][version][key][index] != stringToBytes32(stringNull));
-        return StringUint256Arrays[msg.sender][version][key][index];
+        require(StringUint256Arrays[msg.sender][addressIndex][version][key][index] != stringToBytes32(stringNull));
+        return StringUint256Arrays[msg.sender][addressIndex][version][key][index];
     }
     
     //function Edit(uint256 key, uint index, address value, address addressNull) public;
     function _Edit(address addressIndex, bytes32 version, uint256 key, uint index, bytes32 value, string stringNull) public
     {
-        require(StringUint256Arrays[msg.sender][version][key][index] != stringToBytes32(stringNull));
-        StringUint256Arrays[msg.sender][version][key][index] = value;
+        require(StringUint256Arrays[msg.sender][addressIndex][version][key][index] != stringToBytes32(stringNull));
+        StringUint256Arrays[msg.sender][addressIndex][version][key][index] = value;
     }
     
     //function Remove(uint256 key, uint index, address addressNull) public;
     function _Remove(address addressIndex, bytes32 version, uint256 key, uint index, string stringNull) public
     {
-        require(StringUint256Arrays[msg.sender][version][key][index] != stringToBytes32(stringNull));
-        uint len = StringUint256Arrays[msg.sender][version][key].length;
-        bytes32 swapped = StringUint256Arrays[msg.sender][version][key][len - 1];
-        StringUint256Arrays[msg.sender][version][key][index] = swapped;
-        StringUint256Arrays[msg.sender][version][key].length--;
-        StringUint256ArraysCount--;
+        require(StringUint256Arrays[msg.sender][addressIndex][version][key][index] != stringToBytes32(stringNull));
+        uint len = StringUint256Arrays[msg.sender][addressIndex][version][key].length;
+        bytes32 swapped = StringUint256Arrays[msg.sender][addressIndex][version][key][len - 1];
+        StringUint256Arrays[msg.sender][addressIndex][version][key][index] = swapped;
+        StringUint256Arrays[msg.sender][addressIndex][version][key].length--;
+        StringUint256ArraysCounts[addressIndex]--;
     }
     
     // "set" Bytes32 Keys & "Set" Uint256 Keys
@@ -1811,13 +1811,13 @@ contract StringsDB is Upgradable
     {
         if(value != stringToBytes32(stringNull))
         {
-            StringBytes32[msg.sender][version][key] = value;
+            StringBytes32[msg.sender][addressIndex][version][key] = value;
         }
         else
         {
-            StringBytes32[msg.sender][version][key] = stringToBytes32(stringNull);
+            StringBytes32[msg.sender][addressIndex][version][key] = stringToBytes32(stringNull);
         }
-        StringBytes32Count++;
+        StringBytes32Counts[addressIndex]++;
     }
     
     //function Set(uint256 key, address value, address addressNull) public;
@@ -1825,13 +1825,13 @@ contract StringsDB is Upgradable
     {
         if(value != stringToBytes32(stringNull))
         {
-            StringUint256[msg.sender][version][key] = value;
+            StringUint256[msg.sender][addressIndex][version][key] = value;
         }
         else
         {
-            StringUint256[msg.sender][version][key] = stringToBytes32(stringNull);
+            StringUint256[msg.sender][addressIndex][version][key] = stringToBytes32(stringNull);
         }
-        StringUint256Count++;
+        StringUint256Counts[addressIndex]++;
     }
     
     //function Sets(uint256 key, string index, address value, address addressNull) public;
@@ -1839,28 +1839,28 @@ contract StringsDB is Upgradable
     {
         if(value != stringToBytes32(stringNull))
         {
-            StringKeys[msg.sender][version][key][index] = value;
+            StringKeys[msg.sender][addressIndex][version][key][index] = value;
         }
         else
         {
-            StringKeys[msg.sender][version][key][index] = stringToBytes32(stringNull);
+            StringKeys[msg.sender][addressIndex][version][key][index] = stringToBytes32(stringNull);
         }
-        StringKeysCount++;
+        StringKeysCounts[addressIndex]++;
     }
     
     //function Reads(uint256 key, string index, address addressNull) public returns(address);
     function _Reads(address addressIndex, bytes32 version, uint256 key, bytes32 index, string stringNull) public view returns(bytes32)
     {
-        require(StringKeys[msg.sender][version][key][index] != stringToBytes32(stringNull));
-        return StringKeys[msg.sender][version][key][index];
+        require(StringKeys[msg.sender][addressIndex][version][key][index] != stringToBytes32(stringNull));
+        return StringKeys[msg.sender][addressIndex][version][key][index];
     }
     
     //function Removes(uint256 key, string index, address addressNull) public;
     function _Removes(address addressIndex, bytes32 version, uint256 key, bytes32 index, string stringNull) public
     {
-        require(StringKeys[msg.sender][version][key][index] != stringToBytes32(stringNull));
-        delete StringKeys[msg.sender][version][key][index];
-        StringKeysCount--;
+        require(StringKeys[msg.sender][addressIndex][version][key][index] != stringToBytes32(stringNull));
+        delete StringKeys[msg.sender][addressIndex][version][key][index];
+        StringKeysCounts[addressIndex]--;
     }
     
     /*
@@ -1870,23 +1870,23 @@ contract StringsDB is Upgradable
     */
     function stringBytes32Counts(address addressIndex) public view returns(uint)
     {
-        return StringBytes32Counts;
+        return StringBytes32Counts[addressIndex];
     }
     function stringUint256Counts(address addressIndex) public view returns(uint)
     {
-        return StringUint256Counts;
+        return StringUint256Counts[addressIndex];
     }
     function stringBytes32ArrayCounts(address addressIndex) public view returns(uint)
     {
-        return StringBytes32ArraysCounts;
+        return StringBytes32ArraysCounts[addressIndex];
     }
     function stringUint256ArrayCounts(address addressIndex) public view returns(uint)
     {
-        return StringUint256ArraysCounts;
+        return StringUint256ArraysCounts[addressIndex];
     }
     function stringKeyCounts(address addressIndex) public view returns(uint)
     {
-        return StringKeysCounts;
+        return StringKeysCounts[addressIndex];
     }
 }
 
@@ -1900,72 +1900,72 @@ contract UintsDB is Upgradable
     mapping(address => mapping(address => mapping(bytes32 => mapping(uint256 => mapping(bytes32 => uint256))))) UintKeys;
     
     // KEY COUNTS
-    uint UintBytes32Counts;
-    uint UintUint256Counts;
-    uint UintBytes32ArraysCounts;
-    uint UintUint256ArraysCounts;
-    uint UintKeysCounts;
+    mapping(address => uint) UintBytes32Counts;
+    mapping(address => uint) UintUint256Counts;
+    mapping(address => uint) UintBytes32ArraysCounts;
+    mapping(address => uint) UintUint256ArraysCounts;
+    mapping(address => uint) UintKeysCounts;
     
     // Bytes32 Keys
     //function create(string key, address value, address addressNull) public;
     function _create(address addressIndex, bytes32 version, bytes32 key, uint256 value, uint uintNull) public
     {
-        require(UintBytes32[msg.sender][version][key] == uintNull);
-        UintBytes32[msg.sender][version][key] = value;
-        UintBytes32Count++;
+        require(UintBytes32[msg.sender][addressIndex][version][key] == uintNull);
+        UintBytes32[msg.sender][addressIndex][version][key] = value;
+        UintBytes32Counts[addressIndex]++;
     }
     
     //function read(string key, address addressNull) public returns(address);
     function _read(address addressIndex, bytes32 version, bytes32 key, uint uintNull) public view returns(uint256)
     {
-        require(UintBytes32[msg.sender][version][key] != uintNull);
-        return UintBytes32[msg.sender][version][key];
+        require(UintBytes32[msg.sender][addressIndex][version][key] != uintNull);
+        return UintBytes32[msg.sender][addressIndex][version][key];
     }
     
     //function update(string key, address value, address addressNull) public;
     function _update(address addressIndex, bytes32 version, bytes32 key, uint256 value, uint uintNull) public
     {
-        require(UintBytes32[msg.sender][version][key] != uintNull);
-        UintBytes32[msg.sender][version][key] = value;
+        require(UintBytes32[msg.sender][addressIndex][version][key] != uintNull);
+        UintBytes32[msg.sender][addressIndex][version][key] = value;
     }
     
     //function destroy(string key, address addressNull) public;
     function _destroy(address addressIndex, bytes32 version, bytes32 key, uint uintNull) public
     {
-        require(UintBytes32[msg.sender][version][key] != uintNull);
-        delete UintBytes32[msg.sender][version][key];
-        UintBytes32Count--;
+        require(UintBytes32[msg.sender][addressIndex][version][key] != uintNull);
+        delete UintBytes32[msg.sender][addressIndex][version][key];
+        UintBytes32Counts[addressIndex]--;
     }
     
     // Uint256 Keys
     //function Create(uint256 key, address value, address addressNull) public;
     function _Create(address addressIndex, bytes32 version, uint256 key, uint256 value, uint uintNull) public
     {
-        require(UintUint256[msg.sender][version][key] == uintNull);
-        UintUint256[msg.sender][version][key] = value;
-        UintUint256Count++;
+        require(UintUint256[msg.sender][addressIndex][version][key] == uintNull);
+        UintUint256[msg.sender][addressIndex][version][key] = value;
+        UintUint256Counts[addressIndex]++;
     }
     
     //function Read(uint256 key, address addressNull) public returns(address);
     function _Read(address addressIndex, bytes32 version, uint256 key, uint uintNull) public view returns(uint256)
     {
-        require(UintUint256[msg.sender][version][key] != uintNull);
-        return UintUint256[msg.sender][version][key];
+        require(UintUint256[msg.sender][addressIndex][version][key] != uintNull);
+        return UintUint256[msg.sender][addressIndex][version][key];
     }
     
     //function Update(uint256 key, address value, address addressNull) public;
     function _Update(address addressIndex, bytes32 version, uint256 key, uint256 value, uint uintNull) public
     {
-        require(UintUint256[msg.sender][version][key] != uintNull);
-        UintUint256[msg.sender][version][key] = value;
+        require(UintUint256[msg.sender][addressIndex][version][key] != uintNull);
+        UintUint256[msg.sender][addressIndex][version][key] = value;
     }
     
     //function Destroy(uint256 key, address addressNull) public;
     function _Destroy(address addressIndex, bytes32 version, uint256 key, uint uintNull) public
     {
-        require(UintUint256[msg.sender][version][key] != uintNull);
-        delete UintUint256[msg.sender][version][key];
-        UintUint256Count--;
+        require(UintUint256[msg.sender][addressIndex][version][key] != uintNull);
+        delete UintUint256[msg.sender][addressIndex][version][key];
+        UintUint256Counts[addressIndex]--;
     }
     
     // Bytes32 Arrays
@@ -1974,38 +1974,38 @@ contract UintsDB is Upgradable
     {
         if(value != uintNull)
         {
-            UintBytes32Arrays[msg.sender][version][key].push(value);
+            UintBytes32Arrays[msg.sender][addressIndex][version][key].push(value);
         }
         else
         {
-            UintBytes32Arrays[msg.sender][version][key].push(uintNull);
+            UintBytes32Arrays[msg.sender][addressIndex][version][key].push(uintNull);
         }
-        UintBytes32ArraysCount++;
+        UintBytes32ArraysCounts[addressIndex]++;
     }
     
     //function pull(string key, uint index, address addressNull) public returns(address);
     function _pull(address addressIndex, bytes32 version, bytes32 key, uint index, uint uintNull) public view returns(uint256)
     {
-        require(UintBytes32Arrays[msg.sender][version][key][index] != uintNull);
-        return UintBytes32Arrays[msg.sender][version][key][index];
+        require(UintBytes32Arrays[msg.sender][addressIndex][version][key][index] != uintNull);
+        return UintBytes32Arrays[msg.sender][addressIndex][version][key][index];
     }
     
     //function edit(string key, uint index, address value, address addressNull) public;
     function _edit(address addressIndex, bytes32 version, bytes32 key, uint index, uint256 value, uint uintNull) public
     {
-        require(UintBytes32Arrays[msg.sender][version][key][index] != uintNull);
-        UintBytes32Arrays[msg.sender][version][key][index] = value;
+        require(UintBytes32Arrays[msg.sender][addressIndex][version][key][index] != uintNull);
+        UintBytes32Arrays[msg.sender][addressIndex][version][key][index] = value;
     }
     
     //function remove(string key, uint index, address addressNull) public;
     function _remove(address addressIndex, bytes32 version, bytes32 key, uint index, uint uintNull) public
     {
-        require(UintBytes32Arrays[msg.sender][version][key][index] != uintNull);
-        uint len = UintBytes32Arrays[msg.sender][version][key].length;
-        uint256 swapped = UintBytes32Arrays[msg.sender][version][key][len - 1];
-        UintBytes32Arrays[msg.sender][version][key][index] = swapped;
-        UintBytes32Arrays[msg.sender][version][key].length--;
-        UintBytes32ArraysCount--;
+        require(UintBytes32Arrays[msg.sender][addressIndex][version][key][index] != uintNull);
+        uint len = UintBytes32Arrays[msg.sender][addressIndex][version][key].length;
+        uint256 swapped = UintBytes32Arrays[msg.sender][addressIndex][version][key][len - 1];
+        UintBytes32Arrays[msg.sender][addressIndex][version][key][index] = swapped;
+        UintBytes32Arrays[msg.sender][addressIndex][version][key].length--;
+        UintBytes32ArraysCounts[addressIndex]--;
     }
     
     // Uint256 Arrays
@@ -2014,38 +2014,38 @@ contract UintsDB is Upgradable
     {
         if(value != uintNull)
         {
-            UintUint256Arrays[msg.sender][version][key].push(value);
+            UintUint256Arrays[msg.sender][addressIndex][version][key].push(value);
         }
         else
         {
-            UintUint256Arrays[msg.sender][version][key].push(uintNull);
+            UintUint256Arrays[msg.sender][addressIndex][version][key].push(uintNull);
         }
-        UintUint256ArraysCount++;
+        UintUint256ArraysCounts[addressIndex]++;
     }
     
     //function Pull(uint256 key, uint index, address addressNull) public returns(address);
     function _Pull(address addressIndex, bytes32 version, uint256 key, uint index, uint uintNull) public view returns(uint256)
     {
-        require(UintUint256Arrays[msg.sender][version][key][index] != uintNull);
-        return UintUint256Arrays[msg.sender][version][key][index];
+        require(UintUint256Arrays[msg.sender][addressIndex][version][key][index] != uintNull);
+        return UintUint256Arrays[msg.sender][addressIndex][version][key][index];
     }
     
     //function Edit(uint256 key, uint index, address value, address addressNull) public;
     function _Edit(address addressIndex, bytes32 version, uint256 key, uint index, uint256 value, uint uintNull) public
     {
-        require(UintUint256Arrays[msg.sender][version][key][index] != uintNull);
-        UintUint256Arrays[msg.sender][version][key][index] = value;
+        require(UintUint256Arrays[msg.sender][addressIndex][version][key][index] != uintNull);
+        UintUint256Arrays[msg.sender][addressIndex][version][key][index] = value;
     }
     
     //function Remove(uint256 key, uint index, address addressNull) public;
     function _Remove(address addressIndex, bytes32 version, uint256 key, uint index, uint uintNull) public
     {
-        require(UintUint256Arrays[msg.sender][version][key][index] != uintNull);
-        uint len = UintUint256Arrays[msg.sender][version][key].length;
-        uint256 swapped = UintUint256Arrays[msg.sender][version][key][len - 1];
-        UintUint256Arrays[msg.sender][version][key][index] = swapped;
-        UintUint256Arrays[msg.sender][version][key].length--;
-        UintUint256ArraysCount--;
+        require(UintUint256Arrays[msg.sender][addressIndex][version][key][index] != uintNull);
+        uint len = UintUint256Arrays[msg.sender][addressIndex][version][key].length;
+        uint256 swapped = UintUint256Arrays[msg.sender][addressIndex][version][key][len - 1];
+        UintUint256Arrays[msg.sender][addressIndex][version][key][index] = swapped;
+        UintUint256Arrays[msg.sender][addressIndex][version][key].length--;
+        UintUint256ArraysCounts[addressIndex]--;
     }
     
     // "set" Bytes32 Keys & "Set" Uint256 Keys
@@ -2058,13 +2058,13 @@ contract UintsDB is Upgradable
     {
         if(value != uintNull)
         {
-            UintBytes32[msg.sender][version][key] = value;
+            UintBytes32[msg.sender][addressIndex][version][key] = value;
         }
         else
         {
-            UintBytes32[msg.sender][version][key] = uintNull;
+            UintBytes32[msg.sender][addressIndex][version][key] = uintNull;
         }
-        UintBytes32Count++;
+        UintBytes32Counts[addressIndex]++;
     }
     
     //function Set(uint256 key, address value, address addressNull) public;
@@ -2072,13 +2072,13 @@ contract UintsDB is Upgradable
     {
         if(value != uintNull)
         {
-            UintUint256[msg.sender][version][key] = value;
+            UintUint256[msg.sender][addressIndex][version][key] = value;
         }
         else
         {
-            UintUint256[msg.sender][version][key] = uintNull;
+            UintUint256[msg.sender][addressIndex][version][key] = uintNull;
         }
-        UintUint256Count++;
+        UintUint256Counts[addressIndex]++;
     }
     
     //function Sets(uint256 key, string index, address value, address addressNull) public;
@@ -2086,28 +2086,28 @@ contract UintsDB is Upgradable
     {
         if(value != uintNull)
         {
-            UintKeys[msg.sender][version][key][index] = value;
+            UintKeys[msg.sender][addressIndex][version][key][index] = value;
         }
         else
         {
-            UintKeys[msg.sender][version][key][index] = uintNull;
+            UintKeys[msg.sender][addressIndex][version][key][index] = uintNull;
         }
-        UintKeysCount++;
+        UintKeysCounts[addressIndex]++;
     }
     
     //function Reads(uint256 key, string index, address addressNull) public returns(address);
     function _Reads(address addressIndex, bytes32 version, uint256 key, bytes32 index, uint uintNull) public view returns(uint256)
     {
-        require(UintKeys[msg.sender][version][key][index] != uintNull);
-        return UintKeys[msg.sender][version][key][index];
+        require(UintKeys[msg.sender][addressIndex][version][key][index] != uintNull);
+        return UintKeys[msg.sender][addressIndex][version][key][index];
     }
     
     //function Removes(uint256 key, string index, address addressNull) public;
     function _Removes(address addressIndex, bytes32 version, uint256 key, bytes32 index, uint uintNull) public
     {
-        require(UintKeys[msg.sender][version][key][index] != uintNull);
-        delete UintKeys[msg.sender][version][key][index];
-        UintKeysCount--;
+        require(UintKeys[msg.sender][addressIndex][version][key][index] != uintNull);
+        delete UintKeys[msg.sender][addressIndex][version][key][index];
+        UintKeysCounts[addressIndex]--;
     }
     
     /*
@@ -2117,23 +2117,23 @@ contract UintsDB is Upgradable
     */
     function uintBytes32Counts(address addressIndex) public view returns(uint)
     {
-        return UintBytes32Counts;
+        return UintBytes32Counts[addressIndex];
     }
     function uintUint256Counts(address addressIndex) public view returns(uint)
     {
-        return UintUint256Counts;
+        return UintUint256Counts[addressIndex];
     }
     function uintBytes32ArrayCounts(address addressIndex) public view returns(uint)
     {
-        return UintBytes32ArraysCounts;
+        return UintBytes32ArraysCounts[addressIndex];
     }
     function uintUint256ArrayCounts(address addressIndex) public view returns(uint)
     {
-        return UintUint256ArraysCounts;
+        return UintUint256ArraysCounts[addressIndex];
     }
     function uintKeyCounts(address addressIndex) public view returns(uint)
     {
-        return UintKeysCounts;
+        return UintKeysCounts[addressIndex];
     }
 }
 
