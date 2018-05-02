@@ -146,7 +146,7 @@ contract AddressesDB is Upgradable
     function _Destroy(address addressIndex, bytes32 version, uint256 key, address addressNull) public;
     function _push(address addressIndex, bytes32 version, bytes32 key, address value, address addressNull) public;
     function _pull(address addressIndex, bytes32 version, bytes32 key, uint index, address addressNull) public view returns(address);
-    function _edit(address addressIndex, bytes32 version, bytes32 key, uint index, address addressNull, address value) public;
+    function _edit(address addressIndex, bytes32 version, bytes32 key, uint index, address value, address addressNull) public;
     function _remove(address addressIndex, bytes32 version, bytes32 key, uint index, address addressNull) public;
     function _Push(address addressIndex, bytes32 version, uint256 key, address value, address addressNull) public;
     function _Pull(address addressIndex, bytes32 version, uint256 key, uint index, address addressNull) public view returns(address);
@@ -157,11 +157,11 @@ contract AddressesDB is Upgradable
     function _Sets(address addressIndex, bytes32 version, uint256 key, bytes32 index, address value, address addressNull) public;
     function _Reads(address addressIndex, bytes32 version, uint256 key, bytes32 index, address addressNull) public view returns(address);
     function _Removes(address addressIndex, bytes32 version, uint256 key, bytes32 index, address addressNull) public;
-    function addressBytes32Count(address addressIndex) public view returns(uint);
-    function addressUint256Count(address addressIndex) public view returns(uint);
-    function addressBytes32ArrayCount(address addressIndex) public view returns(uint);
-    function addressUint256ArrayCount(address addressIndex) public view returns(uint);
-    function addressKeyCount(address addressIndex) public view returns(uint);
+    function addressBytes32Counts(address addressIndex) public view returns(uint);
+    function addressUint256Counts(address addressIndex) public view returns(uint);
+    function addressBytes32ArrayCounts(address addressIndex) public view returns(uint);
+    function addressUint256ArrayCounts(address addressIndex) public view returns(uint);
+    function addressKeyCounts(address addressIndex) public view returns(uint);
 }
 
 contract AddressesProxy is Upgradable

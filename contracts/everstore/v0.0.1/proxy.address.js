@@ -146,7 +146,7 @@ contract AddressDB is Upgradable
     function _Destroy(bytes32 version, uint256 key, address addressNull) public;
     function _push(bytes32 version, bytes32 key, address value, address addressNull) public;
     function _pull(bytes32 version, bytes32 key, uint index, address addressNull) public view returns(address);
-    function _edit(bytes32 version, bytes32 key, uint index, address addressNull, address value) public;
+    function _edit(bytes32 version, bytes32 key, uint index, address value, address addressNull) public;
     function _remove(bytes32 version, bytes32 key, uint index, address addressNull) public;
     function _Push(bytes32 version, uint256 key, address value, address addressNull) public;
     function _Pull(bytes32 version, uint256 key, uint index, address addressNull) public view returns(address);
