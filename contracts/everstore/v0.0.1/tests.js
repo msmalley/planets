@@ -1,7 +1,7 @@
 pragma solidity ^0.4.18;
 
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
-// V1.1 - Private = 0xa22F7c65CbB28c0c499F1287257d178b67989E52 = 0.26
+// v0.0.1 - Addresses Only = 0x71A346577fED04057BD81d95de66Bb32919B9663 = 0.42
 
 // MS Personal = 0x7d0C58E478479c8f6f5A96C2424d6AE4F82980e0
 
@@ -189,149 +189,29 @@ contract AddressProxy is Upgradable
     function Removes(uint256 key, string index, address addressNull) public;
 }
 
-/*
-contract BoolProxy is Upgradable
-{
-    // Bytes32 Keys
-    function create(string key, bool value, bool boolNull) public;
-    function read(string key, bool boolNull) public returns(bool);
-    function update(string key, bool value, bool boolNull) public;
-    function destroy(string key, bool boolNull) public;
-    
-    // Uint256 Keys
-    function Create(uint256 key, bool value, bool boolNull) public;
-    function Read(uint256 key, bool boolNull) public returns(bool);
-    function Update(uint256 key, bool value, bool boolNull) public;
-    function Destroy(uint256 key, bool boolNull) public;
-    
-    // Bytes32 Arrays
-    function push(string key, bool value, bool boolNull) public;
-    function pull(string key, uint index, bool boolNull) public returns(bool);
-    function edit(string key, uint index, bool value, bool boolNull) public;
-    function remove(string key, uint index, bool boolNull) public;
-    
-    // Uint256 Arrays
-    function Push(uint256 key, bool value, bool boolNull) public;
-    function Pull(uint256 key, uint index, bool boolNull) public returns(bool);
-    function Edit(uint256 key, uint index, bool value, bool boolNull) public;
-    function Remove(uint256 key, uint index, bool boolNull) public;
-    
-    // "set" Bytes32 Keys & "Set" Uint256 Keys
-    // If not exist then create else update ...
-    // "Sets" Uses Uint256 & Bytes32 Keys ...
-    // "Reads" Allows for Reading "Sets"
-    // "Removes" Allows for Deleting "Sets"
-    function set(string key, bool value, bool boolNull) public;
-    function Set(uint256 key, bool value, bool boolNull) public;
-    function Sets(uint256 key, string index, bool value, bool boolNull) public;
-    function Reads(uint256 key, string index, bool boolNull) public returns(bool);
-    function Removes(uint256 key, string index, bool boolNull) public;
-}
-
-contract StringProxy is Upgradable
-{
-    // Bytes32 Keys
-    function create(string key, bytes32 value, string stringNull) public;
-    function read(string key, string stringNull) public returns(bytes32);
-    function _read(string key, string stringNull) public returns(string);
-    function update(string key, bytes32 value, string stringNull) public;
-    function destroy(string key, string stringNull) public;
-    
-    // Uint256 Keys
-    function Create(uint256 key, bytes32 value, string stringNull) public;
-    function Read(uint256 key, string stringNull) public returns(bytes32);
-    function _Read(uint256 key, string stringNull) public returns(string);
-    function Update(uint256 key, bytes32 value, string stringNull) public;
-    function Destroy(uint256 key, string stringNull) public;
-    
-    // Bytes32 Arrays
-    function push(string key, bytes32 value, string stringNull) public;
-    function pull(string key, uint index, string stringNull) public returns(bytes32);
-    function _pull(string key, uint index, string stringNull) public returns(string);
-    function edit(string key, uint index, bytes32 value, string stringNull) public;
-    function remove(string key, uint index, string stringNull) public;
-    
-    // Uint256 Arrays
-    function Push(uint256 key, bytes32 value, string stringNull) public;
-    function Pull(uint256 key, uint index, string stringNull) public returns(bytes32);
-    function _Pull(uint256 key, uint index, string stringNull) public returns(string);
-    function Edit(uint256 key, uint index, bytes32 value, string stringNull) public;
-    function Remove(uint256 key, uint index, string stringNull) public;
-    
-    // "set" Bytes32 Keys & "Set" Uint256 Keys
-    // If not exist then create else update ...
-    // "Sets" Uses Uint256 & Bytes32 Keys ...
-    // "Reads" Allows for Reading "Sets"
-    // "Removes" Allows for Deleting "Sets"
-    function set(string key, bytes32 value, string stringNull) public;
-    function Set(uint256 key, bytes32 value, string stringNull) public;
-    function Sets(uint256 key, string index, bytes32 value, string stringNull) public;
-    function Reads(uint256 key, string index, string stringNull) public returns(bytes32);
-    function _Reads(uint256 key, string index, string stringNull) public returns(string);
-    function Removes(uint256 key, string index, string stringNull) public;
-}
-
-contract UintProxy is Upgradable
-{
-    // Bytes32 Keys
-    function create(string key, uint value, uint uintNull) public;
-    function read(string key, uint uintNull) public returns(uint);
-    function update(string key, uint value, uint uintNull) public;
-    function destroy(string key, uint uintNull) public;
-    
-    // Uint256 Keys
-    function Create(uint256 key, uint value, uint uintNull) public;
-    function Read(uint256 key, uint uintNull) public returns(uint);
-    function Update(uint256 key, uint value, uint uintNull) public;
-    function Destroy(uint256 key, uint uintNull) public;
-    
-    // Bytes32 Arrays
-    function push(string key, uint value, uint uintNull) public;
-    function pull(string key, uint index, uint uintNull) public returns(uint);
-    function edit(string key, uint index, uint value, uint uintNull) public;
-    function remove(string key, uint index, uint uintNull) public;
-    
-    // Uint256 Arrays
-    function Push(uint256 key, uint value, uint uintNull) public;
-    function Pull(uint256 key, uint index, uint uintNull) public returns(uint);
-    function Edit(uint256 key, uint index, uint value, uint uintNull) public;
-    function Remove(uint256 key, uint index, uint uintNull) public;
-    
-    // "set" Bytes32 Keys & "Set" Uint256 Keys
-    // If not exist then create else update ...
-    // "Sets" Uses Uint256 & Bytes32 Keys ...
-    // "Reads" Allows for Reading "Sets"
-    // "Removes" Allows for Deleting "Sets"
-    function set(string key, uint value, uint uintNull) public;
-    function Set(uint256 key, uint value, uint uintNull) public;
-    function Sets(uint256 key, string index, uint value, uint uintNull) public;
-    function Reads(uint256 key, string index, uint uintNull) public returns(uint);
-    function Removes(uint256 key, string index, uint uintNull) public;
-}
-
 contract AddressesProxy is Upgradable
 {
     // Bytes32 Keys
     function create(address addressIndex, string key, address value, address addressNull) public;
-    function read(address addressIndex, string key, address addressNull) public returns(address);
+    function read(address addressIndex, string key, address addressNull) public view returns(address);
     function update(address addressIndex, string key, address value, address addressNull) public;
     function destroy(address addressIndex, string key, address addressNull) public;
     
     // Uint256 Keys
     function Create(address addressIndex, uint256 key, address value, address addressNull) public;
-    function Read(address addressIndex, uint256 key, address addressNull) public returns(address);
+    function Read(address addressIndex, uint256 key, address addressNull) public view returns(address);
     function Update(address addressIndex, uint256 key, address value, address addressNull) public;
     function Destroy(address addressIndex, uint256 key, address addressNull) public;
     
     // Bytes32 Arrays
     function push(address addressIndex, string key, address value, address addressNull) public;
-    function pull(address addressIndex, string key, uint index, address addressNull) public returns(address);
+    function pull(address addressIndex, string key, uint index, address addressNull) public view returns(address);
     function edit(address addressIndex, string key, uint index, address value, address addressNull) public;
     function remove(address addressIndex, string key, uint index, address addressNull) public;
     
     // Uint256 Arrays
     function Push(address addressIndex, uint256 key, address value, address addressNull) public;
-    function Pull(address addressIndex, uint256 key, uint index, address addressNull) public returns(address);
+    function Pull(address addressIndex, uint256 key, uint index, address addressNull) public view returns(address);
     function Edit(address addressIndex, uint256 key, uint index, address value, address addressNull) public;
     function Remove(address addressIndex, uint256 key, uint index, address addressNull) public;
     
@@ -343,180 +223,25 @@ contract AddressesProxy is Upgradable
     function set(address addressIndex, string key, address value, address addressNull) public;
     function Set(address addressIndex, uint256 key, address value, address addressNull) public;
     function Sets(address addressIndex, uint256 key, string index, address value, address addressNull) public;
-    function Reads(address addressIndex, uint256 key, string index, address addressNull) public returns(address);
+    function Reads(address addressIndex, uint256 key, string index, address addressNull) public view returns(address);
     function Removes(address addressIndex, uint256 key, string index, address addressNull) public;
 }
 
-contract BoolsProxy is Upgradable
-{
-    // Bytes32 Keys
-    function create(address addressIndex, string key, bool value, bool boolNull) public;
-    function read(address addressIndex, string key, bool boolNull) public returns(bool);
-    function update(address addressIndex, string key, bool value, bool boolNull) public;
-    function destroy(address addressIndex, string key, bool boolNull) public;
-    
-    // Uint256 Keys
-    function Create(address addressIndex, uint256 key, bool value, bool boolNull) public;
-    function Read(address addressIndex, uint256 key, bool boolNull) public returns(bool);
-    function Update(address addressIndex, uint256 key, bool value, bool boolNull) public;
-    function Destroy(address addressIndex, uint256 key, bool boolNull) public;
-    
-    // Bytes32 Arrays
-    function push(address addressIndex, string key, bool value, bool boolNull) public;
-    function pull(address addressIndex, string key, uint index, bool boolNull) public returns(bool);
-    function edit(address addressIndex, string key, uint index, bool value, bool boolNull) public;
-    function remove(address addressIndex, string key, uint index, bool boolNull) public;
-    
-    // Uint256 Arrays
-    function Push(address addressIndex, uint256 key, bool value, bool boolNull) public;
-    function Pull(address addressIndex, uint256 key, uint index, bool boolNull) public returns(bool);
-    function Edit(address addressIndex, uint256 key, uint index, bool value, bool boolNull) public;
-    function Remove(address addressIndex, uint256 key, uint index, bool boolNull) public;
-    
-    // "set" Bytes32 Keys & "Set" Uint256 Keys
-    // If not exist then create else update ...
-    // "Sets" Uses Uint256 & Bytes32 Keys ...
-    // "Reads" Allows for Reading "Sets"
-    // "Removes" Allows for Deleting "Sets"
-    function set(address addressIndex, string key, bool value, bool boolNull) public;
-    function Set(address addressIndex, uint256 key, bool value, bool boolNull) public;
-    function Sets(address addressIndex, uint256 key, string index, bool value, bool boolNull) public;
-    function Reads(address addressIndex, uint256 key, string index, bool boolNull) public returns(bool);
-    function Removes(address addressIndex, uint256 key, string index, bool boolNull) public;
-}
-
-contract StringsProxy is Upgradable
-{
-    // Bytes32 Keys
-    function create(address addressIndex, string key, bytes32 value, string stringNull) public;
-    function read(address addressIndex, string key, string stringNull) public returns(bytes32);
-    function _read(address addressIndex, string key, string stringNull) public returns(string);
-    function update(address addressIndex, string key, bytes32 value, string stringNull) public;
-    function destroy(address addressIndex, string key, string stringNull) public;
-    
-    // Uint256 Keys
-    function Create(address addressIndex, uint256 key, bytes32 value, string stringNull) public;
-    function Read(address addressIndex, uint256 key, string stringNull) public returns(bytes32);
-    function _Read(address addressIndex, uint256 key, string stringNull) public returns(string);
-    function Update(address addressIndex, uint256 key, bytes32 value, string stringNull) public;
-    function Destroy(address addressIndex, uint256 key, string stringNull) public;
-    
-    // Bytes32 Arrays
-    function push(address addressIndex, string key, bytes32 value, string stringNull) public;
-    function pull(address addressIndex, string key, uint index, string stringNull) public returns(bytes32);
-    function _pull(address addressIndex, string key, uint index, string stringNull) public returns(string);
-    function edit(address addressIndex, string key, uint index, bytes32 value, string stringNull) public;
-    function remove(address addressIndex, string key, uint index, string stringNull) public;
-    
-    // Uint256 Arrays
-    function Push(address addressIndex, uint256 key, bytes32 value, string stringNull) public;
-    function Pull(address addressIndex, uint256 key, uint index, string stringNull) public returns(bytes32);
-    function _Pull(address addressIndex, uint256 key, uint index, string stringNull) public returns(string);
-    function Edit(address addressIndex, uint256 key, uint index, bytes32 value, string stringNull) public;
-    function Remove(address addressIndex, uint256 key, uint index, string stringNull) public;
-    
-    // "set" Bytes32 Keys & "Set" Uint256 Keys
-    // If not exist then create else update ...
-    // "Sets" Uses Uint256 & Bytes32 Keys ...
-    // "Reads" Allows for Reading "Sets"
-    // "Removes" Allows for Deleting "Sets"
-    function set(address addressIndex, string key, bytes32 value, string stringNull) public;
-    function Set(address addressIndex, uint256 key, bytes32 value, string stringNull) public;
-    function Sets(address addressIndex, uint256 key, string index, bytes32 value, string stringNull) public;
-    function Reads(address addressIndex, uint256 key, string index, string stringNull) public returns(bytes32);
-    function _Reads(address addressIndex, uint256 key, string index, string stringNull) public returns(string);
-    function Removes(address addressIndex, uint256 key, string index, string stringNull) public;
-}
-
-contract UintsProxy is Upgradable
-{
-    // Bytes32 Keys
-    function create(address addressIndex, string key, uint value, uint uintNull) public;
-    function read(address addressIndex, string key, uint uintNull) public returns(uint);
-    function update(address addressIndex, string key, uint value, uint uintNull) public;
-    function destroy(address addressIndex, string key, uint uintNull) public;
-    
-    // Uint256 Keys
-    function Create(address addressIndex, uint256 key, uint value, uint uintNull) public;
-    function Read(address addressIndex, uint256 key, uint uintNull) public returns(uint);
-    function Update(address addressIndex, uint256 key, uint value, uint uintNull) public;
-    function Destroy(address addressIndex, uint256 key, uint uintNull) public;
-    
-    // Bytes32 Arrays
-    function push(address addressIndex, string key, uint value, uint uintNull) public;
-    function pull(address addressIndex, string key, uint index, uint uintNull) public returns(uint);
-    function edit(address addressIndex, string key, uint index, uint value, uint uintNull) public;
-    function remove(address addressIndex, string key, uint index, uint uintNull) public;
-    
-    // Uint256 Arrays
-    function Push(address addressIndex, uint256 key, uint value, uint uintNull) public;
-    function Pull(address addressIndex, uint256 key, uint index, uint uintNull) public returns(uint);
-    function Edit(address addressIndex, uint256 key, uint index, uint value, uint uintNull) public;
-    function Remove(address addressIndex, uint256 key, uint index, uint uintNull) public;
-    
-    // "set" Bytes32 Keys & "Set" Uint256 Keys
-    // If not exist then create else update ...
-    // "Sets" Uses Uint256 & Bytes32 Keys ...
-    // "Reads" Allows for Reading "Sets"
-    // "Removes" Allows for Deleting "Sets"
-    function set(address addressIndex, string key, uint value, uint uintNull) public;
-    function Set(address addressIndex, uint256 key, uint value, uint uintNull) public;
-    function Sets(address addressIndex, uint256 key, string index, uint value, uint uintNull) public;
-    function Reads(address addressIndex, uint256 key, string index, uint uintNull) public returns(uint);
-    function Removes(address addressIndex, uint256 key, string index, uint uintNull) public;
-}
-
-*/
-
 contract tests is Upgradable
 {
-    // PROXY SETUP
-    //address AddressAddress;
     AddressProxy Address;
-    
-    /*
-    BoolProxy Bool;
-    StringProxy _String;
-    UintProxy Uint;
     AddressesProxy Addresses;
-    BoolsProxy Bools;
-    StringsProxy Strings;
-    UintsProxy Uints;
-    */
-    
-    function tests(address proxyAddress) public 
+ 
+    function tests(address proxyForAddress, address proxyForAddresses) public 
     {
-        // Setup Proxies
-        //AddressAddress = proxyAddress;
-        Address = AddressProxy(proxyAddress);
-        
-        /*
-        Bool = BoolProxy(proxyAddress);
-        _String = StringProxy(proxyAddress);
-        Uint = UintProxy(proxyAddress);
-        Addresses = AddressesProxy(proxyAddress);
-        Bools = BoolsProxy(proxyAddress);
-        Strings = StringsProxy(proxyAddress);
-        Uints = UintsProxy(proxyAddress);
-        
-        string memory sNull; uint uNull; address aNull;
-        */
+        Address = AddressProxy(proxyForAddress);
+        Addresses = AddressesProxy(proxyForAddresses);
     }
     
-    function updateProxy(address proxyAddress) public onlyOwner
+    function updateProxy(address proxyForAddress, address proxyForAddresses) public onlyOwner
     {
-        //AddressAddress = proxyAddress;
-        Address = AddressProxy(proxyAddress);
-        
-        /*
-        Bool = BoolProxy(proxyAddress);
-        _String = StringProxy(proxyAddress);
-        Uint = UintProxy(proxyAddress);
-        Addresses = AddressesProxy(proxyAddress);
-        Bools = BoolsProxy(proxyAddress);
-        Strings = StringsProxy(proxyAddress);
-        Uints = UintsProxy(proxyAddress);
-        */
+        Address = AddressProxy(proxyForAddress);
+        Addresses = AddressesProxy(proxyForAddresses);
     }
     
     /*
@@ -579,5 +304,67 @@ contract tests is Upgradable
     {
         address addressNull;
         return Address.Pull(key, index, addressNull);
+    }
+    
+    /*
+    
+    ADDRESSED SETS
+    
+    */
+    function setAddresses(address addressIndex, string key, address value) public
+    {
+        address addressNull;
+        Addresses.set(addressIndex, key, value, addressNull);
+    }
+    function SetAddresses(address addressIndex, uint256 key, address value) public
+    {
+        address addressNull;
+        Addresses.Set(addressIndex, key, value, addressNull);
+    }
+    function SetsAddresses(address addressIndex, uint256 key, string index, address value) public
+    {
+        address addressNull;
+        Addresses.Sets(addressIndex, key, index, value, addressNull);
+    }
+    function setAddressesArray(address addressIndex, string key, address value) public
+    {
+        address addressNull;
+        Addresses.push(addressIndex, key, value, addressNull);
+    }
+    function SetAddressesArray(address addressIndex, uint256 key, address value) public
+    {
+        address addressNull;
+        Addresses.Push(addressIndex, key, value, addressNull);
+    }
+    
+    /*
+    
+    ADDRESSED GETS
+    
+    */
+    function getAddresses(address addressIndex, string key) public view returns(address)
+    {
+        address addressNull;
+        return Addresses.read(addressIndex, key, addressNull);
+    }
+    function GetAddresses(address addressIndex, uint256 key) public view returns(address)
+    {
+        address addressNull;
+        return Addresses.Read(addressIndex, key, addressNull);
+    }
+    function GetsAddresses(address addressIndex, uint256 key, string index) public view returns(address)
+    {
+        address addressNull;
+        return Addresses.Reads(addressIndex, key, index, addressNull);
+    }
+    function getAddressesArray(address addressIndex, string key, uint index) public view returns(address)
+    {
+        address addressNull;
+        return Addresses.pull(addressIndex, key, index, addressNull);
+    }
+    function GetAddressesArray(address addressIndex, uint256 key, uint index) public view returns(address)
+    {
+        address addressNull;
+        return Addresses.Pull(addressIndex, key, index, addressNull);
     }
 }

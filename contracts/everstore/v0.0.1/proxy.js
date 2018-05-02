@@ -802,14 +802,11 @@ contract DeployProxies is AddressProxy
         Bools.updateProxy(databaseAddress);
         Strings.updateProxy(databaseAddress);
         Uints.updateProxy(databaseAddress);
-        */
     }
     
     function updateDatabaseName(string databaseName) public onlyOwner
     {
         AddressVersion = databaseName;
-        
-        /*
         Bool.updateVersion(databaseName);
         _String.updateVersion(databaseName);
         Uint.updateVersion(databaseName);
@@ -817,6 +814,5 @@ contract DeployProxies is AddressProxy
         Bools.updateVersion(databaseName);
         Strings.updateVersion(databaseName);
         Uints.updateVersion(databaseName);
-        */
     }
 }

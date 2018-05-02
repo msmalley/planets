@@ -1372,7 +1372,7 @@ contract AddressesDB is Upgradable
     {
         return AddressBytes32ArraysCounts[addressIndex];
     }
-    function addressUint256ArrayCount(address addressIndex) public view returns(uint)
+    function addressUint256ArrayCounts(address addressIndex) public view returns(uint)
     {
         return AddressUint256ArraysCounts[addressIndex];
     }
@@ -2229,84 +2229,84 @@ contract Everstore is AddressDB, BoolDB, StringDB, UintDB, AddressesDB, BoolsDB,
     ADDRESSED KEY VALUE COUNTS 
     
     */
-    function addressCounts() public view returns(uint)
+    function addressCounts(address addressIndex) public view returns(uint)
     {
-        return addressBytes32Counts();
+        return addressBytes32Counts(addressIndex);
     }
-    function AddressCounts() public view returns(uint)
+    function AddressCounts(address addressIndex) public view returns(uint)
     {
-        return addressUint256Counts();
+        return addressUint256Counts(addressIndex);
     }
-    function addressArrayCounts() public view returns(uint)
+    function addressArrayCounts(address addressIndex) public view returns(uint)
     {
-        return addressBytes32ArrayCounts();
+        return addressBytes32ArrayCounts(addressIndex);
     }
-    function AddressArrayCounts() public view returns(uint)
+    function AddressArrayCounts(address addressIndex) public view returns(uint)
     {
-        return addressUint256ArrayCounts();
+        return addressUint256ArrayCounts(addressIndex);
     }
-    function AddressKeyCounts() public view returns(uint)
+    function AddressKeyCounts(address addressIndex) public view returns(uint)
     {
-        return addressKeyCounts();
+        return addressKeyCounts(addressIndex);
     }
-    function boolCounts() public view returns(uint)
+    function boolCounts(address addressIndex) public view returns(uint)
     {
-        return boolBytes32Counts();
+        return boolBytes32Counts(addressIndex);
     }
-    function BoolCounts() public view returns(uint)
+    function BoolCounts(address addressIndex) public view returns(uint)
     {
-        return boolUint256Counts();
+        return boolUint256Counts(addressIndex);
     }
-    function boolArrayCounts() public view returns(uint)
+    function boolArrayCounts(address addressIndex) public view returns(uint)
     {
-        return boolBytes32ArrayCounts();
+        return boolBytes32ArrayCounts(addressIndex);
     }
-    function BoolArrayCounts() public view returns(uint)
+    function BoolArrayCounts(address addressIndex) public view returns(uint)
     {
-        return boolUint256ArrayCounts();
+        return boolUint256ArrayCounts(addressIndex);
     }
-    function BoolKeyCounts() public view returns(uint)
+    function BoolKeyCounts(address addressIndex) public view returns(uint)
     {
-        return boolKeyCounts();
+        return boolKeyCounts(addressIndex);
     }
-    function stringCounts() public view returns(uint)
+    function stringCounts(address addressIndex) public view returns(uint)
     {
-        return stringBytes32Counts();
+        return stringBytes32Counts(addressIndex);
     }
-    function StringCounts() public view returns(uint)
+    function StringCounts(address addressIndex) public view returns(uint)
     {
-        return stringUint256Counts();
+        return stringUint256Counts(addressIndex);
     }
-    function stringArrayCounts() public view returns(uint)
+    function stringArrayCounts(address addressIndex) public view returns(uint)
     {
-        return stringBytes32ArrayCounts();
+        return stringBytes32ArrayCounts(addressIndex);
     }
-    function StringArrayCounts() public view returns(uint)
+    function StringArrayCounts(address addressIndex) public view returns(uint)
     {
-        return stringUint256ArrayCounts();
+        return stringUint256ArrayCounts(addressIndex);
     }
-    function StringKeyCounts() public view returns(uint)
+    function StringKeyCounts(address addressIndex) public view returns(uint)
     {
-        return stringKeyCounts();
+        return stringKeyCounts(addressIndex);
     }
-    function uintCounts() public view returns(uint)
+    function uintCounts(address addressIndex) public view returns(uint)
     {
-        return uintBytes32Counts();
+        return uintBytes32Counts(addressIndex);
     }
-    function UintCounts() public view returns(uint)
+    function UintCounts(address addressIndex) public view returns(uint)
     {
-        return uintUint256Counts();
+        return uintUint256Counts(addressIndex);
     }
-    function uintArrayCounts() public view returns(uint)
+    function uintArrayCounts(address addressIndex) public view returns(uint)
     {
-        return uintBytes32ArrayCounts();
+        return uintBytes32ArrayCounts(addressIndex);
     }
-    function UintArrayCounts() public view returns(uint)
+    function UintArrayCounts(address addressIndex) public view returns(uint)
     {
-        return uintUint256ArrayCounts();
+        return uintUint256ArrayCounts(addressIndex);
     }
-    function UintKeyCounts() public view returns(uint)
+    function UintKeyCounts(address addressIndex) public view returns(uint)
     {
-        return uintKeyCounts();
+        return uintKeyCounts(addressIndex);
     }
 }
