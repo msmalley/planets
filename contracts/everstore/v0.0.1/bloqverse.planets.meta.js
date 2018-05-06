@@ -1,7 +1,17 @@
 pragma solidity ^0.4.18;
 
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
-// v0.0.1 = XXX = XXX
+// v0.0.1 = 0xF02fC8D1A2884637C119B5F06e7182694c2f38F9 = 0.81
+// v0.0.1 = 0xC5C7e4fB006a914621379D22fF13b73269b4105E = 0.79
+// v0.0.1 = 0xC13a3a8f1AfA0d018A7ABD446D8f7D51EB50641b = 0.79
+// v0.0.1 = 0xb836f8662Ab27C6fC303050D86fb2aA908462Ffc = 0.78
+// v0.0.1 = 0x1361d43E9c3e6f2e31A61F4e3ef21FCb8c7dF92E = 0.75
+// v0.0.1 = 0xBCB761D37a2e8224B60f51FCeF2B0f3a25f59eC8 = 0.75
+// v0.0.1 = 0xd5C8Ba4827BFbBDE03b5e50Bcdc4CBDf787Bd3E8 = 0.75
+// v0.0.1 = 0xEB20f265F0ebaC7D2D2093D9920d409ff10667C9 = 0.76
+
+// v0.0.1 = 0xB3C553aD3D7F08c816707E60374557D3e21d79f2 = 0.76
+// Genesis Prime = 0.15
 
 /*
 
@@ -181,32 +191,27 @@ contract Proxy is Upgradable
 
 contract ERC721 is Upgradable
 {
-    function totalSupply() public returns (uint);
-    function balanceOf(address) public returns (uint);
-    function tokenOfOwnerByIndex(address beneficiary, uint index) public returns (uint);
-    function ownerOf(uint tokenId) public returns (address);
+    function totalSupply() public view returns (uint);
+    function balanceOf(address) public view returns (uint);
+    function tokenOfOwnerByIndex(address beneficiary, uint index) public view returns (uint);
+    function ownerOf(uint tokenId) public view returns (address);
     function transfer(address to, uint tokenId) public;
     function takeOwnership(uint tokenId) public;
     function approve(address beneficiary, uint tokenId) public;
     function metadata(uint256 tokenId) public view returns (string);
-    event TokenCreated(uint tokenId, address beneficiary, string meta);
-    event TokenDestroyed(uint tokenId, address beneficiary);
-    event TokenTransferred(uint tokenId, address from, address to);
-    event TokenTransferAllowed(uint tokenId, address beneficiary);
-    event TokenTransferDisallowed(uint tokenId, address beneficiary);
-    event TokenMetadataUpdated(uint tokenId, address beneficiary, string data);
+    function mint(address beneficiary, uint256 id, string meta) external;
+    function updateTokensMetadata(address sender, uint256 id, string meta) public returns(bool);
 }
 
-contract Planets is ERC721
+contract PlanetMeta is Upgradable
 {
     Proxy db;
+    ERC721 tokens;
     
-    string public name = 'Planet Tokens';
-    string public symbol = 'PT';
-    
-    function Planets
+    function PlanetMeta
     (
         address proxyAddress,
+        address tokenAddress,
         string UniverseName, 
         uint StartingWeiDonation, 
         uint CoordinateLimit, 
@@ -217,6 +222,7 @@ contract Planets is ERC721
     public onlyOwner
     {
         db = Proxy(proxyAddress);
+        tokens = ERC721(tokenAddress);
         setup_universe
         (
             UniverseName, 
@@ -226,12 +232,12 @@ contract Planets is ERC721
             WeiPerPlanet, 
             DonationAddress
         );
-        setup_donations();
     }
     
-    function updateProxy(address proxyAddress) public onlyOwner
+    function updateProxy(address proxyAddress, address tokenAddress) public onlyOwner
     {
         db = Proxy(proxyAddress);
+        tokens = ERC721(tokenAddress);
     }
     
     function setup_universe
@@ -253,129 +259,6 @@ contract Planets is ERC721
         db.setAddress('donation_address', DonationAddress);
     }
     
-    function setup_donations() internal
-    {
-        address donation_address = db.getAddress('donation_address');
-        require(db.getsUint(donation_address, 'donation_start') == 0);
-        db.setsUint(donation_address, 'donation_start', db.getUint('min_donation'));
-        db.setsUint(donation_address, 'donation_genesis', block.number);
-        db.setsUint(donation_address, 'donation_checkpoint', block.number);
-        db.setsUint(donation_address, 'donation_interval', db.getUint('block_intervals'));
-        db.setsUint(donation_address, 'donation_ppp', db.getUint('planet_price'));
-        db.setsUint(donation_address, 'donation_amount', db.getUint('min_donation'));
-    }
-    
-    /*
-    
-    ERC721 FUNCTIONS
-    
-    */
-    function totalSupply() public returns (uint) 
-    {
-        return db.getUint('total');
-    }
-
-    function balanceOf(address beneficiary) public returns (uint) 
-    {
-        return db.getsUint(beneficiary, 'balance');
-    }
-
-    function tokenOfOwnerByIndex(address beneficiary, uint index) public returns (uint) 
-    {
-        require(index >= 0);
-        require(index < balanceOf(beneficiary));
-        string memory uid = combine('owned', '_', uintToString(index), '', '');
-        return db.getsUint(beneficiary, uid);
-    }
-
-    function getAllTokens(address beneficiary) public view returns (uint[]) 
-    {
-        uint size = db.getsUint(beneficiary, 'balance');
-        uint[] memory result = new uint[](size);
-        for (uint index = 0; index < size; index++) 
-        {
-            string memory uid = combine('owned', '_', uintToString(index), '', '');
-            result[index] = db.getsUint(beneficiary, uid);
-        }
-        return result;
-    }
-
-    function ownerOf(uint id) public returns (address) 
-    {
-        return db.GetAddress(id, 'owner');
-    }
-
-    function transfer(address to, uint id) public
-    {
-        require(
-            db.GetAddress(id, 'owner') == msg.sender 
-            || db.GetAddress(id, 'allowed') == msg.sender
-        );
-        _transfer(db.GetAddress(id, 'owner'), to, id);
-    }
-
-    function takeOwnership(uint id) public 
-    {
-        require(db.GetAddress(id, 'allowed') == msg.sender);
-        _transfer(db.GetAddress(id, 'owner'), msg.sender, id);
-    }
-
-    function approve(address beneficiary, uint id) public 
-    {
-        require(db.GetAddress(id, 'owner') == msg.sender);
-        if(db.GetAddress(id, 'allowed') != 0)
-        {
-            db.SetAddress(id, 'allowed', 0);
-            emit TokenTransferDisallowed(id, db.GetAddress(id, 'allowed'));
-        }
-        db.SetAddress(id, 'allowed', beneficiary);
-        emit TokenTransferAllowed(id, beneficiary);
-    }
-
-    function metadata(uint256 id) public view returns(string) 
-    {
-        return bytes32ToString(db.GetString(id, 'meta'));
-    }
-
-    function updateTokenMetadata(uint id, string meta) internal returns(bool)
-    {
-        require(db.GetAddress(id, 'owner') == msg.sender);
-        db.SetString(id, 'meta', stringToBytes32(meta));
-        emit TokenMetadataUpdated(id, msg.sender, meta);
-        return true;
-    }
-
-    function _transfer(address from, address to, uint id) internal returns(bool)
-    {
-        db.SetAddress(id, 'allowed', 0);
-        _removeTokenFrom(from, id);
-        _addTokenTo(to, id);
-        emit TokenTransferred(id, from, to);
-        return true;
-    }
-
-    function _removeTokenFrom(address from, uint id) internal 
-    {
-        require(db.getsAddress(from, 'balance') > 0);
-        uint length = db.getsUint(from, 'balance');
-        uint index = db.GetUint(id, 'index');
-        string memory uid = combine('owned', '_', uintToString(length - 1), '', '');
-        uint swapToken = db.getsUint(from, uid);
-        db.setsUint(from, uid, 0);
-        db.SetUint(swapToken, 'index', index);
-        db.setsUint(from, 'balance', db.getsUint(from, 'balance') - 1);
-    }
-
-    function _addTokenTo(address beneficiary, uint id) internal 
-    {
-        uint length = db.getsUint(beneficiary, 'balance');
-        string memory uid = combine('owned', '_', uintToString(length), '', '');
-        db.setsUint(beneficiary, uid, id);
-        db.SetAddress(id, 'owner', beneficiary);
-        db.SetUint(id, 'index', length);
-        db.setsUint(beneficiary, 'balance', length + 1);
-    }
-    
     /*
     
     PLANET SPECIFIC FUNCTIONALITY
@@ -389,10 +272,7 @@ contract Planets is ERC721
     
     function generate_token(address beneficiary, uint256 id, string planetName) internal
     {
-        _addTokenTo(beneficiary, id);
-        db.setUint('total', db.getUint('total') + 1);
-        db.SetString(id, 'meta', stringToBytes32(planetName));
-        emit TokenCreated(id, beneficiary, planetName);  
+        tokens.mint(beneficiary, id, planetName);
     }
     
     function generate_planet
@@ -436,59 +316,34 @@ contract Planets is ERC721
         // Variables required for require ...
         uint256 id = uid(xCoordinate, yCoordinate, zCoordinate);
         address donation_address = db.getAddress('donation_address');
-        uint minimum_donation = db.getsUint(donation_address, 'donation_amount');
+        uint minimum_donation = db.getUint('min_donation');
         uint coordinate_limit = db.getUint('coordinate_limit');
 
         // Check required paramters
-        require(db.GetAddress(id, 'owner') == 0);
+        require(tokens.ownerOf(id) == 0);
         require(msg.value >= minimum_donation);
         require(xCoordinate <= coordinate_limit);
         require(yCoordinate <= coordinate_limit);
         require(zCoordinate <= coordinate_limit);
         
-        address(donation_address).transfer(msg.value);
-        
         generate_token(beneficiary, id, planetName);
         generate_planet(xCoordinate, yCoordinate, zCoordinate, msg.value, planetName, liason, url);
         db.SetAddress(id, 'planet_owner', beneficiary);
         
+        donation_address.transfer(msg.value);
         bumpDonations();
     }
     
     function bumpDonations() public
     {
         uint this_block = block.number;
-        address donation_address = db.getAddress('donation_address');
-        uint checkpoint = db.getsUint(donation_address, 'donation_checkpoint');
-        uint interval = db.getsUint(donation_address, 'donation_interval');
+        uint checkpoint = db.getUint('donation_checkpoint');
+        uint interval = db.getUint('block_intervals');
         if(this_block > (checkpoint + interval))
         {
-            uint ppp = db.getsUint(donation_address, 'donation_ppp');
-            db.setsUint(donation_address, 'donation_checkpoint', this_block);
-            db.setsUint(donation_address, 'donation_amount', (ppp * db.getUint('total')));
-        }
-    }
-    
-    function MinimumDonation() public view returns(uint)
-    {
-        address donation_address = db.getAddress('donation_address');
-        return db.getsUint(donation_address, 'donation_amount');
-    }
-
-    function BlocksToGo() public view returns(uint)
-    {
-        uint this_block = block.number;
-        address donation_address = db.getAddress('donation_address');
-        uint checkpoint = db.getsUint(donation_address, 'donation_checkpoint');
-        uint interval = db.getsUint(donation_address, 'donation_interval');
-        uint next_block = checkpoint + interval;
-        if(this_block < next_block)
-        {
-            return next_block - this_block;
-        }
-        else
-        {
-            return 0;
+            uint ppp = db.getUint('planet_price');
+            db.setUint('donation_checkpoint', this_block);
+            db.setUint('min_donation', (ppp * tokens.totalSupply()));
         }
     }
     
@@ -515,18 +370,6 @@ contract Planets is ERC721
         );
     }
     
-    function UpdateDonationAddress(address NewAddress) onlyOwner public
-    {
-        address old_address = db.getAddress('donation_address');
-        db.setAddress('donation_address', NewAddress);
-        db.setsUint(NewAddress, 'donation_start', db.getsUint(old_address, 'donation_start'));
-        db.setsUint(NewAddress, 'donation_genesis', db.getsUint(old_address, 'donation_genesis'));
-        db.setsUint(NewAddress, 'donation_checkpoint', db.getsUint(old_address, 'donation_checkpoint'));
-        db.setsUint(NewAddress, 'donation_interval', db.getsUint(old_address, 'donation_interval'));
-        db.setsUint(NewAddress, 'donation_ppp', db.getsUint(old_address, 'donation_ppp'));
-        db.setsUint(NewAddress, 'donation_amount', db.getsUint(old_address, 'donation_amount'));
-    }
-    
     function exists(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (bool) 
     {
         return ownerOfPlanet(xCoordinate, yCoordinate, zCoordinate) != 0;
@@ -534,13 +377,13 @@ contract Planets is ERC721
 
     function ownerOfPlanet(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (address) 
     {
-        return db.GetAddress(uid(xCoordinate, yCoordinate, zCoordinate), 'owner');
+        return tokens.ownerOf(uid(xCoordinate, yCoordinate, zCoordinate));
     }
     
     function updatePlanetName(uint xCoordinate, uint yCoordinate, uint zCoordinate, string planetName) public 
     {
         uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        if(updateTokenMetadata(id, planetName))
+        if(tokens.updateTokensMetadata(msg.sender, id, planetName))
         {
             db.SetString(id, 'planet_name', stringToBytes32(planetName));
         }
@@ -549,14 +392,14 @@ contract Planets is ERC721
     function updatePlanetLiason(uint xCoordinate, uint yCoordinate, uint zCoordinate, string LiasonName) public 
     {
         uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        require(msg.sender == db.GetAddress(id, 'owner'));
+        require(msg.sender == tokens.ownerOf(id));
         db.SetString(id, 'planet_liason', stringToBytes32(LiasonName));
     }
 
     function updatePlanetURL(uint xCoordinate, uint yCoordinate, uint zCoordinate, string LiasonURL) public 
     {
         uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        require(msg.sender == db.GetAddress(id, 'owner'));
+        require(msg.sender == tokens.ownerOf(id));
         db.SetString(id, 'planet_url', stringToBytes32(LiasonURL));
     }
     
@@ -566,6 +409,12 @@ contract Planets is ERC721
         return bytes32ToString(db.GetString(id, 'planet_liason'));
     }
 
+    function getPlanetName(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(string) 
+    {
+        uint id = uid(xCoordinate, yCoordinate, zCoordinate);
+        return bytes32ToString(db.GetString(id, 'planet_name'));
+    }
+    
     function getPlanetUrl(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(string) 
     {
         uint id = uid(xCoordinate, yCoordinate, zCoordinate);

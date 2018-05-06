@@ -1,7 +1,8 @@
 pragma solidity ^0.4.18;
 
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
-// v0.0.1 = 0x6caa5A9a3482A11Cf02d7dCe055F38F9A181AF22 = 0.31
+// v0.0.1 = 0xEfc3b79c078ba43C115672976cba2A757f108811 = 0.53
+// v0.0.1 = 0xDC6BCC77dba5a5f4cbD66A715f173ae8de1DEa42 = 0.53
 
 /*
 
@@ -181,198 +182,198 @@ contract Bloqverse is Upgradable
 
 contract Proxy is Upgradable
 {
-    Bloqverse db;
+    Bloqverse bloq;
     bytes32 dbVersion;
     
-    function Proxy(address bloqverseAddress, string databaseVersion)
+    function Proxy(address bloqverseAddress, string databaseVersion) public onlyOwner
     {
         dbVersion = stringToBytes32(databaseVersion);
-        db = Bloqverse(bloqverseAddress);
+        bloq = Bloqverse(bloqverseAddress);
     }
     
     // Set Contract Data
     function setAddress(string key, address value) public
     {
         bytes32 _key = stringToBytes32(key);
-        db._setAddress(dbVersion, _key, value);
+        bloq._setAddress(dbVersion, _key, value);
     }
     function setBool(string key, bool value) public
     {
         bytes32 _key = stringToBytes32(key);
-        db._setBool(dbVersion, _key, value)
+        bloq._setBool(dbVersion, _key, value);
     }
     function setString(string key, bytes32 value) public
     {
         bytes32 _key = stringToBytes32(key);
-        db._setString(dbVersion, _key, value)
+        bloq._setString(dbVersion, _key, value);
     }
     function setUint(string key, uint256 value) public
     {
         bytes32 _key = stringToBytes32(key);
-        db._setUint(dbVersion, _key, value)
+        bloq._setUint(dbVersion, _key, value);
     }
     
     // Set Addressed Data
     function setsAddress(address addressKey, string param, address value) public
     {
         bytes32 _param = stringToBytes32(param);
-        db._setsAddress(dbVersion, addressKey, _param, value);
+        bloq._setsAddress(dbVersion, addressKey, _param, value);
     }
     function setsBool(address addressKey, string param, bool value) public
     {
         bytes32 _param = stringToBytes32(param);
-        db._setsBool(dbVersion, addressKey, _param, value);
+        bloq._setsBool(dbVersion, addressKey, _param, value);
     }
     function setsString(address addressKey, string param, bytes32 value) public
     {
         bytes32 _param = stringToBytes32(param);
-        db._setsString(dbVersion, addressKey, _param, value);
+        bloq._setsString(dbVersion, addressKey, _param, value);
     }
     function setsUint(address addressKey, string param, uint256 value) public
     {
         bytes32 _param = stringToBytes32(param);
-        db._setsUint(dbVersion, addressKey, _param, value);
+        bloq._setsUint(dbVersion, addressKey, _param, value);
     }
     
     // Set Token Data
     function SetAddress(uint256 key, string param, address value) public
     {
         bytes32 _param = stringToBytes32(param);
-        db._SetAddress(dbVersion, key, _param, value);
+        bloq._SetAddress(dbVersion, key, _param, value);
     }
     function SetBool(uint256 key, string param, bool value) public
     {
         bytes32 _param = stringToBytes32(param);
-        db._SetBool(dbVersion, key, _param, value);
+        bloq._SetBool(dbVersion, key, _param, value);
     }
     function SetString(uint256 key, string param, bytes32 value) public
     {
         bytes32 _param = stringToBytes32(param);
-        db._SetString(dbVersion, key, _param, value);
+        bloq._SetString(dbVersion, key, _param, value);
     }
     function SetUint(uint256 key, string param, uint256 value) public
     {
         bytes32 _param = stringToBytes32(param);
-        db._SetUint(dbVersion, key, _param, value);
+        bloq._SetUint(dbVersion, key, _param, value);
     }
     
     // Get Contract Data
     function getAddress(string key) public view returns(address)
     {
         bytes32 _key = stringToBytes32(key);
-        return db._getAddress(dbVersion, _key);
+        return bloq._getAddress(dbVersion, _key);
     }
     function getBool(string key) public view returns(bool)
     {
         bytes32 _key = stringToBytes32(key);
-        return db._getBool(dbVersion, _key);
+        return bloq._getBool(dbVersion, _key);
     }
     function getString(string key) public view returns(bytes32)
     {
         bytes32 _key = stringToBytes32(key);
-        return db._getString(dbVersion, _key);
+        return bloq._getString(dbVersion, _key);
     }
     function getUint(string key) public view returns(uint256)
     {
         bytes32 _key = stringToBytes32(key);
-        return db._getUint(dbVersion, _key);
+        return bloq._getUint(dbVersion, _key);
     }
     
     // Get Addressed Data
     function getsAddress(address addressKey, string param) public view returns(address)
     {
         bytes32 _param = stringToBytes32(param);
-        return db._getsAddress(dbVersion, addressKey, _param);
+        return bloq._getsAddress(dbVersion, addressKey, _param);
     }
     function getsBool(address addressKey, string param) public view returns(bool)
     {
         bytes32 _param = stringToBytes32(param);
-        return db._getsBool(dbVersion, addressKey, _param);
+        return bloq._getsBool(dbVersion, addressKey, _param);
     }
     function getsString(address addressKey, string param) public view returns(bytes32)
     {
         bytes32 _param = stringToBytes32(param);
-        return db._getsString(dbVersion, addressKey, _param);
+        return bloq._getsString(dbVersion, addressKey, _param);
     }
     function getsUint(address addressKey, string param) public view returns(uint256)
     {
         bytes32 _param = stringToBytes32(param);
-        return db._getsUint(dbVersion, addressKey, _param);
+        return bloq._getsUint(dbVersion, addressKey, _param);
     }
     
     // Get Token Data
     function GetAddress(uint256 key, string param) public view returns(address)
     {
         bytes32 _param = stringToBytes32(param);
-        return db._GetAddress(dbVersion, key, _param);
+        return bloq._GetAddress(dbVersion, key, _param);
     }
     function GetBool(uint256 key, string param) public view returns(bool)
     {
         bytes32 _param = stringToBytes32(param);
-        return db._GetBool(dbVersion, key, _param);
+        return bloq._GetBool(dbVersion, key, _param);
     }
     function GetString(uint256 key, string param) public view returns(bytes32)
     {
         bytes32 _param = stringToBytes32(param);
-        return db._GetString(dbVersion, key, _param);
+        return bloq._GetString(dbVersion, key, _param);
     }
     function GetUint(uint256 key, string param) public view returns(uint256)
     {
         bytes32 _param = stringToBytes32(param);
-        return db._GetUint(dbVersion, key, _param);
+        return bloq._GetUint(dbVersion, key, _param);
     }
     
     // Get Contract Data Counts
     function contractAddressCount() public view returns(uint)
     {
-        return db._contractAddressCount(dbVersion);
+        return bloq._contractAddressCount(dbVersion);
     }
     function contractBoolCount() public view returns(uint)
     {
-        return db._contractBoolCount(dbVersion);
+        return bloq._contractBoolCount(dbVersion);
     }
     function contractStringCount() public view returns(uint)
     {
-        return db._contractStringCount(dbVersion);
+        return bloq._contractStringCount(dbVersion);
     }
     function contractUintCount() public view returns(uint)
     {
-        return db._contractUintCount(dbVersion);
+        return bloq._contractUintCount(dbVersion);
     }
     
     // Get Addressed Data Counts
     function addressAddressCount(address addressKey) public view returns(uint)
     {
-        return db._addressAddressCount(dbVersion, addressKey);
+        return bloq._addressAddressCount(dbVersion, addressKey);
     }
     function addressBoolCount(address addressKey) public view returns(uint)
     {
-        return db._addressBoolCount(dbVersion, addressKey);
+        return bloq._addressBoolCount(dbVersion, addressKey);
     }
     function addressStringCount(address addressKey) public view returns(uint)
     {
-        return db._addressStringCount(dbVersion, addressKey);
+        return bloq._addressStringCount(dbVersion, addressKey);
     }
     function addressUintCount(address addressKey) public view returns(uint)
     {
-        return db._addressUintCount(dbVersion, addressKey);
+        return bloq._addressUintCount(dbVersion, addressKey);
     }
     
     // Get Token Data Counts
     function tokenAddressCount(uint256 key) public view returns(uint)
     {
-        return db._tokenAddressCount(dbVersion, key);
+        return bloq._tokenAddressCount(dbVersion, key);
     }
     function tokenBoolCount(uint256 key) public view returns(uint)
     {
-        return db._tokenAddressCount(dbVersion, key);
+        return bloq._tokenAddressCount(dbVersion, key);
     }
     function tokenStringCount(uint256 key) public view returns(uint)
     {
-        return db._tokenAddressCount(dbVersion, key);
+        return bloq._tokenAddressCount(dbVersion, key);
     }
     function tokenUintCount(uint256 key) public view returns(uint)
     {
-        return db._tokenAddressCount(dbVersion, key);
+        return bloq._tokenAddressCount(dbVersion, key);
     }
 }
