@@ -3,7 +3,7 @@ pragma solidity ^0.4.18;
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 // Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
 
-// v0.0.2 = Tokens ERC721 Only = 0x9F1d675b709Cc763AbACF01adcAB4AEfEa2E0d1E = 0.81
+// v0.0.2 = Tokens ERC721 Only = 0x7426d669b3956C21bA755deD5d3862E4261DFA4e = 0.82
 
 /*
 
@@ -350,7 +350,7 @@ contract PlanetTokens is ERC721
         );
         require(db.GetString(id, 'meta') == stringToBytes32(''));
         db.SetString(id, 'meta', stringToBytes32(meta));
-        db.SetUint(id, 'bob', this.block);
+        db.SetUint(id, 'bob', block.number);
         db.setUint('total', db.getUint('total') + 1);
         _addTokenTo(beneficiary, id);
     }

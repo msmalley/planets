@@ -3,7 +3,11 @@ pragma solidity ^0.4.18;
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 // Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
 
-// v0.0.2 = 0x9961035A3D91Cc4D7e7B0691306BB30d4076d173 = 0.77
+// Interval = 15120
+// Wei = 100000000000000
+// Ether = 0.0001
+
+// v0.0.2 = 0xA036586e0811E118DDf8325604E8767deC35CD1E = 0.86
 
 /*
 
@@ -214,7 +218,7 @@ contract PlanetMeta is Upgradable
     Proxy db;
     ERC721 tokens;
     
-    function() payable
+    function() public payable
     {
         address donation_address = db.getAddress('donation_address');
         donation_address.transfer(msg.value);
@@ -370,6 +374,11 @@ contract PlanetMeta is Upgradable
         return db.getUint('min_donation');
     }
     
+    function blockIntervals() public view returns(uint)
+    {
+        return db.getUint('block_intervals');
+    }
+    
     function blocksToGo() public view returns(uint)
     {
         uint this_block = block.number;
@@ -390,11 +399,10 @@ contract PlanetMeta is Upgradable
         uint d,
         uint n,
         uint a,
-        uint cost,
         uint age,
         string planetName,
-        string planetLiason,
-        string planetHome,
+        string ownerName,
+        string ownerHome,
         address planetOwner
     ){
         uint id = uid(xCoordinate, yCoordinate, zCoordinate);
@@ -402,9 +410,10 @@ contract PlanetMeta is Upgradable
             db.GetUint(id, 'planet_d'),
             db.GetUint(id, 'planet_n'),
             db.GetUint(id, 'planet_a'),
-            db.GetUint(id, 'planet_cost'),
-            getPlanetAge(id),
-            bytes32ToString(db.GetString(id, 'meta'),
+            getPlanetAge(xCoordinate, yCoordinate, zCoordinate),
+            bytes32ToString(db.GetString(id, 'meta')),
+            bytes32ToString(db.GetString(id, 'planet_liason')),
+            bytes32ToString(db.GetString(id, 'planet_url')),
             tokens.ownerOf(id)
         );
     }
@@ -439,28 +448,30 @@ contract PlanetMeta is Upgradable
         db.SetString(id, 'planet_url', stringToBytes32(LiasonURL));
     }
     
-    function getLiasonName(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(string)
+    function getPlanetCost(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(uint) 
     {
         uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        return bytes32ToString(db.GetString(id, 'planet_liason'));
-    }
-
-    function getPlanetName(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(string) 
-    {
-        uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        return bytes32ToString(tokens.metabytes(id));
-    }
-    
-    function getPlanetUrl(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(string) 
-    {
-        uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        return bytes32ToString(db.GetString(id, 'planet_url'));
+        return db.GetUint(id, 'planet_cost');
     }
     
     function getPlanetAge(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(uint) 
     {
         uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        return (this.block - db.GetUint(id, 'bob'));
+        return (block.number - db.GetUint(id, 'bob'));
+    }
+    
+    function getPlanetCoordinates(uint256 id) public view returns
+    (
+        uint xCoordinate,
+        uint yCoordinate,
+        uint zCoordinate
+    ) 
+    {
+        return(
+            db.GetUint(id, 'planet_x'),
+            db.GetUint(id, 'planet_y'),
+            db.GetUint(id, 'planet_z')
+        );
     }
     
     function transferPlanet(address beneficiary, uint xCoordinate, uint yCoordinate, uint zCoordinate) public

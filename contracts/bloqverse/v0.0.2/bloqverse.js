@@ -1,7 +1,7 @@
 pragma solidity ^0.4.18;
 
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
-// v0.0.2 = 0xc5095d0e3036A911cFAFfD34A0aB400C2f852A6a = 0.31
+// v0.0.2 = 0x41229fe265cF242d19ea36b530Fb5d2d04bB54aB = 0.31
 
 /*
 
