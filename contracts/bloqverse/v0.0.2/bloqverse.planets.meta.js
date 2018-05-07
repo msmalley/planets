@@ -3,36 +3,26 @@ pragma solidity ^0.4.18;
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 // Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
 
-// v0.0.1 = 0xF02fC8D1A2884637C119B5F06e7182694c2f38F9 = 0.81
-// v0.0.1 = 0xC5C7e4fB006a914621379D22fF13b73269b4105E = 0.79
-// v0.0.1 = 0xC13a3a8f1AfA0d018A7ABD446D8f7D51EB50641b = 0.79
-// v0.0.1 = 0xb836f8662Ab27C6fC303050D86fb2aA908462Ffc = 0.78
-// v0.0.1 = 0x1361d43E9c3e6f2e31A61F4e3ef21FCb8c7dF92E = 0.75
-// v0.0.1 = 0xBCB761D37a2e8224B60f51FCeF2B0f3a25f59eC8 = 0.75
-// v0.0.1 = 0xd5C8Ba4827BFbBDE03b5e50Bcdc4CBDf787Bd3E8 = 0.75
-// v0.0.1 = 0xEB20f265F0ebaC7D2D2093D9920d409ff10667C9 = 0.76
-// v0.0.1 = 0xB3C553aD3D7F08c816707E60374557D3e21d79f2 = 0.76
-// v0.0.1 = 0x781199E702bC9601a545f34C586BeD0fdEfa5009 = 0.77
-// v0.0.1 = 0xf6fE69788c5704173CED02E967647807145DC490 = 0.77
-// v0.0.1 = 0x94B2E55A714616248f41A5fD830e8BB203ECe1D1 = 0.77
-// v0.0.1 = 0x32fA37dE6481a9dAa3FADaec8f4702774A2D4fA1 = 0.77
-// v0.0.1 = 0x6Abd94Cb80fF4f3BD5E908BFeD475f8007374871 = 0.77
-// v0.0.1 = 0x6F6856AC4C1BbDAb6309255E98cb9BC693852232 = 0.77
-// v0.0.1 = 0x547845e2C8279D8628E5d3c199771A97f3f7b5F5 = 0.78
-// v0.0.1 = 0x12a504d573519E3920876455001b83fe3159bF2d = 0.76
-// v0.0.1 = 0xD1B1AE5656Ff4F97dF3213175C1eEBB260d2fee0 = 0.78
-// v0.0.1 = 0x241f0De0E4D43efFb4D10d1cfAdf3F5E2f7956c6 = 0.78
-// v0.0.1 = 0x4DDB89460e5F6b4888C1c2b23953c52626696f1a = 0.78
-// v0.0.1 = 0x9De4d6D33787770f3FeD6cC5fdb1DA8650dDDeA8 = 0.77
-
-// v0.0.1 = 0x9961035A3D91Cc4D7e7B0691306BB30d4076d173 = 0.77
-// Genesis Prime = 0.15
+// v0.0.2 = 0x9961035A3D91Cc4D7e7B0691306BB30d4076d173 = 0.77
 
 /*
 
 BloqVerse: Intergalactic Construct Framework
 Developer: The Blockchain Embassy
 URI: http://bce.asia
+
+Instructions:
+
+Step 1 -    Initiate Bloqverse()
+Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
+Step 3 -    Initiate PlanetTokens() -- linking to Proxy Contract Address
+Step 4 -    Initiate PlanetMeta() - linking to Proxy AND PlanetTokens Contract Addresses
+
+Step 5 -    Enable external minting:
+            Call ActivateMeta() within PlanetTokens() contract linking to PlanetMeta contract address
+            
+Step 6 -    Only way to issue tokens / planets ...
+            Call the Genesis() function in PlanetMeta contract
 
 */
 

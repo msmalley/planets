@@ -3,32 +3,26 @@ pragma solidity ^0.4.18;
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 // Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
 
-// v0.0.1 = Tokens ERC721 Only = 0xFdFBbA370f9dffaB7e66a885734De74d101d1ef3 = 0.63
-// v0.0.1 = Tokens ERC721 Only = 0xA1D7D6d9dA01DAA8Af1F348637C4e2bd7F767B36 = 0.73
-// v0.0.1 = Tokens ERC721 Only = 0x114Cbbda1d6b6D0196380959e20eAbf684013959 = 0.78
-// v0.0.1 = Tokens ERC721 Only = 0x214515fcFE35A5026b1FCC881637e7a733824a85 = 0.81
-// v0.0.1 = Tokens ERC721 Only = 0xbBd23E1aa6266Fa9206559C566b61e41919969dc = 0.71
-// v0.0.1 = Tokens ERC721 Only = 0x96C91a75143adf0E0B24a062A636704a31ad3d24 = 0.68
-// v0.0.1 = Tokens ERC721 Only = 0x3D402802a379DA904D107f48f31D24D1039c09b3 = 0.71
-// v0.0.1 = Tokens ERC721 Only = 0x4afaE42841F1132B1AE4bdbffaC28bfcb3eCac2e = 0.71
-// v0.0.1 = Tokens ERC721 Only = 0x2A0668353457a4e6Ef123c10cFa224711533b67b = 0.73
-// v0.0.1 = Tokens ERC721 Only = 0xFe1a09B0DD06512B38Da9c9f01dfe3ab875d5929 = 0.71
-// v0.0.1 = Tokens ERC721 Only = 0x7Ac3D6716382EC9F1268337E93411d1668f65CBF = 0.71
-// v0.0.1 = Tokens ERC721 Only = 0x0055EB9A6B846E7bDCfC090A51C19AaF4D2BB163 = 0.71
-// v0.0.1 = Tokens ERC721 Only = 0x6876B273dC0ADF84D46F3B9346EC8f223CF5A9CA = 0.71
-// v0.0.1 = Tokens ERC721 Only = 0x808D12a77719A182D7fb85661981B4683fE31e8a = 0.71
-// v0.0.1 = Tokens ERC721 Only = 0xf475B2969F3aEb2Df2E7941Dbf5272a6A798a40e = 0.71
-// v0.0.1 = Tokens ERC721 Only = 0x84BEF6AF1FE69bebbfe731925f1fa4Ffa019c193 = 0.73
-// v0.0.1 = Tokens ERC721 Only = 0x983aBA73a1b8CF7F8FeeA293Bb8b954E85f76999 = 0.73
-// v0.0.1 = Tokens ERC721 Only = 0x1635fF197bFF8D2f308654e60733A5eef0dEbfbe = 0.76
-// v0.0.1 = Tokens ERC721 Only = 0xbBB7750b0a6316a4D512228CF5921765855d87A0 = 0.78
-// v0.0.1 = Tokens ERC721 Only = 0x9F1d675b709Cc763AbACF01adcAB4AEfEa2E0d1E = 0.81
+// v0.0.2 = Tokens ERC721 Only = 0x9F1d675b709Cc763AbACF01adcAB4AEfEa2E0d1E = 0.81
 
 /*
 
 BloqVerse: Intergalactic Construct Framework
 Developer: The Blockchain Embassy
 URI: http://bce.asia
+
+Instructions:
+
+Step 1 -    Initiate Bloqverse()
+Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
+Step 3 -    Initiate PlanetTokens() -- linking to Proxy Contract Address
+Step 4 -    Initiate PlanetMeta() - linking to Proxy AND PlanetTokens Contract Addresses
+
+Step 5 -    Enable external minting:
+            Call ActivateMeta() within PlanetTokens() contract linking to PlanetMeta contract address
+            
+Step 6 -    Only way to issue tokens / planets ...
+            Call the Genesis() function in PlanetMeta contract
 
 */
 
