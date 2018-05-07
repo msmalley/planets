@@ -200,7 +200,7 @@ contract ERC721 is Upgradable
     function balanceOf(address) public view returns (uint);
     function tokenOfOwnerByIndex(address beneficiary, uint index) public view returns (uint);
     function ownerOf(uint tokenId) public view returns (address);
-    function transferToken(address to, uint tokenId) public;
+    function transfer(address to, uint tokenId) public;
     function takeOwnership(uint tokenId) public;
     function updateTokenMetadata(uint tokenId, string meta) public returns(bool);
     function approve(address beneficiary, uint tokenId) public;
@@ -282,7 +282,7 @@ contract PlanetTokens is ERC721
         return db.GetAddress(id, 'owner');
     }
 
-    function transferToken(address to, uint id) public
+    function transfer(address to, uint id) public
     {
         require(
             db.GetAddress(id, 'owner') == msg.sender
@@ -350,6 +350,7 @@ contract PlanetTokens is ERC721
         );
         require(db.GetString(id, 'meta') == stringToBytes32(''));
         db.SetString(id, 'meta', stringToBytes32(meta));
+        db.SetUint(id, 'bob', this.block);
         db.setUint('total', db.getUint('total') + 1);
         _addTokenTo(beneficiary, id);
     }

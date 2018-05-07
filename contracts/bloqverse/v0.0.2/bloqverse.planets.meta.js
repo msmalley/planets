@@ -200,7 +200,7 @@ contract ERC721 is Upgradable
     function balanceOf(address) public view returns (uint);
     function tokenOfOwnerByIndex(address beneficiary, uint index) public view returns (uint);
     function ownerOf(uint tokenId) public view returns (address);
-    function transferToken(address to, uint tokenId) public;
+    function transfer(address to, uint tokenId) public;
     function takeOwnership(uint tokenId) public;
     function approve(address beneficiary, uint tokenId) public;
     function metadata(uint256 tokenId) public view returns (string);
@@ -213,6 +213,12 @@ contract PlanetMeta is Upgradable
 {
     Proxy db;
     ERC721 tokens;
+    
+    function() payable
+    {
+        address donation_address = db.getAddress('donation_address');
+        donation_address.transfer(msg.value);
+    }
     
     function PlanetMeta
     (
@@ -310,6 +316,7 @@ contract PlanetMeta is Upgradable
     function genesis
     (
         address beneficiary, 
+        address returnAddress, 
         uint xCoordinate, 
         uint yCoordinate, 
         uint zCoordinate, 
@@ -327,15 +334,21 @@ contract PlanetMeta is Upgradable
 
         // Check required paramters
         require(tokens.ownerOf(id) == 0);
-        require(msg.value >= minimum_donation);
-        require(xCoordinate <= coordinate_limit);
-        require(yCoordinate <= coordinate_limit);
-        require(zCoordinate <= coordinate_limit);
-        
-        generate_token(beneficiary, id, planetName);
-        generate_planet(xCoordinate, yCoordinate, zCoordinate, msg.value, planetName, liason, url);
-        
-        donation_address.transfer(msg.value);
+        if(msg.value >= minimum_donation)
+        {
+            require(xCoordinate < coordinate_limit);
+            require(yCoordinate < coordinate_limit);
+            require(zCoordinate < coordinate_limit);
+
+            generate_token(beneficiary, id, planetName);
+            generate_planet(xCoordinate, yCoordinate, zCoordinate, msg.value, planetName, liason, url);
+
+            donation_address.transfer(msg.value);
+        }
+        else
+        {
+            returnAddress.transfer(msg.value);
+        }
         bumpDonations();
     }
     
@@ -352,25 +365,46 @@ contract PlanetMeta is Upgradable
         }
     }
     
+    function minimumDonation() public view returns(uint)
+    {
+        return db.getUint('min_donation');
+    }
+    
+    function blocksToGo() public view returns(uint)
+    {
+        uint this_block = block.number;
+        uint checkpoint = db.getUint('donation_checkpoint');
+        uint interval = db.getUint('block_intervals');
+        uint next_block = checkpoint + interval;
+        if(this_block < next_block)
+        {
+            return next_block - this_block;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    
     function getPlanet(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(
-        uint x,
-        uint y,
-        uint z,
         uint d,
         uint n,
         uint a,
         uint cost,
-        address beneficiary
+        uint age,
+        string planetName,
+        string planetLiason,
+        string planetHome,
+        address planetOwner
     ){
         uint id = uid(xCoordinate, yCoordinate, zCoordinate);
         return(
-            db.GetUint(id, 'planet_x'),
-            db.GetUint(id, 'planet_y'),
-            db.GetUint(id, 'planet_z'),
             db.GetUint(id, 'planet_d'),
             db.GetUint(id, 'planet_n'),
             db.GetUint(id, 'planet_a'),
             db.GetUint(id, 'planet_cost'),
+            getPlanetAge(id),
+            bytes32ToString(db.GetString(id, 'meta'),
             tokens.ownerOf(id)
         );
     }
@@ -423,10 +457,16 @@ contract PlanetMeta is Upgradable
         return bytes32ToString(db.GetString(id, 'planet_url'));
     }
     
+    function getPlanetAge(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(uint) 
+    {
+        uint id = uid(xCoordinate, yCoordinate, zCoordinate);
+        return (this.block - db.GetUint(id, 'bob'));
+    }
+    
     function transferPlanet(address beneficiary, uint xCoordinate, uint yCoordinate, uint zCoordinate) public
     {
         uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        tokens.transferToken(beneficiary, id);
+        tokens.transfer(beneficiary, id);
     }
     
     function planetsDiscovered() public view returns(uint)
