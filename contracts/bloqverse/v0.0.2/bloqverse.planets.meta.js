@@ -7,7 +7,7 @@ pragma solidity ^0.4.18;
 // Wei = 100000000000000
 // Ether = 0.0001
 
-// v0.0.2 = 0xA036586e0811E118DDf8325604E8767deC35CD1E = 0.86
+// v0.0.2 = 0x0031c9E929C1D132dB5B0602CB2F4eC062345614 = 0.88
 
 /*
 
@@ -29,6 +29,33 @@ Step 6 -    Only way to issue tokens / planets ...
             Call the Genesis() function in PlanetMeta contract
 
 */
+
+library SafeMath 
+{
+    function add(uint a, uint b) internal pure returns (uint c) 
+    {
+        c = a + b;
+        require(c >= a);
+    }
+
+    function sub(uint a, uint b) internal pure returns (uint c) 
+    {
+        require(b <= a);
+        c = a - b;
+    }
+
+    function mul(uint a, uint b) internal pure returns (uint c) 
+    {
+        c = a * b;
+        require(a == 0 || c / a == b);
+    }
+
+    function div(uint a, uint b) internal pure returns (uint c) 
+    {
+        require(b > 0);
+        c = a / b;
+    }
+}
 
 contract AbleToUtilizeStrings
 {
@@ -110,7 +137,7 @@ contract AbleToUtilizeStrings
         else return byte(uint8(b) + 0x57);
     }
     
-    function toString(address x) public pure returns (string) 
+    function toString(address x) internal pure returns (string) 
     {
         bytes memory s = new bytes(40);
         for (uint i = 0; i < 20; i++) 
@@ -217,6 +244,8 @@ contract PlanetMeta is Upgradable
 {
     Proxy db;
     ERC721 tokens;
+    
+    using SafeMath for uint;
     
     function() public payable
     {
@@ -374,6 +403,11 @@ contract PlanetMeta is Upgradable
         return db.getUint('min_donation');
     }
     
+    function donationAddress() public view returns(address)
+    {
+        return db.getAddress('donation_address');
+    }
+    
     function blockIntervals() public view returns(uint)
     {
         return db.getUint('block_intervals');
@@ -421,6 +455,11 @@ contract PlanetMeta is Upgradable
     function exists(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (bool) 
     {
         return ownerOfPlanet(xCoordinate, yCoordinate, zCoordinate) != 0;
+    }
+    
+    function universeBytes() public view returns (bytes32) 
+    {
+        return db.getString('universe');
     }
 
     function ownerOfPlanet(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (address) 

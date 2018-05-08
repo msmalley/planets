@@ -2,8 +2,9 @@ pragma solidity ^0.4.18;
 
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 // Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
+// Private Test = 0x0c87C4132C11B273Db805876CA2d2f0BD60f4C24
 
-// v0.0.2 = Tokens ERC721 Only = 0x7426d669b3956C21bA755deD5d3862E4261DFA4e = 0.82
+// v0.0.2 = 0x6F9bC315dC2e6B5970e2D956f921a309A7CBAbE8 = 0.59
 
 /*
 
@@ -229,189 +230,189 @@ contract ERC721 is Upgradable
     function ownerOf(uint tokenId) public view returns (address);
     function transfer(address to, uint tokenId) public;
     function takeOwnership(uint tokenId) public;
-    function updateTokenMetadata(uint tokenId, string meta) public returns(bool);
     function approve(address beneficiary, uint tokenId) public;
     function metadata(uint256 tokenId) public view returns (string);
     function metabytes(uint256 tokenId) public view returns (bytes32);
-    event TokenCreated(uint tokenId, address beneficiary, string meta);
-    event TokenDestroyed(uint tokenId, address beneficiary);
-    event TokenTransferred(uint tokenId, address from, address to);
-    event TokenTransferAllowed(uint tokenId, address beneficiary);
-    event TokenTransferDisallowed(uint tokenId, address beneficiary);
-    event TokenMetadataUpdated(uint tokenId, address beneficiary, string data);
+    function mint(address beneficiary, uint256 id, string meta) external;
+    function updateTokenMetadata(uint tokenId, string meta) public returns(bool);
 }
 
-contract PlanetTokens is ERC721
+contract PlanetMeta is Upgradable
+{
+    function exists(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (bool);
+    function uid(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (uint256);
+    function donationAddress() public view returns(address);
+    function universeBytes() public view returns(bytes32);
+}
+
+contract PlanetPlayers is Upgradable
 {
     Proxy db;
+    ERC721 tokens;
+    PlanetMeta meta;
     
     using SafeMath for uint;
     
-    string public name = 'Planet Tokens';
-    string public symbol = 'PT';
+    function() public payable
+    {
+        address donation_address = meta.donationAddress();
+        donation_address.transfer(msg.value);
+    }
     
-    address public activeMetaAddress;
-    
-    function PlanetTokens
+    function PlanetPlayers
     (
-        address proxyAddress
+        address proxyAddress,
+        address tokenAddress,
+        address metaAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
+        tokens = ERC721(tokenAddress);
+        meta = PlanetMeta(metaAddress);
     }
     
-    function updateProxy(address proxyAddress) public onlyOwner
+    function updateProxy
+    (
+        address proxyAddress, 
+        address tokenAddress,
+        address metaAddress
+    ) 
+    public onlyOwner
     {
         db = Proxy(proxyAddress);
+        tokens = ERC721(tokenAddress);
+        meta = PlanetMeta(metaAddress);
     }
     
-    function activateMeta(address contractMetaAddress) public onlyOwner
+    function destroyPlayer() public
     {
-        activeMetaAddress = contractMetaAddress;
+        require(db.getsString(tx.origin, 'player_name') != stringToBytes32(''));
+        uint256 id = db.getsUint(tx.origin, 'player_pob');
+        db.setsString(tx.origin, 'player_name', stringToBytes32(''));
+        db.setsUint(tx.origin, 'player_bob', 0);
+        db.setsUint(tx.origin, 'player_pob', 0);
+        db.setsUint(tx.origin, 'player_dna', 0);
+        db.setUint('players', db.getUint('players') - 1);
+        db.SetUint(id, 'players', db.GetUint(id, 'players') - 1);
     }
     
-    /*
-    
-    ERC721 FUNCTIONS
-    
-    */
-    function totalSupply() public view returns (uint) 
+    function generatePlayer
+    (
+        string playerName,
+        uint xCoordinateOfHomeWorld,
+        uint yCoordinateOfHomeWorld,
+        uint zCoordinateOfHomeWorld
+    ) 
+    public
     {
-        return db.getUint('total');
-    }
-
-    function balanceOf(address beneficiary) public view returns (uint) 
-    {
-        return db.getsUint(beneficiary, 'balance');
-    }
-
-    function tokenOfOwnerByIndex(address beneficiary, uint index) public view returns (uint) 
-    {
-        require(index >= 0);
-        require(index < balanceOf(beneficiary));
-        string memory uid = combine('owned', '_', uintToString(index), '', '');
-        return db.getsUint(beneficiary, uid);
-    }
-
-    function getAllTokens(address beneficiary) public view returns (uint[]) 
-    {
-        uint size = db.getsUint(beneficiary, 'balance');
-        uint[] memory result = new uint[](size);
-        for (uint index = 0; index < size; index++) 
-        {
-            string memory uid = combine('owned', '_', uintToString(index), '', '');
-            result[index] = db.getsUint(beneficiary, uid);
-        }
-        return result;
-    }
-
-    function ownerOf(uint id) public view returns (address) 
-    {
-        return db.GetAddress(id, 'owner');
-    }
-
-    function transfer(address to, uint id) public
-    {
-        require(
-            db.GetAddress(id, 'owner') == msg.sender
-            || db.GetAddress(id, 'allowed') == msg.sender
-            || db.GetAddress(id, 'owner') == tx.origin
-            || db.GetAddress(id, 'allowed') == tx.origin
+        uint256 id = meta.uid
+        (
+            xCoordinateOfHomeWorld, 
+            yCoordinateOfHomeWorld,
+            zCoordinateOfHomeWorld
         );
-        _transfer(db.GetAddress(id, 'owner'), to, id);
-    }
-
-    function takeOwnership(uint id) public 
-    {
-        if(db.GetAddress(id, 'allowed') == msg.sender)
-        {
-            _transfer(db.GetAddress(id, 'owner'), msg.sender, id);
-        }
-        else if(db.GetAddress(id, 'allowed') == tx.origin)
-        {
-            _transfer(db.GetAddress(id, 'owner'), tx.origin, id);
-        }
-        
-    }
-
-    function approve(address beneficiary, uint id) public 
-    {
-        require(
-            db.GetAddress(id, 'owner') == msg.sender
-            || db.GetAddress(id, 'owner') == tx.origin
-        );
-        if(db.GetAddress(id, 'allowed') != 0)
-        {
-            db.SetAddress(id, 'allowed', 0);
-            emit TokenTransferDisallowed(id, db.GetAddress(id, 'allowed'));
-        }
-        db.SetAddress(id, 'allowed', beneficiary);
-        emit TokenTransferAllowed(id, beneficiary);
-    }
-
-    function metadata(uint256 id) public view returns(string) 
-    {
-        return bytes32ToString(db.GetString(id, 'meta'));
-    }    
-    
-    function metabytes(uint256 id) public view returns(bytes32) 
-    {
-        return db.GetString(id, 'meta');
-    }
-
-    function updateTokenMetadata(uint id, string meta) public returns(bool)
-    {
-        require(
-            db.GetAddress(id, 'owner') == msg.sender
-            || db.GetAddress(id, 'owner') == tx.origin
-        );
-        db.SetString(id, 'meta', stringToBytes32(meta));
-        emit TokenMetadataUpdated(id, db.GetAddress(id, 'owner'), meta);
-        return true;
+        require(meta.exists
+        (
+            xCoordinateOfHomeWorld, 
+            yCoordinateOfHomeWorld,
+            zCoordinateOfHomeWorld
+        ));
+        require(db.getsString(tx.origin, 'player_name') == stringToBytes32(''));
+        db.setsString(tx.origin, 'player_name', stringToBytes32(playerName));
+        db.setsUint(tx.origin, 'player_bob', block.number);
+        db.setsUint(tx.origin, 'player_pob', id);
+        db.setsUint(tx.origin, 'player_dna', uint256(keccak256
+        (
+            xCoordinateOfHomeWorld, 
+            yCoordinateOfHomeWorld, 
+            zCoordinateOfHomeWorld, 
+            tx.origin, 
+            bytes32ToString(meta.universeBytes())
+        )));
+        db.setUint('players', db.getUint('players') + 1);
+        db.SetUint(id, 'players', db.GetUint(id, 'players') + 1);
     }
     
-    function mint(address beneficiary, uint256 id, string meta) external
+    function playerCount() public view returns(uint)
     {
-        require(
-            activeMetaAddress == msg.sender
-            || activeMetaAddress == tx.origin
+        return db.getUint('players');
+    }
+    
+    function planetPlayerCount(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(uint)
+    {
+        uint256 id = meta.uid(xCoordinate, yCoordinate, zCoordinate);
+        return db.GetUint(id, 'players');
+    }
+    
+    function getPlayer
+    (
+        address playerAddress
+    ) 
+    public view returns
+    (
+        string playerName,
+        uint256 playerDNA,
+        uint playerAge,
+        string planetOfBirth,
+        uint planetsOwned,
+        bool playerIsRebel
+    )
+    {
+        return
+        (
+            bytes32ToString(db.getsString(playerAddress, 'player_name')),
+            db.getsUint(playerAddress, 'player_dna'),
+            (block.number - db.getsUint(playerAddress, 'player_bob')),
+            bytes32ToString(tokens.metabytes(db.getsUint(playerAddress, 'player_pob'))),
+            tokens.balanceOf(playerAddress),
+            isRebel(playerAddress)
         );
-        require(db.GetString(id, 'meta') == stringToBytes32(''));
-        db.SetString(id, 'meta', stringToBytes32(meta));
-        db.SetUint(id, 'bob', block.number);
-        db.setUint('total', db.getUint('total') + 1);
-        _addTokenTo(beneficiary, id);
     }
-
-    function _transfer(address from, address to, uint id) internal returns(bool)
+    
+    function updatePlayer
+    (
+        string playerName
+    ) 
+    public
     {
-        db.SetAddress(id, 'allowed', 0);
-        _removeTokenFrom(from, id);
-        _addTokenTo(to, id);
-        emit TokenTransferred(id, from, to);
-        return true;
+        require(db.getsString(tx.origin, 'player_name') != stringToBytes32(''));
+        db.setsString(tx.origin, 'player_name', stringToBytes32(playerName));
     }
-
-    function _removeTokenFrom(address from, uint id) internal 
+    
+    function isRebel(address playerAddress) public view returns(bool)
     {
-        require(db.getsUint(from, 'balance') > 0);
-        uint length = db.getsUint(from, 'balance');
-        uint index = db.GetUint(id, 'index');
-        string memory uid = combine('owned', '_', uintToString(length - 1), '', '');
-        uint swapToken = db.getsUint(from, uid);
-        db.setsUint(from, uid, 0);
-        db.SetUint(swapToken, 'index', index);
-        db.setsUint(from, 'balance', db.getsUint(from, 'balance') - 1);
+        return db.getsBool(playerAddress, 'is_rebel');
     }
-
-    function _addTokenTo(address beneficiary, uint id) internal 
+    
+    function amRebel(bool value) public
     {
-        uint length = db.getsUint(beneficiary, 'balance');
-        string memory uid = combine('owned', '_', uintToString(length), '', '');
-        db.setsUint(beneficiary, uid, id);
-        db.SetAddress(id, 'owner', beneficiary);
-        db.SetUint(id, 'index', length);
-        db.setsUint(beneficiary, 'balance', length + 1);
+        if(value)
+        {
+            db.setsBool(tx.origin, 'is_rebel', value);
+        }
+    }
+    
+    function rebelPlanet(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(bool)
+    {
+        uint256 id = meta.uid(xCoordinate, yCoordinate, zCoordinate);
+        address planetAddress = tokens.ownerOf(id);
+        return db.getsBool(planetAddress, 'is_rebel');
+    }
+    
+    function planetStatus(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns
+    (
+        string planetName,
+        uint256 tokenID,
+        bool ruledByRebels
+    )
+    {
+        uint256 id = meta.uid(xCoordinate, yCoordinate, zCoordinate);
+        return
+        (
+            bytes32ToString(db.GetString(id, 'meta')),
+            id,
+            rebelPlanet(xCoordinate, yCoordinate, zCoordinate)
+        );
     }
 }

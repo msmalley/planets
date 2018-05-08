@@ -24,6 +24,33 @@ Step 6 -    Only way to issue tokens / planets ...
 
 */
 
+library SafeMath 
+{
+    function add(uint a, uint b) internal pure returns (uint c) 
+    {
+        c = a + b;
+        require(c >= a);
+    }
+
+    function sub(uint a, uint b) internal pure returns (uint c) 
+    {
+        require(b <= a);
+        c = a - b;
+    }
+
+    function mul(uint a, uint b) internal pure returns (uint c) 
+    {
+        c = a * b;
+        require(a == 0 || c / a == b);
+    }
+
+    function div(uint a, uint b) internal pure returns (uint c) 
+    {
+        require(b > 0);
+        c = a / b;
+    }
+}
+
 contract AbleToUtilizeStrings
 {
     function bytes32ToString(bytes32 x) internal pure returns (string) 
@@ -104,7 +131,7 @@ contract AbleToUtilizeStrings
         else return byte(uint8(b) + 0x57);
     }
     
-    function toString(address x) public pure returns (string) 
+    function toString(address x) internal pure returns (string) 
     {
         bytes memory s = new bytes(40);
         for (uint i = 0; i < 20; i++) 
@@ -145,6 +172,8 @@ contract Upgradable is AbleToUtilizeStrings
 
 contract Bloqverse is Upgradable
 {
+    using SafeMath for uint;
+    
     // Base Contract Data
     mapping(address => mapping(bytes32 => mapping(bytes32 => address))) ContractAddresses;
     mapping(address => mapping(bytes32 => mapping(bytes32 => bool))) ContractBools;
