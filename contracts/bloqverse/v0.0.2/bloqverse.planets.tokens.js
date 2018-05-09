@@ -380,7 +380,7 @@ contract PlanetTokens is ERC721
         require(db.GetString(id, 'meta') == stringToBytes32(''));
         db.SetString(id, 'meta', stringToBytes32(meta));
         db.SetUint(id, 'bob', block.number);
-        db.setUint('total', db.getUint('total') + 1);
+        db.setUint('total', db.getUint('total').add(1));
         _addTokenTo(beneficiary, id);
     }
 
@@ -398,11 +398,11 @@ contract PlanetTokens is ERC721
         require(db.getsUint(from, 'balance') > 0);
         uint length = db.getsUint(from, 'balance');
         uint index = db.GetUint(id, 'index');
-        string memory uid = combine('owned', '_', uintToString(length - 1), '', '');
+        string memory uid = combine('owned', '_', uintToString(length.sub(1)), '', '');
         uint swapToken = db.getsUint(from, uid);
         db.setsUint(from, uid, 0);
         db.SetUint(swapToken, 'index', index);
-        db.setsUint(from, 'balance', db.getsUint(from, 'balance') - 1);
+        db.setsUint(from, 'balance', db.getsUint(from, 'balance').sub(1));
     }
 
     function _addTokenTo(address beneficiary, uint id) internal 
@@ -412,6 +412,6 @@ contract PlanetTokens is ERC721
         db.setsUint(beneficiary, uid, id);
         db.SetAddress(id, 'owner', beneficiary);
         db.SetUint(id, 'index', length);
-        db.setsUint(beneficiary, 'balance', length + 1);
+        db.setsUint(beneficiary, 'balance', length.add(1));
     }
 }

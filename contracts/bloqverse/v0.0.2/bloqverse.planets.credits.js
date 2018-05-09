@@ -4,7 +4,7 @@ pragma solidity ^0.4.18;
 // Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
 // Private Test = 0x0c87C4132C11B273Db805876CA2d2f0BD60f4C24
 
-// v0.0.2 = 0xA43d20C1aFCf9A9CbF31f1CbC344A7A9c0F87A95 = 0.68
+// v0.0.2 = Advanced ERC20 Tokens = 0x437eF63a57a9da535Af5F8593dC22dCd5B4391ba = 0.79
 
 /*
 
@@ -222,222 +222,191 @@ contract Proxy is Upgradable
     function tokenUintCount(uint256 key) public view returns(uint);
 }
 
-contract ERC721 is Upgradable
+contract ERC20 is Upgradable
 {
-    function totalSupply() public view returns (uint);
-    function balanceOf(address) public view returns (uint);
-    function tokenOfOwnerByIndex(address beneficiary, uint index) public view returns (uint);
-    function ownerOf(uint tokenId) public view returns (address);
-    function transfer(address to, uint tokenId) public;
-    function takeOwnership(uint tokenId) public;
-    function approve(address beneficiary, uint tokenId) public;
-    function metadata(uint256 tokenId) public view returns (string);
-    function metabytes(uint256 tokenId) public view returns (bytes32);
-    function mint(address beneficiary, uint256 id, string meta) external;
-    function updateTokenMetadata(uint tokenId, string meta) public returns(bool);
+    function totalSupply(string optionalResource) public constant returns (uint);
+    function balanceOf(address tokenOwner, string optionalResource) public constant returns (uint balance);
+    function allowance(address tokenOwner, address spender, string optionalResource) public constant returns (uint remaining);
+    function transfer(address to, uint units, string optionalResource) public returns (bool success);
+    function approve(address spender, uint units, string optionalResource) public returns (bool success);
+    function transferFrom(address from, address to, uint units, string optionalResource) public returns (bool success);
+    event Transfer(address indexed from, address indexed to, uint units);
+    event Approval(address indexed tokenOwner, address indexed spender, uint units);
 }
 
 contract PlanetMeta is Upgradable
 {
-    function exists(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (bool);
-    function uid(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (uint256);
-    function donationAddress() public view returns(address);
     function universeBytes() public view returns(bytes32);
 }
 
-contract PlanetPlayers is Upgradable
+contract ApproveAndCallFallBack 
+{
+    function receiveApproval(address from, uint256 tokens, address token, bytes data) public;
+}
+
+contract UniversalCredits is ERC20
 {
     Proxy db;
-    ERC721 tokens;
     PlanetMeta meta;
     
     using SafeMath for uint;
     
-    function() public payable
-    {
-        address donation_address = meta.donationAddress();
-        donation_address.transfer(msg.value);
-    }
+    string public name = 'Universal Credits';
+    string public symbol = 'UCT';
+    string public universe;
     
-    function PlanetPlayers
+    function UniversalCredits
     (
         address proxyAddress,
-        address tokenAddress,
         address metaAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
-        tokens = ERC721(tokenAddress);
         meta = PlanetMeta(metaAddress);
+        universe = bytes32ToString(meta.universeBytes());
     }
     
     function updateProxy
     (
-        address proxyAddress, 
-        address tokenAddress,
+        address proxyAddress,
         address metaAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
-        tokens = ERC721(tokenAddress);
         meta = PlanetMeta(metaAddress);
+        universe = bytes32ToString(meta.universeBytes());
     }
     
-    function destroyPlayer() public
+    function uid(string id) public view returns(uint256)
     {
-        require(db.getsString(tx.origin, 'player_name') != stringToBytes32(''));
-        uint256 id = db.getsUint(tx.origin, 'player_pob');
-        db.setsString(tx.origin, 'player_name', stringToBytes32(''));
-        db.setsUint(tx.origin, 'player_bob', 0);
-        db.setsUint(tx.origin, 'player_pob', 0);
-        db.setsUint(tx.origin, 'player_dna', 0);
-        db.setUint('players', db.getUint('players').sub(1));
-        db.SetUint(id, 'players', db.GetUint(id, 'players').sub(1));
+        return uint256(keccak256(universe, '|', id));
     }
     
-    function generatePlayer
+    /*
+    
+    ADVANCED ERC20 FUNCTIONS
+    
+    -- STANDARD FUNCTIONS PROVIDED FOR CREDITS
+    -- ADDED "RESOURCE" VARIABLE FOR TOKENS OTHER THAN "CREDIT" - SUCH AS "WOOD", "STONE", ETC ...
+    
+    */
+    
+    function totalSupply(string optionalResource) public constant returns (uint) 
+    {
+        string memory id = 'credit_total';
+        if(stringToBytes32(optionalResource) != stringToBytes32(''))
+        {
+            id = combine(optionalResource, '_', 'total', '', '');
+        }
+        return db.getUint(id);
+    }
+
+    function balanceOf(address tokenOwner, string optionalResource) public constant returns (uint balance) 
+    {
+        string memory id = 'credit_balance';
+        if(stringToBytes32(optionalResource) != stringToBytes32(''))
+        {
+            id = combine(optionalResource, '_', 'balance', '', '');
+        }
+        return db.getsUint(tokenOwner, id);
+    }
+    
+    function transfer(address to, uint units, string optionalResource) public returns (bool success) 
+    {
+        string memory id = 'credit_balance';
+        if(stringToBytes32(optionalResource) != stringToBytes32(''))
+        {
+            id = combine(optionalResource, '_', 'balance', '', '');
+        }
+        require(db.getsUint(tx.origin, id) >= units);
+        db.setsUint(tx.origin, id, db.getsUint(tx.origin, id).sub(units));
+        db.setsUint(to, id, db.getsUint(to, id).add(units));
+        emit Transfer(msg.sender, to, units);
+        return true;
+    }
+    
+    function approve(address spender, uint units, string optionalResource) public returns (bool success) 
+    {
+        string memory id = 'credit_allowed';
+        if(stringToBytes32(optionalResource) != stringToBytes32(''))
+        {
+            id = combine(optionalResource, '_', 'allowed', '_', toString(spender));
+        }
+        db.setsUint(tx.origin, id, units);
+        emit Approval(tx.origin, spender, units);
+        return true;
+    }
+    
+    function transferFrom(address from, address to, uint units, string optionalResource) public returns (bool success) 
+    {
+        string memory id = 'credit_allowed';
+        string memory key = 'credit_balance';
+        if(stringToBytes32(optionalResource) != stringToBytes32(''))
+        {
+            id = combine(optionalResource, '_', 'allowed', '_', toString(msg.sender));
+            key = combine(optionalResource, '_', 'balance', '', '');
+        }
+        require(db.getsUint(from, id) >= units);
+        db.setsUint(msg.sender, id, db.getsUint(msg.sender, id).sub(units));
+        db.setsUint(from, key, db.getsUint(from, key).sub(units));
+        db.setsUint(to, key, db.getsUint(to, key).add(units));
+        emit Transfer(from, to, units);
+        return true;
+    }
+    
+    function allowance
     (
-        string playerName,
-        uint xCoordinateOfHomeWorld,
-        uint yCoordinateOfHomeWorld,
-        uint zCoordinateOfHomeWorld
+        address tokenOwner, 
+        address spender, 
+        string optionalResource
     ) 
-    public
+    public constant returns (uint remaining) 
     {
-        uint256 id = meta.uid
-        (
-            xCoordinateOfHomeWorld, 
-            yCoordinateOfHomeWorld,
-            zCoordinateOfHomeWorld
-        );
-        require(meta.exists
-        (
-            xCoordinateOfHomeWorld, 
-            yCoordinateOfHomeWorld,
-            zCoordinateOfHomeWorld
-        ));
-        require(db.getsString(tx.origin, 'player_name') == stringToBytes32(''));
-        db.setsString(tx.origin, 'player_name', stringToBytes32(playerName));
-        db.setsUint(tx.origin, 'player_bob', block.number);
-        db.setsUint(tx.origin, 'player_pob', id);
-        db.setsUint(tx.origin, 'player_dna', uint256(keccak256
-        (
-            xCoordinateOfHomeWorld, 
-            yCoordinateOfHomeWorld, 
-            zCoordinateOfHomeWorld, 
-            tx.origin, 
-            bytes32ToString(meta.universeBytes())
-        )));
-        db.setUint('players', db.getUint('players').add(1));
-        db.SetUint(id, 'players', db.GetUint(id, 'players').add(1));
+        string memory id = 'credit_allowed';
+        if(stringToBytes32(optionalResource) != stringToBytes32(''))
+        {
+            id = combine(optionalResource, '_', 'allowed', '_', toString(spender));
+        }
+        return db.getsUint(tokenOwner, id);
     }
     
-    function playerCount() public view returns(uint)
-    {
-        return db.getUint('players');
-    }
-    
-    function planetPlayerCount(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(uint)
-    {
-        uint256 id = meta.uid(xCoordinate, yCoordinate, zCoordinate);
-        return db.GetUint(id, 'players');
-    }
-    
-    function getPlayer
+    function approveAndCall
     (
-        address playerAddress
+        address spender, 
+        uint units, 
+        bytes data, 
+        string optionalResource
     ) 
-    public view returns
-    (
-        string playerName,
-        uint256 playerDNA,
-        uint playerAge,
-        string planetOfBirth,
-        bool playerIsRebel,
-        string ally
-    )
+    public returns (bool success) 
     {
-        address allyAddress = db.getsAddress(playerAddress, 'player_ally');
-        return
-        (
-            bytes32ToString(db.getsString(playerAddress, 'player_name')),
-            db.getsUint(playerAddress, 'player_dna'),
-            (block.number - db.getsUint(playerAddress, 'player_bob')),
-            bytes32ToString(tokens.metabytes(db.getsUint(playerAddress, 'player_pob'))),
-            isRebel(playerAddress),
-            bytes32ToString(db.getsString(allyAddress, 'player_name'))
-        );
-    }
-    
-    function playerLocation(address playerAddress) public view returns
-    (
-        string planet
-    )
-    {
-        if(tokens.metabytes(db.getsUint(playerAddress, 'player_planet')) == stringToBytes32(''))
+        string memory id = 'credit_allowed';
+        if(stringToBytes32(optionalResource) != stringToBytes32(''))
         {
-            return bytes32ToString(tokens.metabytes(db.getsUint(playerAddress, 'player_pob')));
+            id = combine(optionalResource, '_', 'allowed', '_', toString(spender));
         }
-        else
+        db.setsUint(msg.sender, id, units);
+        emit Approval(msg.sender, spender, units);
+        ApproveAndCallFallBack(spender).receiveApproval(msg.sender, units, this, data);
+        return true;
+    }
+    
+    function mint(address beneficary, uint amount, string optionalResource) public onlyOwner
+    {
+        string memory id = 'credit_balance';
+        string memory key = 'credit_total';
+        if(stringToBytes32(optionalResource) != stringToBytes32(''))
         {
-            return bytes32ToString(tokens.metabytes(db.getsUint(playerAddress, 'player_planet')));
+            id = combine(optionalResource, '_', 'balance', '', '');
+            key = combine(optionalResource, '_', 'total', '', '');
         }
+        db.setsUint(beneficary, id, db.getsUint(beneficary, id).add(amount));
+        db.setUint(key, db.getUint(key).add(amount));
     }
-    
-    function switchPlanets(uint xCoordinate, uint yCoordinate, uint zCoordinate) public
+
+    function () public payable 
     {
-        require(meta.exists(xCoordinate, yCoordinate, zCoordinate));
-        uint256 id = meta.uid(xCoordinate, yCoordinate, zCoordinate);
-        db.setsUint(tx.origin, 'player_planet', id);
-    }
-    
-    function updatePlayerName(string playerName) public
-    {
-        require(db.getsString(tx.origin, 'player_name') != stringToBytes32(''));
-        db.setsString(tx.origin, 'player_name', stringToBytes32(playerName));
-    }
-    
-    function updatePlayerAlly(address allyAddress) public
-    {
-        require(db.getsString(tx.origin, 'player_name') != stringToBytes32(''));
-        db.setsAddress(tx.origin, 'player_ally', allyAddress);
-    }
-    
-    function isRebel(address playerAddress) public view returns(bool)
-    {
-        return db.getsBool(playerAddress, 'is_rebel');
-    }
-    
-    function amRebel(bool value) public
-    {
-        if(value)
-        {
-            db.setsBool(tx.origin, 'is_rebel', value);
-        }
-    }
-    
-    function rebelPlanet(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(bool)
-    {
-        uint256 id = meta.uid(xCoordinate, yCoordinate, zCoordinate);
-        address planetAddress = tokens.ownerOf(id);
-        return db.getsBool(planetAddress, 'is_rebel');
-    }
-    
-    function planetStatus(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns
-    (
-        string planetName,
-        uint256 tokenID,
-        bool ruledByRebels
-    )
-    {
-        uint256 id = meta.uid(xCoordinate, yCoordinate, zCoordinate);
-        return
-        (
-            bytes32ToString(db.GetString(id, 'meta')),
-            id,
-            rebelPlanet(xCoordinate, yCoordinate, zCoordinate)
-        );
+        revert();
     }
 }
