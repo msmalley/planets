@@ -1,7 +1,7 @@
 pragma solidity ^0.4.18;
 
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
-// v0.0.2 = 0x41229fe265cF242d19ea36b530Fb5d2d04bB54aB = 0.31
+// v0.0.2 = 0x2e7B6E0614CE391bAC87A81A3CF7Aa19055D77A6 = 0.41
 
 /*
 
@@ -214,108 +214,22 @@ contract Bloqverse is Upgradable
     function _setAddress(bytes32 version, bytes32 key, address value) public
     {
         ContractAddresses[msg.sender][version][key] = value;
+        ContractAddressCount[msg.sender][version].add(1);
     }
     function _setBool(bytes32 version, bytes32 key, bool value) public
     {
         ContractBools[msg.sender][version][key] = value;
+        ContractBoolCount[msg.sender][version].add(1);
     }
     function _setString(bytes32 version, bytes32 key, bytes32 value) public
     {
         ContractStrings[msg.sender][version][key] = value;
+        ContractStringCount[msg.sender][version].add(1);
     }
     function _setUint(bytes32 version, bytes32 key, uint256 value) public
     {
         ContractUints[msg.sender][version][key] = value;
-    }
-    
-    // Set Addressed Data
-    function _setsAddress(bytes32 version, address addressKey, bytes32 param, address value) public
-    {
-        AddressAddresses[msg.sender][version][addressKey][param] = value;
-    }
-    function _setsBool(bytes32 version, address addressKey, bytes32 param, bool value) public
-    {
-        AddressBools[msg.sender][version][addressKey][param] = value;
-    }
-    function _setsString(bytes32 version, address addressKey, bytes32 param, bytes32 value) public
-    {
-        AddressStrings[msg.sender][version][addressKey][param] = value;
-    }
-    function _setsUint(bytes32 version, address addressKey, bytes32 param, uint256 value) public
-    {
-        AddressUints[msg.sender][version][addressKey][param] = value;
-    }
-    
-    // Set Token Data
-    function _SetAddress(bytes32 version, uint256 key, bytes32 param, address value) public
-    {
-        TokenAddresses[msg.sender][version][key][param] = value;
-    }
-    function _SetBool(bytes32 version, uint256 key, bytes32 param, bool value) public
-    {
-        TokenBools[msg.sender][version][key][param] = value;
-    }
-    function _SetString(bytes32 version, uint256 key, bytes32 param, bytes32 value) public
-    {
-        TokenStrings[msg.sender][version][key][param] = value;
-    }
-    function _SetUint(bytes32 version, uint256 key, bytes32 param, uint256 value) public
-    {
-        TokenUints[msg.sender][version][key][param] = value;
-    }
-    
-    // Get Contract Data
-    function _getAddress(bytes32 version, bytes32 key) public view returns(address)
-    {
-        return ContractAddresses[msg.sender][version][key];
-    }
-    function _getBool(bytes32 version, bytes32 key) public view returns(bool)
-    {
-        return ContractBools[msg.sender][version][key];
-    }
-    function _getString(bytes32 version, bytes32 key) public view returns(bytes32)
-    {
-        return ContractStrings[msg.sender][version][key];
-    }
-    function _getUint(bytes32 version, bytes32 key) public view returns(uint256)
-    {
-        return ContractUints[msg.sender][version][key];
-    }
-    
-    // Get Addressed Data
-    function _getsAddress(bytes32 version, address addressKey, bytes32 param) public view returns(address)
-    {
-        return AddressAddresses[msg.sender][version][addressKey][param];
-    }
-    function _getsBool(bytes32 version, address addressKey, bytes32 param) public view returns(bool)
-    {
-        return AddressBools[msg.sender][version][addressKey][param];
-    }
-    function _getsString(bytes32 version, address addressKey, bytes32 param) public view returns(bytes32)
-    {
-        return AddressStrings[msg.sender][version][addressKey][param];
-    }
-    function _getsUint(bytes32 version, address addressKey, bytes32 param) public view returns(uint256)
-    {
-        return AddressUints[msg.sender][version][addressKey][param];
-    }
-    
-    // Get Token Data
-    function _GetAddress(bytes32 version, uint256 key, bytes32 param) public view returns(address)
-    {
-        return TokenAddresses[msg.sender][version][key][param];
-    }
-    function _GetBool(bytes32 version, uint256 key, bytes32 param) public view returns(bool)
-    {
-        return TokenBools[msg.sender][version][key][param];
-    }
-    function _GetString(bytes32 version, uint256 key, bytes32 param) public view returns(bytes32)
-    {
-        return TokenStrings[msg.sender][version][key][param];
-    }
-    function _GetUint(bytes32 version, uint256 key, bytes32 param) public view returns(uint256)
-    {
-        return TokenUints[msg.sender][version][key][param];
+        ContractUintCount[msg.sender][version].add(1);
     }
     
     // Get Contract Data Counts
@@ -336,6 +250,68 @@ contract Bloqverse is Upgradable
         return ContractUintCount[msg.sender][version];
     }
     
+    // Remove Contract Data
+    function _removeAddress(bytes32 version, bytes32 key) public
+    {
+        delete ContractAddresses[msg.sender][version][key];
+        ContractAddressCount[msg.sender][version].sub(1);
+    }
+    function _removeBool(bytes32 version, bytes32 key) public
+    {
+        delete ContractBools[msg.sender][version][key];
+        ContractBoolCount[msg.sender][version].sub(1);
+    }
+    function _removeString(bytes32 version, bytes32 key) public
+    {
+        delete ContractStrings[msg.sender][version][key];
+        ContractStringCount[msg.sender][version].sub(1);
+    }
+    function _removeUint(bytes32 version, bytes32 key) public
+    {
+        delete ContractUints[msg.sender][version][key];
+        ContractUintCount[msg.sender][version].sub(1);
+    }
+    
+    // Get Contract Data
+    function _getAddress(bytes32 version, bytes32 key) public view returns(address)
+    {
+        return ContractAddresses[msg.sender][version][key];
+    }
+    function _getBool(bytes32 version, bytes32 key) public view returns(bool)
+    {
+        return ContractBools[msg.sender][version][key];
+    }
+    function _getString(bytes32 version, bytes32 key) public view returns(bytes32)
+    {
+        return ContractStrings[msg.sender][version][key];
+    }
+    function _getUint(bytes32 version, bytes32 key) public view returns(uint256)
+    {
+        return ContractUints[msg.sender][version][key];
+    }
+    
+    // Set Addressed Data
+    function _setsAddress(bytes32 version, address addressKey, bytes32 param, address value) public
+    {
+        AddressAddresses[msg.sender][version][addressKey][param] = value;
+        AddressAddressCount[msg.sender][version][addressKey].add(1);
+    }
+    function _setsBool(bytes32 version, address addressKey, bytes32 param, bool value) public
+    {
+        AddressBools[msg.sender][version][addressKey][param] = value;
+        AddressBoolCount[msg.sender][version][addressKey].add(1);
+    }
+    function _setsString(bytes32 version, address addressKey, bytes32 param, bytes32 value) public
+    {
+        AddressStrings[msg.sender][version][addressKey][param] = value;
+        AddressStringCount[msg.sender][version][addressKey].add(1);
+    }
+    function _setsUint(bytes32 version, address addressKey, bytes32 param, uint256 value) public
+    {
+        AddressUints[msg.sender][version][addressKey][param] = value;
+        AddressUintCount[msg.sender][version][addressKey].add(1);
+    }
+    
     // Get Addressed Data Counts
     function _addressAddressCount(bytes32 version, address addressKey) public view returns(uint)
     {
@@ -354,6 +330,68 @@ contract Bloqverse is Upgradable
         return AddressUintCount[msg.sender][version][addressKey];
     }
     
+    // Remove Addressed Data
+    function _removesAddress(bytes32 version, address addressKey, bytes32 param) public
+    {
+        delete AddressAddresses[msg.sender][version][addressKey][param];
+        AddressAddressCount[msg.sender][version][addressKey].sub(1);
+    }
+    function _removesBool(bytes32 version, address addressKey, bytes32 param) public
+    {
+        delete AddressBools[msg.sender][version][addressKey][param];
+        AddressBoolCount[msg.sender][version][addressKey].sub(1);
+    }
+    function _removesString(bytes32 version, address addressKey, bytes32 param) public
+    {
+        delete AddressStrings[msg.sender][version][addressKey][param];
+        AddressStringCount[msg.sender][version][addressKey].sub(1);
+    }
+    function _removesUint(bytes32 version, address addressKey, bytes32 param) public
+    {
+        delete AddressUints[msg.sender][version][addressKey][param];
+        AddressUintCount[msg.sender][version][addressKey].sub(1);
+    }
+    
+    // Get Addressed Data
+    function _getsAddress(bytes32 version, address addressKey, bytes32 param) public view returns(address)
+    {
+        return AddressAddresses[msg.sender][version][addressKey][param];
+    }
+    function _getsBool(bytes32 version, address addressKey, bytes32 param) public view returns(bool)
+    {
+        return AddressBools[msg.sender][version][addressKey][param];
+    }
+    function _getsString(bytes32 version, address addressKey, bytes32 param) public view returns(bytes32)
+    {
+        return AddressStrings[msg.sender][version][addressKey][param];
+    }
+    function _getsUint(bytes32 version, address addressKey, bytes32 param) public view returns(uint256)
+    {
+        return AddressUints[msg.sender][version][addressKey][param];
+    }
+    
+    // Set Token Data
+    function _SetAddress(bytes32 version, uint256 key, bytes32 param, address value) public
+    {
+        TokenAddresses[msg.sender][version][key][param] = value;
+        TokenAddressCount[msg.sender][version][key].add(1);
+    }
+    function _SetBool(bytes32 version, uint256 key, bytes32 param, bool value) public
+    {
+        TokenBools[msg.sender][version][key][param] = value;
+        TokenBoolCount[msg.sender][version][key].add(1);
+    }
+    function _SetString(bytes32 version, uint256 key, bytes32 param, bytes32 value) public
+    {
+        TokenStrings[msg.sender][version][key][param] = value;
+        TokenStringCount[msg.sender][version][key].add(1);
+    }
+    function _SetUint(bytes32 version, uint256 key, bytes32 param, uint256 value) public
+    {
+        TokenUints[msg.sender][version][key][param] = value;
+        TokenUintCount[msg.sender][version][key].add(1);
+    }
+    
     // Get Token Data Counts
     function _tokenAddressCount(bytes32 version, uint256 key) public view returns(uint)
     {
@@ -370,5 +408,45 @@ contract Bloqverse is Upgradable
     function _tokenUintCount(bytes32 version, uint256 key) public view returns(uint)
     {
         return TokenAddressCount[msg.sender][version][key];
+    }
+    
+    // Remove Token Data
+    function _RemoveAddress(bytes32 version, uint256 key, bytes32 param) public
+    {
+        delete TokenAddresses[msg.sender][version][key][param];
+        TokenAddressCount[msg.sender][version][key].sub(1);
+    }
+    function _RemoveBool(bytes32 version, uint256 key, bytes32 param) public
+    {
+        delete TokenBools[msg.sender][version][key][param];
+        TokenBoolCount[msg.sender][version][key].sub(1);
+    }
+    function _RemoveString(bytes32 version, uint256 key, bytes32 param) public
+    {
+        delete TokenStrings[msg.sender][version][key][param];
+        TokenStringCount[msg.sender][version][key].sub(1);
+    }
+    function _RemoveUint(bytes32 version, uint256 key, bytes32 param) public
+    {
+        delete TokenUints[msg.sender][version][key][param];
+        TokenUintCount[msg.sender][version][key].sub(1);
+    }
+    
+    // Get Token Data
+    function _GetAddress(bytes32 version, uint256 key, bytes32 param) public view returns(address)
+    {
+        return TokenAddresses[msg.sender][version][key][param];
+    }
+    function _GetBool(bytes32 version, uint256 key, bytes32 param) public view returns(bool)
+    {
+        return TokenBools[msg.sender][version][key][param];
+    }
+    function _GetString(bytes32 version, uint256 key, bytes32 param) public view returns(bytes32)
+    {
+        return TokenStrings[msg.sender][version][key][param];
+    }
+    function _GetUint(bytes32 version, uint256 key, bytes32 param) public view returns(uint256)
+    {
+        return TokenUints[msg.sender][version][key][param];
     }
 }

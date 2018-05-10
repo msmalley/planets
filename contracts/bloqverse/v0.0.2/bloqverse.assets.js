@@ -4,6 +4,7 @@ pragma solidity ^0.4.18;
 // Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
 
 // v0.0.2 = Tokens ERC721 Only = 0x7426d669b3956C21bA755deD5d3862E4261DFA4e = 0.82
+// v0.0.2 = Tokens ERC721 Only = XXX = 1.2
 
 /*
 
@@ -174,65 +175,30 @@ contract Upgradable is AbleToUtilizeStrings
 
 contract Proxy is Upgradable
 {
-    // Set Contract Data
-    function setAddress(string key, address value) public;
-    function setBool(string key, bool value) public;
-    function setString(string key, bytes32 value) public;
     function setUint(string key, uint256 value) public;
-    // Set Addressed Data
-    function setsAddress(address addressKey, string param, address value) public;
-    function setsBool(address addressKey, string param, bool value) public;
-    function setsString(address addressKey, string param, bytes32 value) public;
     function setsUint(address addressKey, string param, uint256 value) public;
-    // Set Token Data
     function SetAddress(uint256 key, string param, address value) public;
-    function SetBool(uint256 key, string param, bool value) public;
     function SetString(uint256 key, string param, bytes32 value) public;
     function SetUint(uint256 key, string param, uint256 value) public;
-    // Get Contract Data
-    function getAddress(string key) public view returns(address);
-    function getBool(string key) public view returns(bool);
-    function getString(string key) public view returns(bytes32);
     function getUint(string key) public view returns(uint256);
-    // Get Addressed Data
-    function getsAddress(address addressKey, string param) public view returns(address);
-    function getsBool(address addressKey, string param) public view returns(bool);
-    function getsString(address addressKey, string param) public view returns(bytes32);
     function getsUint(address addressKey, string param) public view returns(uint256);
-    // Get Token Data
     function GetAddress(uint256 key, string param) public view returns(address);
-    function GetBool(uint256 key, string param) public view returns(bool);
     function GetString(uint256 key, string param) public view returns(bytes32);
     function GetUint(uint256 key, string param) public view returns(uint256);
-    // Get Contract Data Counts
-    function contractAddressCount() public view returns(uint);
-    function contractBoolCount() public view returns(uint);
-    function contractStringCount() public view returns(uint);
-    function contractUintCount() public view returns(uint);
-    // Get Addressed Data Counts
-    function addressAddressCount(address addressKey) public view returns(uint);
-    function addressBoolCount(address addressKey) public view returns(uint);
-    function addressStringCount(address addressKey) public view returns(uint);
-    function addressUintCount(address addressKey) public view returns(uint);
-    // Get Token Data Counts
-    function tokenAddressCount(uint256 key) public view returns(uint);
-    function tokenBoolCount(uint256 key) public view returns(uint);
-    function tokenStringCount(uint256 key) public view returns(uint);
-    function tokenUintCount(uint256 key) public view returns(uint);
 }
 
 contract ERC721 is Upgradable
 {
-    function totalSupply() public view returns (uint);
-    function balanceOf(address) public view returns (uint);
-    function tokenOfOwnerByIndex(address beneficiary, uint index) public view returns (uint);
-    function ownerOf(uint tokenId) public view returns (address);
-    function transfer(address to, uint tokenId) public;
-    function takeOwnership(uint tokenId) public;
-    function updateTokenMetadata(uint tokenId, string meta) public returns(bool);
-    function approve(address beneficiary, uint tokenId) public;
-    function metadata(uint256 tokenId) public view returns (string);
-    function metabytes(uint256 tokenId) public view returns (bytes32);
+    function totalSupply(string optionalResource) public view returns (uint);
+    function balanceOf(address tokenOwner, string optionalResource) public view returns (uint);
+    function tokenOfOwnerByIndex(address beneficiary, uint index, string optionalResource) public view returns (uint);
+    function ownerOf(uint tokenId, string optionalResource) public view returns (address);
+    function transfer(address to, uint tokenId, string optionalResource) public;
+    function takeOwnership(uint tokenId, string optionalResource) public;
+    function updateTokenMetadata(uint tokenId, string meta, string optionalResource) public returns(bool);
+    function approve(address beneficiary, uint tokenId, string optionalResource) public;
+    function metadata(uint256 tokenId, string optionalResource) public view returns (string);
+    function metabytes(uint256 tokenId, string optionalResource) public view returns (bytes32);
     event TokenCreated(uint tokenId, address beneficiary, string meta);
     event TokenDestroyed(uint tokenId, address beneficiary);
     event TokenTransferred(uint tokenId, address from, address to);
@@ -241,18 +207,18 @@ contract ERC721 is Upgradable
     event TokenMetadataUpdated(uint tokenId, address beneficiary, string data);
 }
 
-contract PlanetTokens is ERC721
+contract UniversalAssets is ERC721
 {
     Proxy db;
     
     using SafeMath for uint;
     
-    string public name = 'Planet Tokens';
-    string public symbol = 'PT';
+    string public name = 'Universal Assets';
+    string public symbol = 'UA';
     
     address public activeMetaAddress;
     
-    function PlanetTokens
+    function UniversalAssets
     (
         address proxyAddress
     ) 
@@ -273,145 +239,156 @@ contract PlanetTokens is ERC721
     
     /*
     
-    ERC721 FUNCTIONS
+    ADVANCED ERC721 FUNCTIONS
+    
+    -- STANDARD FUNCTIONS PROVIDED FOR PLANETS
+    -- ADDED "RESOURCE" VARIABLE FOR ASSETS OTHER THAN "PLANET" - SUCH AS "SPACESHIP", "BUILDING", ETC ...
     
     */
-    function totalSupply() public view returns (uint) 
+    function token_id(string key, string optionalResource) public pure returns(string)
     {
-        return db.getUint('total');
+        if(stringToBytes32(optionalResource) != stringToBytes32(''))
+        {
+            return combine(optionalResource, '_', key, '', '');
+        }
+        else
+        {
+            return combine('planet', '_', key, '', '');
+        }
     }
-
-    function balanceOf(address beneficiary) public view returns (uint) 
+    
+    function totalSupply(string optionalResource) public view returns (uint) 
     {
-        return db.getsUint(beneficiary, 'balance');
+        return db.getUint(token_id('total', optionalResource));
     }
-
-    function tokenOfOwnerByIndex(address beneficiary, uint index) public view returns (uint) 
+    
+    function balanceOf(address beneficiary, string optionalResource) public view returns (uint) 
+    {
+        return db.getsUint(beneficiary, token_id('balance', optionalResource));
+    }
+    
+    function tokenOfOwnerByIndex(address beneficiary, uint index, string optionalResource) public view returns (uint) 
     {
         require(index >= 0);
-        require(index < balanceOf(beneficiary));
-        string memory uid = combine('owned', '_', uintToString(index), '', '');
-        return db.getsUint(beneficiary, uid);
+        require(index < balanceOf(beneficiary, optionalResource));
+        return db.getsUint(beneficiary, combine('owned', '_', uintToString(index), '_', optionalResource));
     }
-
-    function getAllTokens(address beneficiary) public view returns (uint[]) 
+    
+    function getAllTokens(address beneficiary, string optionalResource) public view returns (uint[]) 
     {
-        uint size = db.getsUint(beneficiary, 'balance');
+        uint size = db.getsUint(beneficiary, token_id('balance', optionalResource));
         uint[] memory result = new uint[](size);
         for (uint index = 0; index < size; index++) 
         {
-            string memory uid = combine('owned', '_', uintToString(index), '', '');
-            result[index] = db.getsUint(beneficiary, uid);
+            result[index] = db.getsUint(beneficiary, combine('owned', '_', uintToString(index), '_', optionalResource));
         }
         return result;
     }
-
-    function ownerOf(uint id) public view returns (address) 
+    
+    function ownerOf(uint id, string optionalResource) public view returns (address) 
     {
-        return db.GetAddress(id, 'owner');
+        return db.GetAddress(id, token_id('owner', optionalResource));
     }
-
-    function transfer(address to, uint id) public
+    
+    function transfer(address to, uint id, string optionalResource) public
     {
         require(
-            db.GetAddress(id, 'owner') == msg.sender
-            || db.GetAddress(id, 'allowed') == msg.sender
-            || db.GetAddress(id, 'owner') == tx.origin
-            || db.GetAddress(id, 'allowed') == tx.origin
+            db.GetAddress(id, token_id('owner', optionalResource)) == msg.sender
+            || db.GetAddress(id, token_id('allowed', optionalResource)) == msg.sender
+            || db.GetAddress(id, token_id('owner', optionalResource)) == tx.origin
+            || db.GetAddress(id, token_id('allowed', optionalResource)) == tx.origin
         );
-        _transfer(db.GetAddress(id, 'owner'), to, id);
+        _transfer(db.GetAddress(id, token_id('owner', optionalResource)), to, id, optionalResource);
     }
-
-    function takeOwnership(uint id) public 
+    
+    function takeOwnership(uint id, string optionalResource) public 
     {
-        if(db.GetAddress(id, 'allowed') == msg.sender)
+        if(db.GetAddress(id, token_id('allowed', optionalResource)) == msg.sender)
         {
-            _transfer(db.GetAddress(id, 'owner'), msg.sender, id);
+            _transfer(db.GetAddress(id, token_id('owner', optionalResource)), msg.sender, id, optionalResource);
         }
-        else if(db.GetAddress(id, 'allowed') == tx.origin)
+        else if(db.GetAddress(id, token_id('allowed', optionalResource)) == tx.origin)
         {
-            _transfer(db.GetAddress(id, 'owner'), tx.origin, id);
+            _transfer(db.GetAddress(id, token_id('owner', optionalResource)), tx.origin, id, optionalResource);
         }
         
     }
-
-    function approve(address beneficiary, uint id) public 
+    
+    function approve(address beneficiary, uint id, string optionalResource) public 
     {
         require(
-            db.GetAddress(id, 'owner') == msg.sender
-            || db.GetAddress(id, 'owner') == tx.origin
+            db.GetAddress(id, token_id('owner', optionalResource)) == msg.sender
+            || db.GetAddress(id, token_id('owner', optionalResource)) == tx.origin
         );
-        if(db.GetAddress(id, 'allowed') != 0)
+        if(db.GetAddress(id, token_id('allowed', optionalResource)) != 0)
         {
-            db.SetAddress(id, 'allowed', 0);
-            emit TokenTransferDisallowed(id, db.GetAddress(id, 'allowed'));
+            db.SetAddress(id, token_id('allowed', optionalResource), 0);
+            emit TokenTransferDisallowed(id, db.GetAddress(id, token_id('allowed', optionalResource)));
         }
-        db.SetAddress(id, 'allowed', beneficiary);
+        db.SetAddress(id, token_id('allowed', optionalResource), beneficiary);
         emit TokenTransferAllowed(id, beneficiary);
     }
-
-    function metadata(uint256 id) public view returns(string) 
-    {
-        return bytes32ToString(db.GetString(id, 'meta'));
-    }    
     
-    function metabytes(uint256 id) public view returns(bytes32) 
+    function metadata(uint256 id, string optionalResource) public view returns(string) 
     {
-        return db.GetString(id, 'meta');
+        return bytes32ToString(db.GetString(id, token_id('meta', optionalResource)));
+    }  
+    
+    function metabytes(uint256 id, string optionalResource) public view returns(bytes32) 
+    {
+        return db.GetString(id, token_id('meta', optionalResource));
     }
-
-    function updateTokenMetadata(uint id, string meta) public returns(bool)
+    
+    function updateTokenMetadata(uint id, string meta, string optionalResource) public returns(bool)
     {
         require(
-            db.GetAddress(id, 'owner') == msg.sender
-            || db.GetAddress(id, 'owner') == tx.origin
+            db.GetAddress(id, token_id('owner', optionalResource)) == msg.sender
+            || db.GetAddress(id, token_id('owner', optionalResource)) == tx.origin
         );
-        db.SetString(id, 'meta', stringToBytes32(meta));
-        emit TokenMetadataUpdated(id, db.GetAddress(id, 'owner'), meta);
+        db.SetString(id, token_id('meta', optionalResource), stringToBytes32(meta));
+        emit TokenMetadataUpdated(id, db.GetAddress(id, token_id('owner', optionalResource)), meta);
         return true;
     }
     
-    function mint(address beneficiary, uint256 id, string meta) external
+    function mint(address beneficiary, uint256 id, string meta, string optionalResource) external
     {
         require(
             activeMetaAddress == msg.sender
             || activeMetaAddress == tx.origin
         );
-        require(db.GetString(id, 'meta') == stringToBytes32(''));
-        db.SetString(id, 'meta', stringToBytes32(meta));
-        db.SetUint(id, 'bob', block.number);
-        db.setUint('total', db.getUint('total').add(1));
-        _addTokenTo(beneficiary, id);
+        require(db.GetString(id, token_id('meta', optionalResource)) == stringToBytes32(''));
+        db.SetString(id, token_id('meta', optionalResource), stringToBytes32(meta));
+        db.SetUint(id, token_id('bob', optionalResource), block.number);
+        db.setUint(token_id('total', optionalResource), db.getUint(token_id('total', optionalResource)).add(1));
+        _addTokenTo(beneficiary, id, optionalResource);
     }
 
-    function _transfer(address from, address to, uint id) internal returns(bool)
+    function _transfer(address from, address to, uint id, string optionalResource) internal returns(bool)
     {
-        db.SetAddress(id, 'allowed', 0);
-        _removeTokenFrom(from, id);
-        _addTokenTo(to, id);
+        db.SetAddress(id, token_id('allowed', optionalResource), 0);
+        _removeTokenFrom(from, id, optionalResource);
+        _addTokenTo(to, id, optionalResource);
         emit TokenTransferred(id, from, to);
         return true;
     }
 
-    function _removeTokenFrom(address from, uint id) internal 
+    function _removeTokenFrom(address from, uint id, string optionalResource) internal 
     {
-        require(db.getsUint(from, 'balance') > 0);
-        uint length = db.getsUint(from, 'balance');
-        uint index = db.GetUint(id, 'index');
-        string memory uid = combine('owned', '_', uintToString(length.sub(1)), '', '');
-        uint swapToken = db.getsUint(from, uid);
-        db.setsUint(from, uid, 0);
-        db.SetUint(swapToken, 'index', index);
-        db.setsUint(from, 'balance', db.getsUint(from, 'balance').sub(1));
+        require(db.getsUint(from, token_id('balance', optionalResource)) > 0);
+        uint length = db.getsUint(from, token_id('balance', optionalResource));
+        uint index = db.GetUint(id, token_id('index', optionalResource));
+        uint swapToken = db.getsUint(from, combine('owned', '_', uintToString(length.sub(1)), '_', optionalResource));
+        db.setsUint(from, combine('owned', '_', uintToString(length.sub(1)), '_', optionalResource), 0);
+        db.SetUint(swapToken, token_id('index', optionalResource), index);
+        db.setsUint(from, token_id('balance', optionalResource), db.getsUint(from, token_id('balance', optionalResource)).sub(1));
     }
 
-    function _addTokenTo(address beneficiary, uint id) internal 
+    function _addTokenTo(address beneficiary, uint id, string optionalResource) internal 
     {
-        uint length = db.getsUint(beneficiary, 'balance');
-        string memory uid = combine('owned', '_', uintToString(length), '', '');
-        db.setsUint(beneficiary, uid, id);
-        db.SetAddress(id, 'owner', beneficiary);
-        db.SetUint(id, 'index', length);
-        db.setsUint(beneficiary, 'balance', length.add(1));
+        uint length = db.getsUint(beneficiary, token_id('balance', optionalResource));
+        db.setsUint(beneficiary, combine('owned', '_', uintToString(length), '_', optionalResource), id);
+        db.SetAddress(id, token_id('owner', optionalResource), beneficiary);
+        db.SetUint(id, token_id('index', optionalResource), length);
+        db.setsUint(beneficiary, token_id('balance', optionalResource), length.add(1));
     }
 }

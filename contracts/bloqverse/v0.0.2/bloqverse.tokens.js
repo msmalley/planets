@@ -4,7 +4,7 @@ pragma solidity ^0.4.18;
 // Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
 // Private Test = 0x0c87C4132C11B273Db805876CA2d2f0BD60f4C24
 
-// v0.0.2 = Advanced ERC20 Tokens = 0x437eF63a57a9da535Af5F8593dC22dCd5B4391ba = 0.79
+// v0.0.2 = Advanced ERC20 Tokens = 0x9eAC3c096C03ab60DbC6ad3844D32DF1E4d93a7F = 0.81
 
 /*
 
@@ -234,7 +234,7 @@ contract ERC20 is Upgradable
     event Approval(address indexed tokenOwner, address indexed spender, uint units);
 }
 
-contract PlanetMeta is Upgradable
+contract PlanetTokens is Upgradable
 {
     function universeBytes() public view returns(bytes32);
 }
@@ -244,39 +244,46 @@ contract ApproveAndCallFallBack
     function receiveApproval(address from, uint256 tokens, address token, bytes data) public;
 }
 
-contract UniversalCredits is ERC20
+contract UniversalTokens is ERC20
 {
     Proxy db;
-    PlanetMeta meta;
+    PlanetTokens planets;
     
     using SafeMath for uint;
     
-    string public name = 'Universal Credits';
-    string public symbol = 'UCT';
+    string public name = 'Universal Tokens';
+    string public symbol = 'UT';
     string public universe;
     
-    function UniversalCredits
+    address public activeAtomAddress;
+    
+    function UniversalTokens
     (
         address proxyAddress,
-        address metaAddress
+        address planetContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
-        meta = PlanetMeta(metaAddress);
-        universe = bytes32ToString(meta.universeBytes());
+        planets = PlanetTokens(planetContractAddress);
+        universe = bytes32ToString(planets.universeBytes());
     }
     
     function updateProxy
     (
         address proxyAddress,
-        address metaAddress
+        address planetContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
-        meta = PlanetMeta(metaAddress);
-        universe = bytes32ToString(meta.universeBytes());
+        planets = PlanetTokens(planetContractAddress);
+        universe = bytes32ToString(planets.universeBytes());
+    }
+    
+    function updateAtomContract(address atomContractAddress) public onlyOwner
+    {
+        activeAtomAddress = atomContractAddress;
     }
     
     function uid(string id) public view returns(uint256)
@@ -394,6 +401,23 @@ contract UniversalCredits is ERC20
     
     function mint(address beneficary, uint amount, string optionalResource) public onlyOwner
     {
+        string memory id = 'credit_balance';
+        string memory key = 'credit_total';
+        if(stringToBytes32(optionalResource) != stringToBytes32(''))
+        {
+            id = combine(optionalResource, '_', 'balance', '', '');
+            key = combine(optionalResource, '_', 'total', '', '');
+        }
+        db.setsUint(beneficary, id, db.getsUint(beneficary, id).add(amount));
+        db.setUint(key, db.getUint(key).add(amount));
+    }
+    
+    function make(address beneficary, uint amount, string optionalResource) public
+    {
+        require(
+            activeAtomAddress == msg.sender
+            || activeAtomAddress == tx.origin
+        );
         string memory id = 'credit_balance';
         string memory key = 'credit_total';
         if(stringToBytes32(optionalResource) != stringToBytes32(''))

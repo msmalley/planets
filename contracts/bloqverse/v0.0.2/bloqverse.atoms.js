@@ -4,7 +4,7 @@ pragma solidity ^0.4.18;
 // Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
 // Private Test = 0x0c87C4132C11B273Db805876CA2d2f0BD60f4C24
 
-// v0.0.2 = 0xA43d20C1aFCf9A9CbF31f1CbC344A7A9c0F87A95 = 0.68
+// v0.0.2 = 0x241443e40C14F04aD8F9C069577EE29dAD85821b = 0.2
 
 /*
 
@@ -222,222 +222,99 @@ contract Proxy is Upgradable
     function tokenUintCount(uint256 key) public view returns(uint);
 }
 
-contract ERC721 is Upgradable
+contract ERC20 is Upgradable
 {
-    function totalSupply() public view returns (uint);
-    function balanceOf(address) public view returns (uint);
-    function tokenOfOwnerByIndex(address beneficiary, uint index) public view returns (uint);
-    function ownerOf(uint tokenId) public view returns (address);
-    function transfer(address to, uint tokenId) public;
-    function takeOwnership(uint tokenId) public;
-    function approve(address beneficiary, uint tokenId) public;
-    function metadata(uint256 tokenId) public view returns (string);
-    function metabytes(uint256 tokenId) public view returns (bytes32);
-    function mint(address beneficiary, uint256 id, string meta) external;
-    function updateTokenMetadata(uint tokenId, string meta) public returns(bool);
+    function totalSupply(string optionalResource) public constant returns (uint);
+    function balanceOf(address tokenOwner, string optionalResource) public constant returns (uint balance);
+    function allowance(address tokenOwner, address spender, string optionalResource) public constant returns (uint remaining);
+    function transfer(address to, uint units, string optionalResource) public returns (bool success);
+    function approve(address spender, uint units, string optionalResource) public returns (bool success);
+    function transferFrom(address from, address to, uint units, string optionalResource) public returns (bool success);
+    function make(address beneficary, uint amount, string optionalResource) public;
 }
 
-contract PlanetMeta is Upgradable
+contract PlanetTokens is Upgradable
 {
-    function exists(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (bool);
-    function uid(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (uint256);
+    //function exists(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (bool);
+    //function uid(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (uint256);
     function donationAddress() public view returns(address);
-    function universeBytes() public view returns(bytes32);
+    //function universeBytes() public view returns(bytes32);
 }
 
-contract PlanetPlayers is Upgradable
+contract UniversalAtoms is Upgradable
 {
     Proxy db;
-    ERC721 tokens;
-    PlanetMeta meta;
+    ERC20 tokens;
+    PlanetTokens planets;
     
     using SafeMath for uint;
     
+    struct Atom
+    {
+        string atomicSymbol;
+        string atomicName;
+        uint atomicWeight;
+    }
+    
+    mapping(bytes32 => Atom) Atoms;
+    
     function() public payable
     {
-        address donation_address = meta.donationAddress();
+        address donation_address = planets.donationAddress();
         donation_address.transfer(msg.value);
     }
     
-    function PlanetPlayers
+    function UniversalAtoms
     (
         address proxyAddress,
-        address tokenAddress,
-        address metaAddress
+        address tokenContractAddress,
+        address planetContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
-        tokens = ERC721(tokenAddress);
-        meta = PlanetMeta(metaAddress);
+        tokens = ERC20(tokenContractAddress);
+        planets = PlanetTokens(planetContractAddress);
     }
     
     function updateProxy
     (
         address proxyAddress, 
-        address tokenAddress,
-        address metaAddress
+        address tokenContractAddress,
+        address planetContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
-        tokens = ERC721(tokenAddress);
-        meta = PlanetMeta(metaAddress);
+        tokens = ERC20(tokenContractAddress);
+        planets = PlanetTokens(planetContractAddress);
     }
     
-    function destroyPlayer() public
+    function addAtomicStructure(string atomicSymbol, string atomicName, uint atomicWeight) public onlyOwner
     {
-        require(db.getsString(tx.origin, 'player_name') != stringToBytes32(''));
-        uint256 id = db.getsUint(tx.origin, 'player_pob');
-        db.setsString(tx.origin, 'player_name', stringToBytes32(''));
-        db.setsUint(tx.origin, 'player_bob', 0);
-        db.setsUint(tx.origin, 'player_pob', 0);
-        db.setsUint(tx.origin, 'player_dna', 0);
-        db.setUint('players', db.getUint('players').sub(1));
-        db.SetUint(id, 'players', db.GetUint(id, 'players').sub(1));
+        Atoms[stringToBytes32(atomicSymbol)].atomicName = atomicName;
+        Atoms[stringToBytes32(atomicSymbol)].atomicWeight = atomicWeight;
+        Atoms[stringToBytes32(atomicSymbol)].atomicSymbol = atomicSymbol;
     }
     
-    function generatePlayer
+    function removeAtomicStructure(string atomicSymbol) public onlyOwner
+    {
+        delete Atoms[stringToBytes32(atomicSymbol)];
+    }
+    
+    function atoms(string atomicSymbol) public view returns
     (
-        string playerName,
-        uint xCoordinateOfHomeWorld,
-        uint yCoordinateOfHomeWorld,
-        uint zCoordinateOfHomeWorld
-    ) 
-    public
-    {
-        uint256 id = meta.uid
-        (
-            xCoordinateOfHomeWorld, 
-            yCoordinateOfHomeWorld,
-            zCoordinateOfHomeWorld
-        );
-        require(meta.exists
-        (
-            xCoordinateOfHomeWorld, 
-            yCoordinateOfHomeWorld,
-            zCoordinateOfHomeWorld
-        ));
-        require(db.getsString(tx.origin, 'player_name') == stringToBytes32(''));
-        db.setsString(tx.origin, 'player_name', stringToBytes32(playerName));
-        db.setsUint(tx.origin, 'player_bob', block.number);
-        db.setsUint(tx.origin, 'player_pob', id);
-        db.setsUint(tx.origin, 'player_dna', uint256(keccak256
-        (
-            xCoordinateOfHomeWorld, 
-            yCoordinateOfHomeWorld, 
-            zCoordinateOfHomeWorld, 
-            tx.origin, 
-            bytes32ToString(meta.universeBytes())
-        )));
-        db.setUint('players', db.getUint('players').add(1));
-        db.SetUint(id, 'players', db.GetUint(id, 'players').add(1));
-    }
-    
-    function playerCount() public view returns(uint)
-    {
-        return db.getUint('players');
-    }
-    
-    function planetPlayerCount(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(uint)
-    {
-        uint256 id = meta.uid(xCoordinate, yCoordinate, zCoordinate);
-        return db.GetUint(id, 'players');
-    }
-    
-    function getPlayer
-    (
-        address playerAddress
-    ) 
-    public view returns
-    (
-        string playerName,
-        uint256 playerDNA,
-        uint playerAge,
-        string planetOfBirth,
-        bool playerIsRebel,
-        string ally
-    )
-    {
-        address allyAddress = db.getsAddress(playerAddress, 'player_ally');
-        return
-        (
-            bytes32ToString(db.getsString(playerAddress, 'player_name')),
-            db.getsUint(playerAddress, 'player_dna'),
-            (block.number - db.getsUint(playerAddress, 'player_bob')),
-            bytes32ToString(tokens.metabytes(db.getsUint(playerAddress, 'player_pob'))),
-            isRebel(playerAddress),
-            bytes32ToString(db.getsString(allyAddress, 'player_name'))
+        string atomicName,
+        uint atomicWeight
+    ){
+        return(
+            Atoms[stringToBytes32(atomicSymbol)].atomicName,
+            Atoms[stringToBytes32(atomicSymbol)].atomicWeight
         );
     }
     
-    function playerLocation(address playerAddress) public view returns
-    (
-        string planet
-    )
+    function generateAtoms(string atomicSymbol, address beneficary, uint amount) public onlyOwner
     {
-        if(tokens.metabytes(db.getsUint(playerAddress, 'player_planet')) == stringToBytes32(''))
-        {
-            return bytes32ToString(tokens.metabytes(db.getsUint(playerAddress, 'player_pob')));
-        }
-        else
-        {
-            return bytes32ToString(tokens.metabytes(db.getsUint(playerAddress, 'player_planet')));
-        }
-    }
-    
-    function switchPlanets(uint xCoordinate, uint yCoordinate, uint zCoordinate) public
-    {
-        require(meta.exists(xCoordinate, yCoordinate, zCoordinate));
-        uint256 id = meta.uid(xCoordinate, yCoordinate, zCoordinate);
-        db.setsUint(tx.origin, 'player_planet', id);
-    }
-    
-    function updatePlayerName(string playerName) public
-    {
-        require(db.getsString(tx.origin, 'player_name') != stringToBytes32(''));
-        db.setsString(tx.origin, 'player_name', stringToBytes32(playerName));
-    }
-    
-    function updatePlayerAlly(address allyAddress) public
-    {
-        require(db.getsString(tx.origin, 'player_name') != stringToBytes32(''));
-        db.setsAddress(tx.origin, 'player_ally', allyAddress);
-    }
-    
-    function isRebel(address playerAddress) public view returns(bool)
-    {
-        return db.getsBool(playerAddress, 'is_rebel');
-    }
-    
-    function amRebel(bool value) public
-    {
-        if(value)
-        {
-            db.setsBool(tx.origin, 'is_rebel', value);
-        }
-    }
-    
-    function rebelPlanet(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(bool)
-    {
-        uint256 id = meta.uid(xCoordinate, yCoordinate, zCoordinate);
-        address planetAddress = tokens.ownerOf(id);
-        return db.getsBool(planetAddress, 'is_rebel');
-    }
-    
-    function planetStatus(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns
-    (
-        string planetName,
-        uint256 tokenID,
-        bool ruledByRebels
-    )
-    {
-        uint256 id = meta.uid(xCoordinate, yCoordinate, zCoordinate);
-        return
-        (
-            bytes32ToString(db.GetString(id, 'meta')),
-            id,
-            rebelPlanet(xCoordinate, yCoordinate, zCoordinate)
-        );
+        tokens.make(beneficary, amount, Atoms[stringToBytes32(atomicSymbol)].atomicName);
     }
 }

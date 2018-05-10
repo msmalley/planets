@@ -8,6 +8,7 @@ pragma solidity ^0.4.18;
 // Ether = 0.0001
 
 // v0.0.2 = 0x0031c9E929C1D132dB5B0602CB2F4eC062345614 = 0.88
+// v0.0.2 = XXX = 1.3
 
 /*
 
@@ -227,36 +228,44 @@ contract Proxy is Upgradable
 
 contract ERC721 is Upgradable
 {
-    function totalSupply() public view returns (uint);
-    function balanceOf(address) public view returns (uint);
-    function tokenOfOwnerByIndex(address beneficiary, uint index) public view returns (uint);
-    function ownerOf(uint tokenId) public view returns (address);
-    function transfer(address to, uint tokenId) public;
-    function takeOwnership(uint tokenId) public;
-    function approve(address beneficiary, uint tokenId) public;
-    function metadata(uint256 tokenId) public view returns (string);
-    function metabytes(uint256 tokenId) public view returns (bytes32);
-    function mint(address beneficiary, uint256 id, string meta) external;
-    function updateTokenMetadata(uint tokenId, string meta) public returns(bool);
+    function totalSupply(string optionalResource) public view returns (uint);
+    function balanceOf(address beneficary, string optionalResource) public view returns (uint);
+    function tokenOfOwnerByIndex(address beneficiary, uint index, string optionalResource) public view returns (uint);
+    function ownerOf(uint tokenId, string optionalResource) public view returns (address);
+    function transfer(address to, uint tokenId, string optionalResource) public;
+    function takeOwnership(uint tokenId, string optionalResource) public;
+    function approve(address beneficiary, uint tokenId, string optionalResource) public;
+    function metadata(uint256 tokenId, string optionalResource) public view returns (string);
+    function metabytes(uint256 tokenId, string optionalResource) public view returns (bytes32);
+    function mint(address beneficiary, uint256 id, string meta, string optionalResource) external;
+    function updateTokenMetadata(uint tokenId, string meta, string optionalResource) public returns(bool);
 }
 
-contract PlanetMeta is Upgradable
+contract PlanetTokens is Upgradable
 {
     Proxy db;
-    ERC721 tokens;
+    ERC721 assets;
+    
+    string public name = 'Planet Tokens';
+    string public symbol = 'PT';
     
     using SafeMath for uint;
     
+    function token_id(string key) public pure returns(string)
+    {
+        return combine('planet', '_', key, '', '');
+    }
+    
     function() public payable
     {
-        address donation_address = db.getAddress('donation_address');
+        address donation_address = db.getAddress(token_id('donation'));
         donation_address.transfer(msg.value);
     }
     
-    function PlanetMeta
+    function PlanetTokens
     (
         address proxyAddress,
-        address tokenAddress,
+        address assetAddress,
         string UniverseName, 
         uint StartingWeiDonation, 
         uint CoordinateLimit, 
@@ -267,7 +276,7 @@ contract PlanetMeta is Upgradable
     public onlyOwner
     {
         db = Proxy(proxyAddress);
-        tokens = ERC721(tokenAddress);
+        assets = ERC721(assetAddress);
         setup_universe
         (
             UniverseName, 
@@ -279,10 +288,10 @@ contract PlanetMeta is Upgradable
         );
     }
     
-    function updateProxy(address proxyAddress, address tokenAddress) public onlyOwner
+    function updateProxy(address proxyAddress, address assetAddress) public onlyOwner
     {
         db = Proxy(proxyAddress);
-        tokens = ERC721(tokenAddress);
+        assets = ERC721(assetAddress);
     }
     
     function setup_universe
@@ -296,12 +305,12 @@ contract PlanetMeta is Upgradable
     ) 
     internal
     {
-        db.setString('universe', stringToBytes32(UniverseName));
-        db.setUint('coordinate_limit', CoordinateLimit);
-        db.setUint('block_intervals', BlockIntervals);
-        db.setUint('planet_price', WeiPerPlanet);
-        db.setUint('min_donation', StartingWeiDonation);
-        db.setAddress('donation_address', DonationAddress);
+        db.setString(token_id('universe'), stringToBytes32(UniverseName));
+        db.setUint(token_id('coord_limit'), CoordinateLimit);
+        db.setUint(token_id('block_int'), BlockIntervals);
+        db.setUint(token_id('price'), WeiPerPlanet);
+        db.setUint(token_id('min_don'), StartingWeiDonation);
+        db.setAddress(token_id('donation'), DonationAddress);
     }
     
     /*
@@ -311,13 +320,13 @@ contract PlanetMeta is Upgradable
     */
     function uid(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (uint256)
     {
-        string memory universe = bytes32ToString(db.getString('universe'));
+        string memory universe = bytes32ToString(db.getString(token_id('universe')));
         return uint256(keccak256(xCoordinate, '|', yCoordinate, '|', zCoordinate, '|', universe));
     }
     
     function generate_token(address beneficiary, uint256 id, string planetName) internal
     {
-        tokens.mint(beneficiary, id, planetName);
+        assets.mint(beneficiary, id, planetName, 'planet');
     }
     
     function generate_planet
@@ -332,18 +341,18 @@ contract PlanetMeta is Upgradable
     ) 
     internal
     {
-        string memory universe = bytes32ToString(db.getString('universe'));
+        string memory universe = bytes32ToString(db.getString(token_id('universe')));
         uint256 id = uid(xCoordinate, yCoordinate, zCoordinate);
-        db.SetUint(id, 'planet_x', xCoordinate);
-        db.SetUint(id, 'planet_y', yCoordinate);
-        db.SetUint(id, 'planet_z', zCoordinate);
-        db.SetUint(id, 'planet_d', uint256(keccak256(xCoordinate, '|x|', msg.sender, '|', universe)));
-        db.SetUint(id, 'planet_n', uint256(keccak256(yCoordinate, '|y|', msg.sender, '|', universe)));
-        db.SetUint(id, 'planet_a', uint256(keccak256(zCoordinate, '|z|', msg.sender, '|', universe)));
-        db.SetUint(id, 'planet_cost', value);
-        db.SetString(id, 'planet_liason', stringToBytes32(liason));
-        db.SetString(id, 'planet_url', stringToBytes32(url));
-        tokens.updateTokenMetadata(id, planetName);
+        db.SetUint(id, token_id('x_coord'), xCoordinate);
+        db.SetUint(id, token_id('y_coord'), yCoordinate);
+        db.SetUint(id, token_id('z_coord'), zCoordinate);
+        db.SetUint(id, token_id('d_life'), uint256(keccak256(xCoordinate, '|x|', msg.sender, '|', universe)));
+        db.SetUint(id, token_id('n_life'), uint256(keccak256(yCoordinate, '|y|', msg.sender, '|', universe)));
+        db.SetUint(id, token_id('a_life'), uint256(keccak256(zCoordinate, '|z|', msg.sender, '|', universe)));
+        db.SetUint(id, token_id('cost'), value);
+        db.SetString(id, token_id('liaison'), stringToBytes32(liason));
+        db.SetString(id, token_id('url'), stringToBytes32(url));
+        assets.updateTokenMetadata(id, planetName, 'planet');
     }
     
     function genesis
@@ -361,12 +370,12 @@ contract PlanetMeta is Upgradable
     {
         // Variables required for require ...
         uint256 id = uid(xCoordinate, yCoordinate, zCoordinate);
-        address donation_address = db.getAddress('donation_address');
-        uint minimum_donation = db.getUint('min_donation');
-        uint coordinate_limit = db.getUint('coordinate_limit');
+        address donation_address = db.getAddress(token_id('donation'));
+        uint minimum_donation = db.getUint(token_id('min_don'));
+        uint coordinate_limit = db.getUint(token_id('coord_limit'));
 
         // Check required paramters
-        require(tokens.ownerOf(id) == 0);
+        require(assets.ownerOf(id, 'planet') == 0);
         if(msg.value >= minimum_donation)
         {
             require(xCoordinate < coordinate_limit);
@@ -388,36 +397,36 @@ contract PlanetMeta is Upgradable
     function bumpDonations() public
     {
         uint this_block = block.number;
-        uint checkpoint = db.getUint('donation_checkpoint');
-        uint interval = db.getUint('block_intervals');
+        uint checkpoint = db.getUint(token_id('don_check'));
+        uint interval = db.getUint(token_id('block_int'));
         if(this_block > (checkpoint + interval))
         {
-            uint ppp = db.getUint('planet_price');
-            db.setUint('donation_checkpoint', this_block);
-            db.setUint('min_donation', (ppp * tokens.totalSupply()));
+            uint ppp = db.getUint(token_id('price'));
+            db.setUint(token_id('don_check'), this_block);
+            db.setUint(token_id('min_don'), (ppp * assets.totalSupply('planet')));
         }
     }
     
     function minimumDonation() public view returns(uint)
     {
-        return db.getUint('min_donation');
+        return db.getUint(token_id('min_don'));
     }
     
     function donationAddress() public view returns(address)
     {
-        return db.getAddress('donation_address');
+        return db.getAddress(token_id('donation'));
     }
     
     function blockIntervals() public view returns(uint)
     {
-        return db.getUint('block_intervals');
+        return db.getUint(token_id('block_int'));
     }
     
     function blocksToGo() public view returns(uint)
     {
         uint this_block = block.number;
-        uint checkpoint = db.getUint('donation_checkpoint');
-        uint interval = db.getUint('block_intervals');
+        uint checkpoint = db.getUint(token_id('don_check'));
+        uint interval = db.getUint(token_id('block_int'));
         uint next_block = checkpoint + interval;
         if(this_block < next_block)
         {
@@ -441,14 +450,14 @@ contract PlanetMeta is Upgradable
     ){
         uint id = uid(xCoordinate, yCoordinate, zCoordinate);
         return(
-            db.GetUint(id, 'planet_d'),
-            db.GetUint(id, 'planet_n'),
-            db.GetUint(id, 'planet_a'),
+            db.GetUint(id, token_id('d_life')),
+            db.GetUint(id, token_id('n_life')),
+            db.GetUint(id, token_id('a_life')),
             getPlanetAge(xCoordinate, yCoordinate, zCoordinate),
-            bytes32ToString(db.GetString(id, 'meta')),
-            bytes32ToString(db.GetString(id, 'planet_liason')),
-            bytes32ToString(db.GetString(id, 'planet_url')),
-            tokens.ownerOf(id)
+            bytes32ToString(db.GetString(id, token_id('meta'))),
+            bytes32ToString(db.GetString(id, token_id('liaison'))),
+            bytes32ToString(db.GetString(id, token_id('url'))),
+            assets.ownerOf(id, 'planet')
         );
     }
     
@@ -459,44 +468,44 @@ contract PlanetMeta is Upgradable
     
     function universeBytes() public view returns (bytes32) 
     {
-        return db.getString('universe');
+        return db.getString(token_id('universe'));
     }
 
     function ownerOfPlanet(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (address) 
     {
-        return tokens.ownerOf(uid(xCoordinate, yCoordinate, zCoordinate));
+        return assets.ownerOf(uid(xCoordinate, yCoordinate, zCoordinate), 'planet');
     }
     
     function updatePlanetName(uint xCoordinate, uint yCoordinate, uint zCoordinate, string planetName) public 
     {
         uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        tokens.updateTokenMetadata(id, planetName);
+        assets.updateTokenMetadata(id, planetName, 'planet');
     }
 
     function updatePlanetLiason(uint xCoordinate, uint yCoordinate, uint zCoordinate, string LiasonName) public 
     {
         uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        require(msg.sender == tokens.ownerOf(id));
-        db.SetString(id, 'planet_liason', stringToBytes32(LiasonName));
+        require(msg.sender == assets.ownerOf(id, 'planet'));
+        db.SetString(id, token_id('liaison'), stringToBytes32(LiasonName));
     }
 
     function updatePlanetURL(uint xCoordinate, uint yCoordinate, uint zCoordinate, string LiasonURL) public 
     {
         uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        require(msg.sender == tokens.ownerOf(id));
-        db.SetString(id, 'planet_url', stringToBytes32(LiasonURL));
+        require(msg.sender == assets.ownerOf(id, 'planet'));
+        db.SetString(id, token_id('url'), stringToBytes32(LiasonURL));
     }
     
     function getPlanetCost(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(uint) 
     {
         uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        return db.GetUint(id, 'planet_cost');
+        return db.GetUint(id, token_id('cost'));
     }
     
     function getPlanetAge(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(uint) 
     {
         uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        return (block.number - db.GetUint(id, 'bob'));
+        return (block.number - db.GetUint(id, token_id('bob')));
     }
     
     function getPlanetCoordinates(uint256 id) public view returns
@@ -507,26 +516,26 @@ contract PlanetMeta is Upgradable
     ) 
     {
         return(
-            db.GetUint(id, 'planet_x'),
-            db.GetUint(id, 'planet_y'),
-            db.GetUint(id, 'planet_z')
+            db.GetUint(id, token_id('x_coord')),
+            db.GetUint(id, token_id('y_coord')),
+            db.GetUint(id, token_id('z_coord'))
         );
     }
     
     function transferPlanet(address beneficiary, uint xCoordinate, uint yCoordinate, uint zCoordinate) public
     {
         uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        tokens.transfer(beneficiary, id);
+        assets.transfer(beneficiary, id, 'planet');
     }
     
     function planetsDiscovered() public view returns(uint)
     {
-        return tokens.totalSupply();
+        return assets.totalSupply('planet');
     }
     
     function planetsUndiscovered() public view returns(uint)
     {
-        uint limit = db.getUint('coordinate_limit');
-        return ((limit * limit * limit) - tokens.totalSupply());
+        uint limit = db.getUint(token_id('coord_limit'));
+        return ((limit * limit * limit) - assets.totalSupply('planet'));
     }
 }
