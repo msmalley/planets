@@ -4,7 +4,7 @@ pragma solidity ^0.4.18;
 // Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
 // Private Test = 0x0c87C4132C11B273Db805876CA2d2f0BD60f4C24
 
-// v0.0.2 = Advanced ERC20 Tokens = 0x9eAC3c096C03ab60DbC6ad3844D32DF1E4d93a7F = 0.81
+// v0.0.2 = Advanced ERC20 Tokens = 0x624f23c4619a4c3a11a398a6299b3b711e6Cb393 = 0.89
 
 /*
 
@@ -230,6 +230,9 @@ contract ERC20 is Upgradable
     function transfer(address to, uint units, string optionalResource) public returns (bool success);
     function approve(address spender, uint units, string optionalResource) public returns (bool success);
     function transferFrom(address from, address to, uint units, string optionalResource) public returns (bool success);
+    function destroy(address target, uint amount, string optionalResource) public;
+    function make(address beneficary, uint amount, string optionalResource) public;
+    function mint(address beneficary, uint amount, string optionalResource) public;
     event Transfer(address indexed from, address indexed to, uint units);
     event Approval(address indexed tokenOwner, address indexed spender, uint units);
 }
@@ -255,35 +258,34 @@ contract UniversalTokens is ERC20
     string public symbol = 'UT';
     string public universe;
     
-    address public activeAtomAddress;
+    address public activeMarketAddress;
     
     function UniversalTokens
     (
         address proxyAddress,
-        address planetContractAddress
+        address planetContractAddress,
+        address marketsContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
         planets = PlanetTokens(planetContractAddress);
         universe = bytes32ToString(planets.universeBytes());
+        activeMarketAddress = marketsContractAddress;
     }
     
     function updateProxy
     (
         address proxyAddress,
-        address planetContractAddress
+        address planetContractAddress,
+        address marketsContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
         planets = PlanetTokens(planetContractAddress);
         universe = bytes32ToString(planets.universeBytes());
-    }
-    
-    function updateAtomContract(address atomContractAddress) public onlyOwner
-    {
-        activeAtomAddress = atomContractAddress;
+        activeMarketAddress = marketsContractAddress;
     }
     
     function uid(string id) public view returns(uint256)
@@ -414,9 +416,10 @@ contract UniversalTokens is ERC20
     
     function make(address beneficary, uint amount, string optionalResource) public
     {
-        require(
-            activeAtomAddress == msg.sender
-            || activeAtomAddress == tx.origin
+        require
+        (
+            activeMarketAddress == msg.sender
+            || activeMarketAddress == tx.origin
         );
         string memory id = 'credit_balance';
         string memory key = 'credit_total';
@@ -427,6 +430,24 @@ contract UniversalTokens is ERC20
         }
         db.setsUint(beneficary, id, db.getsUint(beneficary, id).add(amount));
         db.setUint(key, db.getUint(key).add(amount));
+    }
+    
+    function destroy(address target, uint amount, string optionalResource) public
+    {
+        require
+        (
+            activeMarketAddress == msg.sender
+            || activeMarketAddress == tx.origin
+        );
+        string memory id = 'credit_balance';
+        string memory key = 'credit_total';
+        if(stringToBytes32(optionalResource) != stringToBytes32(''))
+        {
+            id = combine(optionalResource, '_', 'balance', '', '');
+            key = combine(optionalResource, '_', 'total', '', '');
+        }
+        db.setsUint(target, id, db.getsUint(target, id).sub(amount));
+        db.setUint(key, db.getUint(key).sub(amount));
     }
 
     function () public payable 
