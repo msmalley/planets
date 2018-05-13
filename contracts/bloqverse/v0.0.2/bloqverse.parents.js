@@ -3,12 +3,13 @@ pragma solidity ^0.4.18;
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 // Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
 // Private Test = 0x0c87C4132C11B273Db805876CA2d2f0BD60f4C24
+// Private John Smith = 0x5DE0d9a57875B867043d82b2441af94AeeAE596B
 
 // Interval = 15120
-// Wei = 100000000000000
-// Ether = 0.0001
+// Wei = 10000000000000
+// Ether = 0.00001
 
-// v0.0.2 = 0xafFe20d3fa1118c986604b02d5Ae887ef4129637 = 0.91
+// v0.0.2 = 0xd5fE8023aDd606603a60C27739891b5ACd646638 = 0.83
 
 /*
 
@@ -176,6 +177,7 @@ contract Upgradable is AbleToUtilizeStrings
         owner = newOwner;
     }
 }
+
 contract Proxy is Upgradable
 {
     // Set Contract Data
@@ -227,193 +229,281 @@ contract Proxy is Upgradable
 
 contract ERC721 is Upgradable
 {
-    function totalSupply(string optionalResource) public view returns (uint);
     function ownerOf(uint tokenId, string optionalResource) public view returns (address);
-    function mint(address beneficiary, uint256 id, string meta, string optionalResource) public;
-    function updateTokenMetadata(uint tokenId, string meta, string optionalResource) public returns(bool);
+    function metabytes(uint256 tokenId, string optionalResource) public view returns (bytes32);
 }
 
 contract PlanetTokens is Upgradable
 {
+    function exists(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (bool);
+    function uid(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (uint256);
+    function donationAddress() public view returns(address);
+    function universeBytes() public view returns(bytes32);
+}
+
+contract PlanetParents is Upgradable
+{
     Proxy db;
     ERC721 assets;
-    
-    string public name = 'Planet Tokens';
-    string public symbol = 'PT';
+    PlanetTokens planets;
     
     using SafeMath for uint;
     
+    address public activeFamilyAddress;
+    address public activePlayerAddress;
+    
     function() public payable
     {
-        address donation_address = db.getAddress('planet_donation');
+        address donation_address = planets.donationAddress();
         donation_address.transfer(msg.value);
     }
     
-    function PlanetTokens
+    function PlanetParents
     (
         address proxyAddress,
-        address assetAddress,
-        string UniverseName, 
+        address assetContractAddress,
+        address planetContractAddress,
+        address familyContractAddress,
+        address playerContractAddress,
         uint StartingWeiDonation, 
-        uint CoordinateLimit, 
+        uint WeiPerParent,
         uint BlockIntervals, 
-        uint WeiPerPlanet, 
-        address DonationAddress
+        uint PlanetSalaryPercentage
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
-        assets = ERC721(assetAddress);
-        setup_universe
-        (
-            UniverseName, 
-            StartingWeiDonation, 
-            CoordinateLimit, 
-            BlockIntervals, 
-            WeiPerPlanet, 
-            DonationAddress
-        );
+        assets = ERC721(assetContractAddress);
+        planets = PlanetTokens(planetContractAddress);
+        activeFamilyAddress = familyContractAddress;
+        activePlayerAddress = playerContractAddress;
+        db.setUint('parent_block_int', BlockIntervals);
+        db.setUint('parent_price', WeiPerParent);
+        db.setUint('parent_min_don', StartingWeiDonation);
+        db.setUint('parent_salary', PlanetSalaryPercentage);
     }
     
-    function updateProxy(address proxyAddress, address assetAddress) public onlyOwner
+    function updateProxy
+    (
+        address proxyAddress, 
+        address assetContractAddress,
+        address planetContractAddress,
+        address familyContractAddress,
+        address playerContractAddress
+    ) 
+    public onlyOwner
     {
         db = Proxy(proxyAddress);
-        assets = ERC721(assetAddress);
+        assets = ERC721(assetContractAddress);
+        planets = PlanetTokens(planetContractAddress);
+        activeFamilyAddress = familyContractAddress;
+        activePlayerAddress = playerContractAddress;
     }
     
-    function setup_universe
+    function updateSalary(uint PlanetSalaryPercentage) public onlyOwner
+    {
+        db.setUint('planet_salary', PlanetSalaryPercentage);
+    }
+    
+    function destroyParent() public
+    {
+        require(db.getsString(tx.origin, 'parent_name') != stringToBytes32(''));
+        uint256 id = db.getsUint(tx.origin, 'parent_pob');
+        db.setsString(tx.origin, 'parent_name', stringToBytes32(''));
+        db.setsUint(tx.origin, 'parent_bob', 0);
+        db.setsUint(tx.origin, 'parent_pob', 0);
+        db.setsUint(tx.origin, 'parent_dna', 0);
+        db.setsUint(tx.origin, 'parent_ally', 0);
+        db.setsAddress(tx.origin, 'parent_spouse', 0);
+        db.setUint('parents', db.getUint('parents').sub(1));
+        db.SetUint(id, 'parents', db.GetUint(id, 'parents').sub(1));
+    }
+    
+    function generateParent
     (
-        string UniverseName, 
-        uint StartingWeiDonation, 
-        uint CoordinateLimit, 
-        uint BlockIntervals, 
-        uint WeiPerPlanet, 
-        address DonationAddress
+        string parentName,
+        uint xCoordinateOfHomeWorld,
+        uint yCoordinateOfHomeWorld,
+        uint zCoordinateOfHomeWorld,
+        address returnAddress
     ) 
-    internal
+    public payable
     {
-        db.setString('planet_universe', stringToBytes32(UniverseName));
-        db.setUint('planet_coord_limit', CoordinateLimit);
-        db.setUint('planet_block_int', BlockIntervals);
-        db.setUint('planet_price', WeiPerPlanet);
-        db.setUint('planet_min_don', StartingWeiDonation);
-        db.setAddress('planet_donation', DonationAddress);
-    }
-    
-    /*
-    
-    PLANET SPECIFIC FUNCTIONALITY
-    
-    */
-    function uid(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (uint256)
-    {
-        string memory universe = bytes32ToString(db.getString('planet_universe'));
-        return uint256(keccak256(xCoordinate, '|', yCoordinate, '|', zCoordinate, '|', universe));
-    }
-    
-    function generate_token(address beneficiary, uint256 id, string planetName) internal
-    {
-        assets.mint(beneficiary, id, planetName, 'planet');
-    }
-    
-    function generate_planet
-    (
-        uint xCoordinate, 
-        uint yCoordinate, 
-        uint zCoordinate, 
-        uint value, 
-        string planetName, 
-        string liason, 
-        string url
-    ) 
-    internal
-    {
-        string memory universe = bytes32ToString(db.getString('planet_universe'));
-        uint256 id = uid(xCoordinate, yCoordinate, zCoordinate);
-        db.SetUint(id, 'planet_x_coord', xCoordinate);
-        db.SetUint(id, 'planet_y_coord', yCoordinate);
-        db.SetUint(id, 'planet_z_coord', zCoordinate);
-        db.SetUint(id, 'planet_d_life', uint256(keccak256(xCoordinate, '|x|', msg.sender, '|', universe)));
-        db.SetUint(id, 'planet_n_life', uint256(keccak256(yCoordinate, '|y|', msg.sender, '|', universe)));
-        db.SetUint(id, 'planet_a_life', uint256(keccak256(zCoordinate, '|z|', msg.sender, '|', universe)));
-        db.SetUint(id, 'planet_cost', value);
-        db.SetString(id, 'planet_liaison', stringToBytes32(liason));
-        db.SetString(id, 'planet_url', stringToBytes32(url));
-        assets.updateTokenMetadata(id, planetName, 'planet');
-    }
-    
-    function genesis
-    (
-        address beneficiary, 
-        address returnAddress, 
-        uint xCoordinate, 
-        uint yCoordinate, 
-        uint zCoordinate, 
-        string planetName, 
-        string liason, 
-        string url
-    ) 
-    public payable 
-    {
-        // Variables required for require ...
-        uint256 id = uid(xCoordinate, yCoordinate, zCoordinate);
-        address donation_address = db.getAddress('planet_donation');
-        uint minimum_donation = db.getUint('planet_min_don');
-        uint coordinate_limit = db.getUint('planet_coord_limit');
-
-        // Check required paramters
-        require(assets.ownerOf(id, 'planet') == 0);
+        uint minimum_donation = db.getUint('parent_min_don');
         if(msg.value >= minimum_donation)
         {
-            require(xCoordinate < coordinate_limit);
-            require(yCoordinate < coordinate_limit);
-            require(zCoordinate < coordinate_limit);
-
-            generate_token(beneficiary, id, planetName);
-            generate_planet(xCoordinate, yCoordinate, zCoordinate, msg.value, planetName, liason, url);
-
-            donation_address.transfer(msg.value);
+            address donation_address = planets.donationAddress();
+            uint256 id = planets.uid
+            (
+                xCoordinateOfHomeWorld, 
+                yCoordinateOfHomeWorld,
+                zCoordinateOfHomeWorld
+            );
+            require(planets.exists
+            (
+                xCoordinateOfHomeWorld, 
+                yCoordinateOfHomeWorld,
+                zCoordinateOfHomeWorld
+            ));
+            require(db.getsString(tx.origin, 'parent_name') == stringToBytes32(''));
+            db.setsString(tx.origin, 'parent_name', stringToBytes32(parentName));
+            db.setsUint(tx.origin, 'parent_bob', block.number);
+            db.setsUint(tx.origin, 'parent_pob', id);
+            db.setsUint(tx.origin, 'parent_dna', uint256(keccak256
+            (
+                xCoordinateOfHomeWorld, 
+                yCoordinateOfHomeWorld, 
+                zCoordinateOfHomeWorld, 
+                tx.origin, 
+                bytes32ToString(planets.universeBytes())
+            )));
+            db.setUint('parents', db.getUint('parents').add(1));
+            db.SetUint(id, 'parents', db.GetUint(id, 'parents').add(1));
+            bumpParentDonations();
+            address planet_address = assets.ownerOf(id, 'planet');
+            uint salary = msg.value.div(db.getUint('planet_salary'));
+            uint donation = msg.value.sub(salary);
+            planet_address.transfer(salary);
+            donation_address.transfer(donation);
         }
         else
         {
+            bumpParentDonations();
             returnAddress.transfer(msg.value);
         }
-        bumpDonations();
     }
     
-    function bumpDonations() public
+    function bumpParentDonations() public
     {
         uint this_block = block.number;
-        uint checkpoint = db.getUint('planet_don_check');
-        uint interval = db.getUint('planet_block_int');
+        uint checkpoint = db.getUint('parent_don_check');
+        uint interval = db.getUint('parent_block_int');
         if(this_block > (checkpoint + interval))
         {
-            uint ppp = db.getUint('planet_price');
-            db.setUint('planet_don_check', this_block);
-            db.setUint('planet_min_don', (ppp * assets.totalSupply('planet')));
+            uint ppp = db.getUint('parent_price');
+            db.setUint('parent_don_check', this_block);
+            db.setUint('parent_min_don', (ppp * db.getUint('parents')));
         }
     }
     
-    function minimumDonation() public view returns(uint)
+    function parentCount() public view returns(uint)
     {
-        return db.getUint('planet_min_don');
+        return db.getUint('parents');
     }
     
-    function donationAddress() public view returns(address)
+    function planetParentCount(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(uint)
     {
-        return db.getAddress('planet_donation');
+        uint256 id = planets.uid(xCoordinate, yCoordinate, zCoordinate);
+        return db.GetUint(id, 'parents');
     }
     
-    function blockIntervals() public view returns(uint)
+    function getParentDNA(address parentAddress) public view returns(uint256 parentDNA)
     {
-        return db.getUint('planet_block_int');
+        return(db.getsUint(parentAddress, 'parent_dna'));
     }
     
-    function blocksToGo() public view returns(uint)
+    function getParent
+    (
+        address parentAddress
+    ) 
+    public view returns
+    (
+        string parentName,
+        uint256 parentDNA,
+        uint parentAge,
+        string planetOfBirth,
+        address ally,
+        address spouse
+    )
+    {
+        return
+        (
+            bytes32ToString(db.getsString(parentAddress, 'parent_name')),
+            db.getsUint(parentAddress, 'parent_dna'),
+            (block.number - db.getsUint(parentAddress, 'parent_bob')),
+            bytes32ToString(assets.metabytes(db.getsUint(parentAddress, 'parent_pob'), 'planet')),
+            db.getsAddress(parentAddress, 'parent_ally'),
+            db.getsAddress(parentAddress, 'parent_spouse')
+        );
+    }
+    
+    function getSalary() public view returns(uint)
+    {
+        return db.getUint('planet_salary');
+    }
+    
+    function getParentBytes(address parentAddress) public view returns(bytes32)
+    {
+        return db.getsString(parentAddress, 'parent_name');
+    }
+    
+    function updateParentName(string parentName) public
+    {
+        require(db.getsString(tx.origin, 'parent_name') != stringToBytes32(''));
+        db.setsString(tx.origin, 'parent_name', stringToBytes32(parentName));
+    }
+    
+    function getParentSpouse(address parentAddress) public view returns(address)
+    {
+        return db.getsAddress(parentAddress, 'parent_spouse');
+    }
+    
+    function getMarried(address parent1, address parent2) public
+    {
+        require
+        (
+            activeFamilyAddress == msg.sender
+            || activeFamilyAddress == tx.origin
+        );
+        db.setsAddress(parent1, 'parent_spouse', parent2);
+        db.setsAddress(parent2, 'parent_spouse', parent1);
+    }
+    
+    function updateMarriageStatus(address parent1, address parent2) public onlyOwner
+    {
+        db.setsAddress(parent1, 'parent_spouse', parent2);
+        db.setsAddress(parent2, 'parent_spouse', parent1);
+    }
+    
+    function getAlly(address parentAddress) public view returns(address)
+    {
+        return db.setsAddress(parentAddress, 'parent_ally');
+    }
+    
+    function alliances(address ally1, address ally2) public
+    {
+        require
+        (
+            activePlayerAddress == msg.sender
+            || activePlayerAddress == tx.origin
+        );
+        if(ally1 == ally2)
+        {
+            db.setsAddress(ally1, 'parent_ally', 0);
+            db.setsAddress(ally2, 'parent_ally', 0);
+        }
+        else
+        {
+            db.setsAddress(ally1, 'parent_ally', ally2);
+            db.setsAddress(ally2, 'parent_ally', ally1);
+        }
+    }
+    
+    function minimumParentDonation() public view returns(uint)
+    {
+        return db.getUint('parent_min_don');
+    }
+    
+    function parentBlockIntervals() public view returns(uint)
+    {
+        return db.getUint('parent_block_int');
+    }
+    
+    function blocksToGoUntilParentPriceIncrease() public view returns(uint)
     {
         uint this_block = block.number;
-        uint checkpoint = db.getUint('planet_don_check');
-        uint interval = db.getUint('planet_block_int');
+        uint checkpoint = db.getUint('parent_don_check');
+        uint interval = db.getUint('parent_block_int');
         uint next_block = checkpoint + interval;
         if(this_block < next_block)
         {
@@ -423,100 +513,5 @@ contract PlanetTokens is Upgradable
         {
             return 0;
         }
-    }
-    
-    function getPlanet(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(
-        uint d,
-        uint n,
-        uint a,
-        uint age,
-        string planetName,
-        string ownerName,
-        string ownerHome,
-        address planetOwner
-    ){
-        uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        return(
-            db.GetUint(id, 'planet_d_life'),
-            db.GetUint(id, 'planet_n_life'),
-            db.GetUint(id, 'planet_a_life'),
-            getPlanetAge(xCoordinate, yCoordinate, zCoordinate),
-            bytes32ToString(db.GetString(id, 'planet_meta')),
-            bytes32ToString(db.GetString(id, 'planet_liaison')),
-            bytes32ToString(db.GetString(id, 'planet_url')),
-            assets.ownerOf(id, 'planet')
-        );
-    }
-    
-    function exists(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (bool) 
-    {
-        return ownerOfPlanet(xCoordinate, yCoordinate, zCoordinate) != 0;
-    }
-    
-    function universeBytes() public view returns (bytes32) 
-    {
-        return db.getString('planet_universe');
-    }
-
-    function ownerOfPlanet(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (address) 
-    {
-        return assets.ownerOf(uid(xCoordinate, yCoordinate, zCoordinate), 'planet');
-    }
-    
-    function updatePlanetName(uint xCoordinate, uint yCoordinate, uint zCoordinate, string planetName) public 
-    {
-        uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        assets.updateTokenMetadata(id, planetName, 'planet');
-    }
-
-    function updatePlanetLiason(uint xCoordinate, uint yCoordinate, uint zCoordinate, string LiasonName) public 
-    {
-        uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        require(msg.sender == assets.ownerOf(id, 'planet'));
-        db.SetString(id, 'planet_liaison', stringToBytes32(LiasonName));
-    }
-
-    function updatePlanetURL(uint xCoordinate, uint yCoordinate, uint zCoordinate, string LiasonURL) public 
-    {
-        uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        require(msg.sender == assets.ownerOf(id, 'planet'));
-        db.SetString(id, 'planet_url', stringToBytes32(LiasonURL));
-    }
-    
-    function getPlanetCost(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(uint) 
-    {
-        uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        return db.GetUint(id, 'planet_cost');
-    }
-    
-    function getPlanetAge(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(uint) 
-    {
-        uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        return (block.number - db.GetUint(id, 'planet_bob'));
-    }
-    
-    function getPlanetCoordinates(uint256 id) public view returns
-    (
-        uint xCoordinate,
-        uint yCoordinate,
-        uint zCoordinate
-    ) 
-    {
-        return(
-            db.GetUint(id, 'planet_x_coord'),
-            db.GetUint(id, 'planet_y_coord'),
-            db.GetUint(id, 'planet_z_coord')
-        );
-    }
-    
-    function planetsDiscovered() public view returns(uint)
-    {
-        return assets.totalSupply('planet');
-    }
-    
-    function planetsUndiscovered() public view returns(uint)
-    {
-        uint limit = db.getUint('planet_coord_limit');
-        return ((limit * limit * limit) - assets.totalSupply('planet'));
     }
 }

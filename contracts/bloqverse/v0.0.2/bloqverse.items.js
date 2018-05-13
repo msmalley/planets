@@ -4,7 +4,7 @@ pragma solidity ^0.4.18;
 // Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
 // Private Test = 0x0c87C4132C11B273Db805876CA2d2f0BD60f4C24
 
-// v0.0.2 = Advanced ERC20 Tokens = 0x6A7Ada36f1AA9468D6048dE1808CEf6b0B1db445 = 0.90
+// v0.0.2 = 0x03d4fBB7b4E81d15986C6f25Ea2A41FFb35b5e6d = 0.79
 
 /*
 
@@ -224,241 +224,157 @@ contract Proxy is Upgradable
 
 contract ERC20 is Upgradable
 {
-    function totalSupply(string optionalResource) public constant returns (uint);
-    function balanceOf(address tokenOwner, string optionalResource) public constant returns (uint balance);
-    function allowance(address tokenOwner, address spender, string optionalResource) public constant returns (uint remaining);
-    function transfer(address to, uint units, string optionalResource) public returns (bool success);
-    function approve(address spender, uint units, string optionalResource) public returns (bool success);
-    function transferFrom(address from, address to, uint units, string optionalResource) public returns (bool success);
+    function balanceOf(address beneficary, string optionalResource) public view returns(uint);
     function destroy(address target, uint amount, string optionalResource) public;
     function make(address beneficary, uint amount, string optionalResource) public;
-    function mint(address beneficary, uint amount, string optionalResource) public;
-    event Transfer(address indexed from, address indexed to, uint units);
-    event Approval(address indexed tokenOwner, address indexed spender, uint units);
 }
 
 contract PlanetTokens is Upgradable
 {
-    function universeBytes() public view returns(bytes32);
+    function donationAddress() public view returns(address);
 }
 
-contract ApproveAndCallFallBack 
+contract UniversalAtoms is Upgradable
 {
-    function receiveApproval(address from, uint256 tokens, address token, bytes data) public;
+    function atom(string atomicIndex) public view returns(bytes32);
+    function atomPrice(string atomicIndex) public view returns(uint);
+    function atomSymbol(string atomicIndex) public view returns(bytes32);
+    function atomicConversion(string from, string to, uint amount) public;
 }
 
-contract UniversalTokens is ERC20
+contract UniversalItems is Upgradable
 {
     Proxy db;
-    PlanetTokens planets;
+    ERC20 tokens;
+    PlanetTokens public planets;
+    UniversalAtoms public atoms;
     
     using SafeMath for uint;
     
-    string public name = 'Universal Tokens';
-    string public symbol = 'UT';
-    string public universe;
+    function() public payable
+    {
+        address donation_address = planets.donationAddress();
+        donation_address.transfer(msg.value);
+    }
     
-    address public activeAtomsAddress;
-    address public activeItemsAddress;
-    
-    function UniversalTokens
+    function UniversalItems
     (
         address proxyAddress,
+        address tokenContractAddress,
         address planetContractAddress,
-        address atomsContractAddress,
-        address itemsContractAddress
+        address atomContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
+        tokens = ERC20(tokenContractAddress);
         planets = PlanetTokens(planetContractAddress);
-        universe = bytes32ToString(planets.universeBytes());
-        activeAtomsAddress = atomsContractAddress;
-        activeItemsAddress = itemsContractAddress;
+        atoms = UniversalAtoms(atomContractAddress);
     }
     
     function updateProxy
     (
-        address proxyAddress,
+        address proxyAddress, 
+        address tokenContractAddress,
         address planetContractAddress,
-        address atomsContractAddress,
-        address itemsContractAddress
+        address atomContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
+        tokens = ERC20(tokenContractAddress);
         planets = PlanetTokens(planetContractAddress);
-        universe = bytes32ToString(planets.universeBytes());
-        activeAtomsAddress = atomsContractAddress;
-        activeItemsAddress = itemsContractAddress;
+        atoms = UniversalAtoms(atomContractAddress);
     }
     
-    function uid(string id) public view returns(uint256)
+    function itemID(string id, string key) public pure returns(string)
     {
-        return uint256(keccak256(universe, '|', id));
+        return combine('item', '_', id, '_', key);
     }
     
-    /*
-    
-    ADVANCED ERC20 FUNCTIONS
-    
-    -- STANDARD FUNCTIONS PROVIDED FOR CREDITS
-    -- ADDED "RESOURCE" VARIABLE FOR TOKENS OTHER THAN "CREDIT" - SUCH AS "WOOD", "STONE", ETC ...
-    
-    */
-    
-    function totalSupply(string optionalResource) public constant returns (uint) 
+    function itemTypeCount() public view returns(uint)
     {
-        string memory id = 'credit_total';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'total', '', '');
-        }
-        return db.getUint(id);
-    }
-
-    function balanceOf(address tokenOwner, string optionalResource) public constant returns (uint balance) 
-    {
-        string memory id = 'credit_balance';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'balance', '', '');
-        }
-        return db.getsUint(tokenOwner, id);
+        return db.getUint('item_type_count');
     }
     
-    function transfer(address to, uint units, string optionalResource) public returns (bool success) 
+    function itemCount(string key) public view returns(uint)
     {
-        string memory id = 'credit_balance';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'balance', '', '');
-        }
-        require(db.getsUint(tx.origin, id) >= units);
-        db.setsUint(tx.origin, id, db.getsUint(tx.origin, id).sub(units));
-        db.setsUint(to, id, db.getsUint(to, id).add(units));
-        emit Transfer(msg.sender, to, units);
-        return true;
+        return db.getUint(itemID(key, 'item_count'));
     }
     
-    function approve(address spender, uint units, string optionalResource) public returns (bool success) 
+    function itemsCount() public view returns(uint)
     {
-        string memory id = 'credit_allowed';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'allowed', '_', toString(spender));
-        }
-        db.setsUint(tx.origin, id, units);
-        emit Approval(tx.origin, spender, units);
-        return true;
+        return db.getUint('item_count');
     }
     
-    function transferFrom(address from, address to, uint units, string optionalResource) public returns (bool success) 
-    {
-        string memory id = 'credit_allowed';
-        string memory key = 'credit_balance';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'allowed', '_', toString(msg.sender));
-            key = combine(optionalResource, '_', 'balance', '', '');
-        }
-        require(db.getsUint(from, id) >= units);
-        db.setsUint(msg.sender, id, db.getsUint(msg.sender, id).sub(units));
-        db.setsUint(from, key, db.getsUint(from, key).sub(units));
-        db.setsUint(to, key, db.getsUint(to, key).add(units));
-        emit Transfer(from, to, units);
-        return true;
-    }
-    
-    function allowance
+    function addItemStructure
     (
-        address tokenOwner, 
-        address spender, 
-        string optionalResource
+        string key, 
+        string description, 
+        uint[] requiredAtomicIndexes,
+        uint[] requiredAtomicAmounts
     ) 
-    public constant returns (uint remaining) 
+    public onlyOwner
     {
-        string memory id = 'credit_allowed';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
+        db.setString(itemID(key, 'key'), stringToBytes32(key));
+        db.setString(itemID(key, 'description'), stringToBytes32(description));
+        db.setUint(itemID(key, 'indexes'), requiredAtomicIndexes.length);
+        db.setUint(itemID(key, 'amounts'), requiredAtomicAmounts.length);
+        for(uint index = 0; index < requiredAtomicIndexes.length; index++)
         {
-            id = combine(optionalResource, '_', 'allowed', '_', toString(spender));
+            db.setUint(itemID(key, combine('index', '_', uintToString(index.add(1)), '', '')), requiredAtomicIndexes[index]);
+            db.setUint(itemID(key, combine('amount', '_', uintToString(index.add(1)), '', '')), requiredAtomicAmounts[index]);
         }
-        return db.getsUint(tokenOwner, id);
+        db.setUint('item_type_count', db.getUint('item_type_count').add(1));
     }
     
-    function approveAndCall
+    function items(string key) public view returns
     (
-        address spender, 
-        uint units, 
-        bytes data, 
-        string optionalResource
-    ) 
-    public returns (bool success) 
-    {
-        string memory id = 'credit_allowed';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
+        string description,
+        uint atomicCost,
+        uint universalSupply,
+        uint[] indexes,
+        uint[] amounts
+    ){
+        uint cost;
+        uint[] memory index = new uint[](db.getUint(itemID(key, 'indexes')));
+        uint[] memory amount = new uint[](db.getUint(itemID(key, 'amounts')));
+        for(uint i = 0; i < index.length; i++)
         {
-            id = combine(optionalResource, '_', 'allowed', '_', toString(spender));
+            index[i] = db.getUint(itemID(key, combine('index', '_', uintToString(i.add(1)), '', '')));
+            amount[i] = db.getUint(itemID(key, combine('amount', '_', uintToString(i.add(1)), '', '')));
+            cost = cost.add(atoms.atomPrice(uintToString(index[i].mul(amount[i]))));
         }
-        db.setsUint(msg.sender, id, units);
-        emit Approval(msg.sender, spender, units);
-        ApproveAndCallFallBack(spender).receiveApproval(msg.sender, units, this, data);
-        return true;
-    }
-    
-    function mint(address beneficary, uint amount, string optionalResource) public onlyOwner
-    {
-        string memory id = 'credit_balance';
-        string memory key = 'credit_total';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'balance', '', '');
-            key = combine(optionalResource, '_', 'total', '', '');
-        }
-        db.setsUint(beneficary, id, db.getsUint(beneficary, id).add(amount));
-        db.setUint(key, db.getUint(key).add(amount));
-    }
-    
-    function make(address beneficary, uint amount, string optionalResource) public
-    {
-        require
-        (
-            activeAtomsAddress == msg.sender
-            || activeItemsAddress == msg.sender
-            || activeAtomsAddress == tx.origin
-            || activeItemsAddress == tx.origin
+        return(
+            bytes32ToString(db.getString(itemID(key, 'description'))),
+            cost,
+            db.getUint(itemID(key, 'item_count')),
+            index,
+            amount
         );
-        string memory id = 'credit_balance';
-        string memory key = 'credit_total';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'balance', '', '');
-            key = combine(optionalResource, '_', 'total', '', '');
-        }
-        db.setsUint(beneficary, id, db.getsUint(beneficary, id).add(amount));
-        db.setUint(key, db.getUint(key).add(amount));
     }
     
-    function destroy(address target, uint amount, string optionalResource) public
+    function craftItem(string key) public 
     {
-        require
-        (
-            activeAtomsAddress == msg.sender
-            || activeItemsAddress == msg.sender
-        );
-        string memory id = 'credit_balance';
-        string memory key = 'credit_total';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
+        require(db.getString(itemID(key, 'key')) == stringToBytes32(key));
+        uint[] memory indexes = new uint[](db.getUint(itemID(key, 'indexes')));
+        uint[] memory amounts = new uint[](db.getUint(itemID(key, 'amounts')));
+        for(uint i = 0; i < indexes.length; i++)
         {
-            id = combine(optionalResource, '_', 'balance', '', '');
-            key = combine(optionalResource, '_', 'total', '', '');
+            indexes[i] = db.getUint(itemID(key, combine('index', '_', uintToString(i.add(1)), '', '')));
+            amounts[i] = db.getUint(itemID(key, combine('amount', '_', uintToString(i.add(1)), '', '')));
         }
-        db.setsUint(target, id, db.getsUint(target, id).sub(amount));
-        db.setUint(key, db.getUint(key).sub(amount));
-    }
-
-    function () public payable 
-    {
-        revert();
+        for(uint index = 0; index < indexes.length; index++)
+        {
+            require(tokens.balanceOf(tx.origin, bytes32ToString(atoms.atom(uintToString(indexes[index])))) >= amounts[index]);
+            atoms.atomicConversion(
+                bytes32ToString(atoms.atomSymbol(uintToString(indexes[index]))), 
+                bytes32ToString(atoms.atomSymbol(uintToString(indexes[index]))), 
+                amounts[index]
+            );
+        }
+        tokens.make(tx.origin, 1, combine('item', '_', key, '', ''));
+        db.setUint('item_count', db.getUint('item_count').add(1));
+        db.setUint(itemID(key, 'item_count'), db.getUint(itemID(key, 'item_count')).add(1));
     }
 }

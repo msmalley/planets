@@ -3,8 +3,8 @@ pragma solidity ^0.4.18;
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 // Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
 
-// v0.0.2 = Tokens ERC721 Only = 0x7426d669b3956C21bA755deD5d3862E4261DFA4e = 0.82
-// v0.0.2 = Tokens ERC721 Only = XXX = 1.2
+// v0.0.2 = Tokens ERC721 Only = 0x9a9C533b76cd5a61882cc11CFf227A68D1bcF752 = 0.99
+// - Missing "approve", "takeOwnership", and all Events ...
 
 /*
 
@@ -194,17 +194,9 @@ contract ERC721 is Upgradable
     function tokenOfOwnerByIndex(address beneficiary, uint index, string optionalResource) public view returns (uint);
     function ownerOf(uint tokenId, string optionalResource) public view returns (address);
     function transfer(address to, uint tokenId, string optionalResource) public;
-    function takeOwnership(uint tokenId, string optionalResource) public;
     function updateTokenMetadata(uint tokenId, string meta, string optionalResource) public returns(bool);
-    function approve(address beneficiary, uint tokenId, string optionalResource) public;
     function metadata(uint256 tokenId, string optionalResource) public view returns (string);
     function metabytes(uint256 tokenId, string optionalResource) public view returns (bytes32);
-    event TokenCreated(uint tokenId, address beneficiary, string meta);
-    event TokenDestroyed(uint tokenId, address beneficiary);
-    event TokenTransferred(uint tokenId, address from, address to);
-    event TokenTransferAllowed(uint tokenId, address beneficiary);
-    event TokenTransferDisallowed(uint tokenId, address beneficiary);
-    event TokenMetadataUpdated(uint tokenId, address beneficiary, string data);
 }
 
 contract UniversalAssets is ERC721
@@ -216,7 +208,8 @@ contract UniversalAssets is ERC721
     string public name = 'Universal Assets';
     string public symbol = 'UA';
     
-    address public activeMetaAddress;
+    address public activePlanetAddress;
+    address public activeChildAddress;
     
     function UniversalAssets
     (
@@ -232,9 +225,14 @@ contract UniversalAssets is ERC721
         db = Proxy(proxyAddress);
     }
     
-    function activateMeta(address contractMetaAddress) public onlyOwner
+    function updatePlanetContract(address planetContractAddress) public onlyOwner
     {
-        activeMetaAddress = contractMetaAddress;
+        activePlanetAddress = planetContractAddress;
+    }
+    
+    function updateChildContract(address childContractAddress) public onlyOwner
+    {
+        activeChildAddress = childContractAddress;
     }
     
     /*
@@ -247,6 +245,7 @@ contract UniversalAssets is ERC721
     */
     function token_id(string key, string optionalResource) public pure returns(string)
     {
+        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
         if(stringToBytes32(optionalResource) != stringToBytes32(''))
         {
             return combine(optionalResource, '_', key, '', '');
@@ -259,16 +258,19 @@ contract UniversalAssets is ERC721
     
     function totalSupply(string optionalResource) public view returns (uint) 
     {
+        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
         return db.getUint(token_id('total', optionalResource));
     }
     
     function balanceOf(address beneficiary, string optionalResource) public view returns (uint) 
     {
+        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
         return db.getsUint(beneficiary, token_id('balance', optionalResource));
     }
     
     function tokenOfOwnerByIndex(address beneficiary, uint index, string optionalResource) public view returns (uint) 
     {
+        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
         require(index >= 0);
         require(index < balanceOf(beneficiary, optionalResource));
         return db.getsUint(beneficiary, combine('owned', '_', uintToString(index), '_', optionalResource));
@@ -276,6 +278,7 @@ contract UniversalAssets is ERC721
     
     function getAllTokens(address beneficiary, string optionalResource) public view returns (uint[]) 
     {
+        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
         uint size = db.getsUint(beneficiary, token_id('balance', optionalResource));
         uint[] memory result = new uint[](size);
         for (uint index = 0; index < size; index++) 
@@ -287,75 +290,55 @@ contract UniversalAssets is ERC721
     
     function ownerOf(uint id, string optionalResource) public view returns (address) 
     {
+        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
         return db.GetAddress(id, token_id('owner', optionalResource));
     }
     
     function transfer(address to, uint id, string optionalResource) public
     {
+        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
         require(
             db.GetAddress(id, token_id('owner', optionalResource)) == msg.sender
-            || db.GetAddress(id, token_id('allowed', optionalResource)) == msg.sender
             || db.GetAddress(id, token_id('owner', optionalResource)) == tx.origin
-            || db.GetAddress(id, token_id('allowed', optionalResource)) == tx.origin
         );
         _transfer(db.GetAddress(id, token_id('owner', optionalResource)), to, id, optionalResource);
     }
     
-    function takeOwnership(uint id, string optionalResource) public 
-    {
-        if(db.GetAddress(id, token_id('allowed', optionalResource)) == msg.sender)
-        {
-            _transfer(db.GetAddress(id, token_id('owner', optionalResource)), msg.sender, id, optionalResource);
-        }
-        else if(db.GetAddress(id, token_id('allowed', optionalResource)) == tx.origin)
-        {
-            _transfer(db.GetAddress(id, token_id('owner', optionalResource)), tx.origin, id, optionalResource);
-        }
-        
-    }
-    
-    function approve(address beneficiary, uint id, string optionalResource) public 
-    {
-        require(
-            db.GetAddress(id, token_id('owner', optionalResource)) == msg.sender
-            || db.GetAddress(id, token_id('owner', optionalResource)) == tx.origin
-        );
-        if(db.GetAddress(id, token_id('allowed', optionalResource)) != 0)
-        {
-            db.SetAddress(id, token_id('allowed', optionalResource), 0);
-            emit TokenTransferDisallowed(id, db.GetAddress(id, token_id('allowed', optionalResource)));
-        }
-        db.SetAddress(id, token_id('allowed', optionalResource), beneficiary);
-        emit TokenTransferAllowed(id, beneficiary);
-    }
-    
     function metadata(uint256 id, string optionalResource) public view returns(string) 
     {
+        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
         return bytes32ToString(db.GetString(id, token_id('meta', optionalResource)));
     }  
     
     function metabytes(uint256 id, string optionalResource) public view returns(bytes32) 
     {
+        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
         return db.GetString(id, token_id('meta', optionalResource));
     }
     
     function updateTokenMetadata(uint id, string meta, string optionalResource) public returns(bool)
     {
+        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
         require(
             db.GetAddress(id, token_id('owner', optionalResource)) == msg.sender
             || db.GetAddress(id, token_id('owner', optionalResource)) == tx.origin
         );
         db.SetString(id, token_id('meta', optionalResource), stringToBytes32(meta));
-        emit TokenMetadataUpdated(id, db.GetAddress(id, token_id('owner', optionalResource)), meta);
         return true;
     }
     
-    function mint(address beneficiary, uint256 id, string meta, string optionalResource) external
+    function mint(address beneficiary, uint256 id, string meta, string optionalResource) public
     {
         require(
-            activeMetaAddress == msg.sender
-            || activeMetaAddress == tx.origin
+            activePlanetAddress == msg.sender
+            || activePlanetAddress == tx.origin
+            || activeChildAddress == msg.sender
+            || activeChildAddress == tx.origin
         );
+        if(stringToBytes32(optionalResource) == stringToBytes32(''))
+        {
+            optionalResource = 'planet';
+        }
         require(db.GetString(id, token_id('meta', optionalResource)) == stringToBytes32(''));
         db.SetString(id, token_id('meta', optionalResource), stringToBytes32(meta));
         db.SetUint(id, token_id('bob', optionalResource), block.number);
@@ -365,15 +348,16 @@ contract UniversalAssets is ERC721
 
     function _transfer(address from, address to, uint id, string optionalResource) internal returns(bool)
     {
+        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
         db.SetAddress(id, token_id('allowed', optionalResource), 0);
         _removeTokenFrom(from, id, optionalResource);
         _addTokenTo(to, id, optionalResource);
-        emit TokenTransferred(id, from, to);
         return true;
     }
 
     function _removeTokenFrom(address from, uint id, string optionalResource) internal 
     {
+        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
         require(db.getsUint(from, token_id('balance', optionalResource)) > 0);
         uint length = db.getsUint(from, token_id('balance', optionalResource));
         uint index = db.GetUint(id, token_id('index', optionalResource));
@@ -385,6 +369,7 @@ contract UniversalAssets is ERC721
 
     function _addTokenTo(address beneficiary, uint id, string optionalResource) internal 
     {
+        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
         uint length = db.getsUint(beneficiary, token_id('balance', optionalResource));
         db.setsUint(beneficiary, combine('owned', '_', uintToString(length), '_', optionalResource), id);
         db.SetAddress(id, token_id('owner', optionalResource), beneficiary);

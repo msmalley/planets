@@ -4,7 +4,10 @@ pragma solidity ^0.4.18;
 // Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
 // Private Test = 0x0c87C4132C11B273Db805876CA2d2f0BD60f4C24
 
-// v0.0.2 = Advanced ERC20 Tokens = 0x6A7Ada36f1AA9468D6048dE1808CEf6b0B1db445 = 0.90
+// v0.0.2 = 0x1C3377688Fd8dc11910be88e20FEE71EfdBE9Ef6 = 0.93
+
+// Periodic element list = https://www.science.co.il/elements/
+// Prices = https://en.wikipedia.org/wiki/Prices_of_elements_and_their_compounds
 
 /*
 
@@ -224,241 +227,181 @@ contract Proxy is Upgradable
 
 contract ERC20 is Upgradable
 {
-    function totalSupply(string optionalResource) public constant returns (uint);
-    function balanceOf(address tokenOwner, string optionalResource) public constant returns (uint balance);
-    function allowance(address tokenOwner, address spender, string optionalResource) public constant returns (uint remaining);
-    function transfer(address to, uint units, string optionalResource) public returns (bool success);
-    function approve(address spender, uint units, string optionalResource) public returns (bool success);
-    function transferFrom(address from, address to, uint units, string optionalResource) public returns (bool success);
+    function balanceOf(address beneficary, string optionalResource) public view returns(uint);
     function destroy(address target, uint amount, string optionalResource) public;
     function make(address beneficary, uint amount, string optionalResource) public;
-    function mint(address beneficary, uint amount, string optionalResource) public;
-    event Transfer(address indexed from, address indexed to, uint units);
-    event Approval(address indexed tokenOwner, address indexed spender, uint units);
 }
 
 contract PlanetTokens is Upgradable
 {
-    function universeBytes() public view returns(bytes32);
+    function donationAddress() public view returns(address);
 }
 
-contract ApproveAndCallFallBack 
-{
-    function receiveApproval(address from, uint256 tokens, address token, bytes data) public;
-}
-
-contract UniversalTokens is ERC20
+contract UniversalAtoms is Upgradable
 {
     Proxy db;
+    ERC20 tokens;
     PlanetTokens planets;
     
     using SafeMath for uint;
     
-    string public name = 'Universal Tokens';
-    string public symbol = 'UT';
-    string public universe;
+    function() public payable
+    {
+        address donation_address = planets.donationAddress();
+        donation_address.transfer(msg.value);
+    }
     
-    address public activeAtomsAddress;
-    address public activeItemsAddress;
-    
-    function UniversalTokens
+    function UniversalAtoms
     (
         address proxyAddress,
-        address planetContractAddress,
-        address atomsContractAddress,
-        address itemsContractAddress
+        address tokenContractAddress,
+        address planetContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
+        tokens = ERC20(tokenContractAddress);
         planets = PlanetTokens(planetContractAddress);
-        universe = bytes32ToString(planets.universeBytes());
-        activeAtomsAddress = atomsContractAddress;
-        activeItemsAddress = itemsContractAddress;
     }
     
     function updateProxy
     (
-        address proxyAddress,
-        address planetContractAddress,
-        address atomsContractAddress,
-        address itemsContractAddress
+        address proxyAddress, 
+        address tokenContractAddress,
+        address planetContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
+        tokens = ERC20(tokenContractAddress);
         planets = PlanetTokens(planetContractAddress);
-        universe = bytes32ToString(planets.universeBytes());
-        activeAtomsAddress = atomsContractAddress;
-        activeItemsAddress = itemsContractAddress;
     }
     
-    function uid(string id) public view returns(uint256)
+    function atomicID(string atomicSymbol, string key) public pure returns(string)
     {
-        return uint256(keccak256(universe, '|', id));
+        return combine('atomic', '_', atomicSymbol, '_', key);
     }
     
-    /*
-    
-    ADVANCED ERC20 FUNCTIONS
-    
-    -- STANDARD FUNCTIONS PROVIDED FOR CREDITS
-    -- ADDED "RESOURCE" VARIABLE FOR TOKENS OTHER THAN "CREDIT" - SUCH AS "WOOD", "STONE", ETC ...
-    
-    */
-    
-    function totalSupply(string optionalResource) public constant returns (uint) 
+    function atomicTypeCount() public view returns(uint)
     {
-        string memory id = 'credit_total';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'total', '', '');
-        }
-        return db.getUint(id);
-    }
-
-    function balanceOf(address tokenOwner, string optionalResource) public constant returns (uint balance) 
-    {
-        string memory id = 'credit_balance';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'balance', '', '');
-        }
-        return db.getsUint(tokenOwner, id);
+        return db.getUint('atom_type_count');
     }
     
-    function transfer(address to, uint units, string optionalResource) public returns (bool success) 
+    function atomicCount(string atomicSymbol) public view returns(uint)
     {
-        string memory id = 'credit_balance';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'balance', '', '');
-        }
-        require(db.getsUint(tx.origin, id) >= units);
-        db.setsUint(tx.origin, id, db.getsUint(tx.origin, id).sub(units));
-        db.setsUint(to, id, db.getsUint(to, id).add(units));
-        emit Transfer(msg.sender, to, units);
-        return true;
+        return db.getUint(atomicID(atomicSymbol, 'atom_count'));
     }
     
-    function approve(address spender, uint units, string optionalResource) public returns (bool success) 
+    function atomCount() public view returns(uint)
     {
-        string memory id = 'credit_allowed';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'allowed', '_', toString(spender));
-        }
-        db.setsUint(tx.origin, id, units);
-        emit Approval(tx.origin, spender, units);
-        return true;
+        return db.getUint('atom_count');
     }
     
-    function transferFrom(address from, address to, uint units, string optionalResource) public returns (bool success) 
+    function addAtomicStructure(string atomicSymbol, string atomicName, uint atomicIndex, uint atomicWeight, uint atomicPricePerKG) public onlyOwner
     {
-        string memory id = 'credit_allowed';
-        string memory key = 'credit_balance';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'allowed', '_', toString(msg.sender));
-            key = combine(optionalResource, '_', 'balance', '', '');
-        }
-        require(db.getsUint(from, id) >= units);
-        db.setsUint(msg.sender, id, db.getsUint(msg.sender, id).sub(units));
-        db.setsUint(from, key, db.getsUint(from, key).sub(units));
-        db.setsUint(to, key, db.getsUint(to, key).add(units));
-        emit Transfer(from, to, units);
-        return true;
+        db.setString(atomicID(atomicSymbol, 'name'), stringToBytes32(atomicName));
+        db.setString(atomicID(uintToString(atomicIndex), 'index'), stringToBytes32(atomicSymbol));
+        db.setUint(atomicID(atomicSymbol, 'weight'), atomicWeight);
+        db.setUint(atomicID(atomicSymbol, 'index'), atomicIndex);
+        db.setUint(atomicID(atomicSymbol, 'price'), atomicPricePerKG);
+        db.setString(atomicID(atomicSymbol, 'symbol'), stringToBytes32(atomicSymbol));
+        db.setUint('atom_type_count', db.getUint('atom_type_count').add(1));
     }
     
-    function allowance
-    (
-        address tokenOwner, 
-        address spender, 
-        string optionalResource
-    ) 
-    public constant returns (uint remaining) 
+    // Temporary function to retro-fit old data ...
+    function updateAtomicIndex(string atomicSymbol, uint atomicIndex) public
     {
-        string memory id = 'credit_allowed';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'allowed', '_', toString(spender));
-        }
-        return db.getsUint(tokenOwner, id);
+        db.setString(atomicID(uintToString(atomicIndex), 'index'), stringToBytes32(atomicSymbol));
+        db.setUint(atomicID(atomicSymbol, 'index'), atomicIndex);
     }
     
-    function approveAndCall
-    (
-        address spender, 
-        uint units, 
-        bytes data, 
-        string optionalResource
-    ) 
-    public returns (bool success) 
+    function updateAtomicPrice(string atomicSymbol, uint atomicPricePerKG) public
     {
-        string memory id = 'credit_allowed';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'allowed', '_', toString(spender));
-        }
-        db.setsUint(msg.sender, id, units);
-        emit Approval(msg.sender, spender, units);
-        ApproveAndCallFallBack(spender).receiveApproval(msg.sender, units, this, data);
-        return true;
+        db.setUint(atomicID(atomicSymbol, 'price'), atomicPricePerKG);
     }
     
-    function mint(address beneficary, uint amount, string optionalResource) public onlyOwner
+    function removeAtomicStructure(string atomicSymbol) public onlyOwner
     {
-        string memory id = 'credit_balance';
-        string memory key = 'credit_total';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'balance', '', '');
-            key = combine(optionalResource, '_', 'total', '', '');
-        }
-        db.setsUint(beneficary, id, db.getsUint(beneficary, id).add(amount));
-        db.setUint(key, db.getUint(key).add(amount));
-    }
-    
-    function make(address beneficary, uint amount, string optionalResource) public
-    {
-        require
-        (
-            activeAtomsAddress == msg.sender
-            || activeItemsAddress == msg.sender
-            || activeAtomsAddress == tx.origin
-            || activeItemsAddress == tx.origin
-        );
-        string memory id = 'credit_balance';
-        string memory key = 'credit_total';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'balance', '', '');
-            key = combine(optionalResource, '_', 'total', '', '');
-        }
-        db.setsUint(beneficary, id, db.getsUint(beneficary, id).add(amount));
-        db.setUint(key, db.getUint(key).add(amount));
-    }
-    
-    function destroy(address target, uint amount, string optionalResource) public
-    {
-        require
-        (
-            activeAtomsAddress == msg.sender
-            || activeItemsAddress == msg.sender
-        );
-        string memory id = 'credit_balance';
-        string memory key = 'credit_total';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'balance', '', '');
-            key = combine(optionalResource, '_', 'total', '', '');
-        }
-        db.setsUint(target, id, db.getsUint(target, id).sub(amount));
-        db.setUint(key, db.getUint(key).sub(amount));
+        db.setString(atomicID(atomicSymbol, 'name'), '');
+        db.setUint(atomicID(atomicSymbol, 'weight'), 0);
+        db.setUint(atomicID(atomicSymbol, 'price'), 0);
+        db.setString(atomicID(atomicSymbol, 'symbol'), '');
+        db.setUint('atom_type_count', db.getUint('atom_type_count').sub(1));
     }
 
-    function () public payable 
+    function atom(string atomicIndex) public view returns(bytes32)
     {
-        revert();
+        string memory symbol = bytes32ToString(db.getString(atomicID(atomicIndex, 'index')));
+        return(db.getString(atomicID(symbol, 'name')));
+    }
+    
+    function atomSymbol(string atomicIndex) public view returns(bytes32)
+    {
+        string memory symbol = bytes32ToString(db.getString(atomicID(atomicIndex, 'index')));
+        return(db.getString(atomicID(symbol, 'symbol')));
+    }
+    
+    function atomPrice(string atomicIndex) public view returns(uint)
+    {
+        string memory symbol = bytes32ToString(db.getString(atomicID(atomicIndex, 'index')));
+        return(db.getUint(atomicID(symbol, 'price')));
+    }
+        
+    function atoms(string atomicSymbol) public view returns
+    (
+        string atomicName,
+        uint atomicIndex,
+        uint atomicWeight,
+        uint pricePerKG,
+        uint universalSupply
+    ){
+        return(
+            bytes32ToString(db.getString(atomicID(atomicSymbol, 'name'))),
+            db.getUint(atomicID(atomicSymbol, 'index')),
+            db.getUint(atomicID(atomicSymbol, 'weight')),
+            db.getUint(atomicID(atomicSymbol, 'price')),
+            db.getUint(atomicID(atomicSymbol, 'atom_count'))
+        );
+    }
+    
+    function getAtomicRate(string from, string to, uint amount) public view returns(uint)
+    {
+        uint from_price = db.getUint(atomicID(from, 'price')).mul(amount);
+        uint to_price = db.getUint(atomicID(to, 'price'));
+        return from_price.div(to_price);
+    }
+    
+    function atomicCreation(string to, uint amount) internal
+    {
+        db.setUint(atomicID(to, 'atom_count'), db.getUint(atomicID(to, 'atom_count')).add(amount));
+        db.setUint('atom_count', db.getUint('atom_count').add(amount));
+        tokens.make(tx.origin, amount, bytes32ToString(db.getString(atomicID(to, 'name'))));
+    }
+    
+    function atomicDestruction(string from, uint amount) internal
+    {
+        db.setUint(atomicID(from, 'atom_count'), db.getUint(atomicID(from, 'atom_count')).sub(amount));
+        db.setUint('atom_count', db.getUint('atom_count').sub(amount));
+        tokens.destroy(tx.origin, amount, bytes32ToString(db.getString(atomicID(from, 'name'))));
+    }
+    
+    function atomicConversion(string from, string to, uint amount) public
+    {
+        uint balance_of_origin = tokens.balanceOf(tx.origin, bytes32ToString(db.getString(atomicID(from, 'name'))));
+        uint converted_amount = getAtomicRate(from, to, amount);
+        require(balance_of_origin >= amount);
+        require(converted_amount >= 1);
+        atomicDestruction(from, amount);
+        if(stringToBytes32(from) != stringToBytes32(to))
+        {
+            atomicCreation(to, converted_amount);
+        }
+    }
+    
+    function generateAtoms(string atomicSymbol, address beneficary, uint amount) public onlyOwner
+    {
+        tokens.make(beneficary, amount, bytes32ToString(db.getString(atomicID(atomicSymbol, 'name'))));
+        db.setUint(atomicID(atomicSymbol, 'atom_count'), db.getUint(atomicID(atomicSymbol, 'atom_count')).add(amount));
+        db.setUint('atom_count', db.getUint('atom_count').add(amount));
     }
 }

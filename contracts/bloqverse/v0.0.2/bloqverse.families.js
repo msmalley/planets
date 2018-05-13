@@ -1,10 +1,13 @@
 pragma solidity ^0.4.18;
 
-// Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
-// Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
-// Private Test = 0x0c87C4132C11B273Db805876CA2d2f0BD60f4C24
+// Private Floyd = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
+// Private FooFoo = 0x0c87C4132C11B273Db805876CA2d2f0BD60f4C24
+// Private John = 0x5DE0d9a57875B867043d82b2441af94AeeAE596B
 
-// v0.0.2 = 0x6BF88EC4957b1b1946e23b7A03Acb0b007ED5dbD = 0.79
+// Genesis Prime ID = 111289844878109423708526826116317304238808005787352761159317502897542254661420
+// Belly Bell Pogo = 61180885501244754967191768054861305480108144323349454664641026835878947931466
+
+// v0.0.2 = 0x09f4C4cFc8Fa998Cf025d5BA5FeB99E692Da322E = 0.46
 
 /*
 
@@ -222,23 +225,32 @@ contract Proxy is Upgradable
     function tokenUintCount(uint256 key) public view returns(uint);
 }
 
-contract ERC20 is Upgradable
+contract ERC721 is Upgradable
 {
-    function balanceOf(address beneficary, string optionalResource) public view returns(uint);
-    function destroy(address target, uint amount, string optionalResource) public;
-    function make(address beneficary, uint amount, string optionalResource) public;
+    function totalSupply(string optionalResource) public view returns (uint);
+    function balanceOf(address tokenOwner, string optionalResource) public view returns (uint);
+    function metabytes(uint256 tokenId, string optionalResource) public view returns (bytes32);
+    function mint(address beneficiary, uint256 id, string meta, string optionalResource) public;
 }
 
 contract PlanetTokens is Upgradable
 {
     function donationAddress() public view returns(address);
+    function universeBytes() public view returns(bytes32);
 }
 
-contract UniversalMarkets is Upgradable
+contract PlanetParents is Upgradable
+{
+    function getParentDNA(address parentAddress) public view returns(uint256 parentDNA);
+    function getParentBytes(address parentAddress) public view returns(bytes32);
+}
+
+contract UniversalFamilies is Upgradable
 {
     Proxy db;
-    ERC20 tokens;
+    ERC721 assets;
     PlanetTokens planets;
+    PlanetParents parents;
     
     using SafeMath for uint;
     
@@ -248,114 +260,101 @@ contract UniversalMarkets is Upgradable
         donation_address.transfer(msg.value);
     }
     
-    function UniversalMarkets
+    function UniversalFamilies
     (
         address proxyAddress,
-        address tokenContractAddress,
-        address planetContractAddress
+        address assetContractAddress,
+        address planetContractAddress,
+        address parentContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
-        tokens = ERC20(tokenContractAddress);
+        assets = ERC721(assetContractAddress);
         planets = PlanetTokens(planetContractAddress);
+        parents = PlanetParents(parentContractAddress);
     }
     
     function updateProxy
     (
         address proxyAddress, 
-        address tokenContractAddress,
-        address planetContractAddress
+        address assetContractAddress,
+        address planetContractAddress,
+        address parentContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
-        tokens = ERC20(tokenContractAddress);
+        assets = ERC721(assetContractAddress);
         planets = PlanetTokens(planetContractAddress);
+        parents = PlanetParents(parentContractAddress);
     }
     
-    function atomicID(string atomicSymbol, string key) public pure returns(string)
+    function childDNA(address mother, address father, uint256 planetID, string childName) public view returns(uint256)
     {
-        return combine('atomic', '_', atomicSymbol, '_', key);
+        uint256 parent1DNA = parents.getParentDNA(mother);
+        uint256 parent2DNA = parents.getParentDNA(father);
+        string memory universe = bytes32ToString(planets.universeBytes());
+        return uint256(keccak256(universe, '|', planetID, '|', parent1DNA, '|', parent2DNA, '|', childName));
     }
     
-    function atomicTypeCount() public view returns(uint)
+    function generateChild(address mother, address father, uint256 planetID, string childName) internal
     {
-        return db.getUint('atom_type_count');
+        uint256 dna = childDNA(mother, father, planetID, childName);
+        require(assets.metabytes(dna, 'children') == stringToBytes32(''));
+        require(assets.metabytes(planetID, 'planet') != stringToBytes32(''));
+        require(parents.getParentBytes(mother) != stringToBytes32(''));
+        require(parents.getParentBytes(father) != stringToBytes32(''));
+        assets.mint(mother, dna, childName, 'children');
+        db.SetUint(dna, 'children_bob', block.number);
+        db.SetUint(dna, 'children_pob', planetID);
+        db.SetAddress(dna, 'children_mother', mother);
+        db.SetAddress(dna, 'children_father', father);
+        db.setsUint(mother, 'children_births', db.getsUint(mother, 'children_births').add(1));
     }
     
-    function atomicCount(string atomicSymbol) public view returns(uint)
+    function forcedMarriage(address mother, address father, uint256 planetID, string childName) public onlyOwner
     {
-        return db.getUint(atomicID(atomicSymbol, 'atom_count'));
+        parents.getMarried(mother, father);
+        generateChild(mother, father, planetID, childName);
     }
     
-    function atomCount() public view returns(uint)
+    function childCount() public view returns(uint)
     {
-        return db.getUint('atom_count');
+        return assets.totalSupply('children');
     }
     
-    function addAtomicStructure(string atomicSymbol, string atomicName, uint atomicWeight, uint atomicPricePerKG) public onlyOwner
+    function childrenCount(address parent) public view returns(uint)
     {
-        db.setString(atomicID(atomicSymbol, 'name'), stringToBytes32(atomicName));
-        db.setUint(atomicID(atomicSymbol, 'weight'), atomicWeight);
-        db.setUint(atomicID(atomicSymbol, 'price'), atomicPricePerKG);
-        db.setString(atomicID(atomicSymbol, 'symbol'), stringToBytes32(atomicSymbol));
-        db.setUint('atom_type_count', db.getUint('atom_type_count').add(1));
+        return assets.balanceOf(parent, 'children');
     }
     
-    function updateAtomicPrice(string atomicSymbol, uint atomicPricePerKG) public
+    function birthCount(address parent) public view returns(uint)
     {
-        db.setUint(atomicID(atomicSymbol, 'price'), atomicPricePerKG);
+        return db.getsUint(parent, 'children_births');
     }
     
-    function removeAtomicStructure(string atomicSymbol) public onlyOwner
+    function getChildAge(uint256 dna) public view returns(uint)
     {
-        db.setString(atomicID(atomicSymbol, 'name'), '');
-        db.setUint(atomicID(atomicSymbol, 'weight'), 0);
-        db.setUint(atomicID(atomicSymbol, 'price'), 0);
-        db.setString(atomicID(atomicSymbol, 'symbol'), '');
-        db.setUint('atom_type_count', db.getUint('atom_type_count').sub(1));
+        return block.number.sub(db.GetUint(dna, 'children_bob'));
     }
     
-    function atoms(string atomicSymbol) public view returns
+    function child(uint256 dna) public view returns
     (
-        string atomicName,
-        uint atomicWeight,
-        uint pricePerKG,
-        uint universalSupply
-    ){
-        return(
-            bytes32ToString(db.getString(atomicID(atomicSymbol, 'name'))),
-            db.getUint(atomicID(atomicSymbol, 'weight')),
-            db.getUint(atomicID(atomicSymbol, 'price')),
-            db.getUint(atomicID(atomicSymbol, 'atom_count'))
+        string childName,
+        uint childAge,
+        string motherName,
+        string fatherName,
+        string planetOfBirth
+    )
+    {
+        return
+        (
+            bytes32ToString(assets.metabytes(dna, 'children')),
+            getChildAge(dna),
+            bytes32ToString(parents.getParentBytes(db.GetAddress(dna, 'children_mother'))),
+            bytes32ToString(parents.getParentBytes(db.GetAddress(dna, 'children_father'))),
+            bytes32ToString(assets.metabytes(db.GetUint(dna, 'children_pob'), 'planet'))
         );
-    }
-    
-    function getAtomicRate(string from, string to, uint amount) public view returns(uint)
-    {
-        uint from_price = db.getUint(atomicID(from, 'price')).mul(amount);
-        uint to_price = db.getUint(atomicID(to, 'price'));
-        return from_price.div(to_price);
-    }
-    
-    function atomicConversion(string from, string to, uint amount) public
-    {
-        uint converted_amount = getAtomicRate(from, to, amount);
-        uint balance_of_origin = tokens.balanceOf(tx.origin, bytes32ToString(db.getString(atomicID(from, 'name'))));
-        require(balance_of_origin >= amount);
-        db.setUint(atomicID(from, 'atom_count'), db.getUint(atomicID(from, 'atom_count')).sub(amount));
-        db.setUint('atom_count', db.getUint('atom_count').sub(amount));
-        tokens.destroy(tx.origin, amount, bytes32ToString(db.getString(atomicID(from, 'name'))));
-        db.setUint(atomicID(to, 'atom_count'), db.getUint(atomicID(to, 'atom_count')).add(converted_amount));
-        db.setUint('atom_count', db.getUint('atom_count').add(converted_amount));
-        tokens.make(tx.origin, converted_amount, bytes32ToString(db.getString(atomicID(to, 'name'))));
-    }
-    
-    function generateAtoms(string atomicSymbol, address beneficary, uint amount) public onlyOwner
-    {
-        tokens.make(beneficary, amount, bytes32ToString(db.getString(atomicID(atomicSymbol, 'name'))));
-        db.setUint(atomicID(atomicSymbol, 'atom_count'), db.getUint(atomicID(atomicSymbol, 'atom_count')).add(amount));
-        db.setUint('atom_count', db.getUint('atom_count').add(amount));
     }
 }

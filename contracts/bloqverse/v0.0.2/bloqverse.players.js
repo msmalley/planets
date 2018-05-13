@@ -1,11 +1,13 @@
 pragma solidity ^0.4.18;
 
-// Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
-// Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
-// Private Test = 0x0c87C4132C11B273Db805876CA2d2f0BD60f4C24
-// Private John Smith = 0x5DE0d9a57875B867043d82b2441af94AeeAE596B
+// Private Floyd = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
+// Private FooFoo = 0x0c87C4132C11B273Db805876CA2d2f0BD60f4C24
+// Private John = 0x5DE0d9a57875B867043d82b2441af94AeeAE596B
 
-// v0.0.2 = 0x952cC4c5d745bD03a32Beb22933738E23C7587a5 = 0.99
+// Genesis Prime ID = 111289844878109423708526826116317304238808005787352761159317502897542254661420
+// Belly Bell Pogo = 61180885501244754967191768054861305480108144323349454664641026835878947931466
+
+// v0.0.2 = 0x90A5fAce70C3C2F5B1C3d49135b63617dB023805 = 0.18
 
 /*
 
@@ -226,22 +228,32 @@ contract Proxy is Upgradable
 contract ERC721 is Upgradable
 {
     function ownerOf(uint tokenId, string optionalResource) public view returns (address);
+    function totalSupply(string optionalResource) public view returns (uint);
+    function balanceOf(address tokenOwner, string optionalResource) public view returns (uint);
     function metabytes(uint256 tokenId, string optionalResource) public view returns (bytes32);
+    function mint(address beneficiary, uint256 id, string meta, string optionalResource) public;
 }
 
 contract PlanetTokens is Upgradable
 {
-    function exists(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (bool);
-    function uid(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (uint256);
     function donationAddress() public view returns(address);
     function universeBytes() public view returns(bytes32);
 }
 
-contract PlanetPlayers is Upgradable
+contract PlanetParents is Upgradable
+{
+    function getAlly(address parentAddress) public view returns(address);
+    function alliances(address ally1, address ally2) public;
+    function getParentDNA(address parentAddress) public view returns(uint256 parentDNA);
+    function getParentBytes(address parentAddress) public view returns(bytes32);
+}
+
+contract UniversalPlayers is Upgradable
 {
     Proxy db;
     ERC721 assets;
     PlanetTokens planets;
+    PlanetParents parents;
     
     using SafeMath for uint;
     
@@ -251,231 +263,56 @@ contract PlanetPlayers is Upgradable
         donation_address.transfer(msg.value);
     }
     
-    function PlanetPlayers
+    function UniversalPlayers
     (
         address proxyAddress,
         address assetContractAddress,
         address planetContractAddress,
-        uint StartingWeiDonation, 
-        uint WeiPerPlayer,
-        uint BlockIntervals, 
-        uint PlanetSalaryPercentage
+        address parentContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
         assets = ERC721(assetContractAddress);
         planets = PlanetTokens(planetContractAddress);
-        db.setUint('player_block_int', BlockIntervals);
-        db.setUint('player_price', WeiPerPlayer);
-        db.setUint('player_min_don', StartingWeiDonation);
-        db.setUint('planet_salary', PlanetSalaryPercentage);
+        parents = PlanetParents(parentContractAddress);
     }
     
     function updateProxy
     (
         address proxyAddress, 
         address assetContractAddress,
-        address planetContractAddress
+        address planetContractAddress,
+        address parentContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
         assets = ERC721(assetContractAddress);
         planets = PlanetTokens(planetContractAddress);
+        parents = PlanetParents(parentContractAddress);
     }
     
-    function updateSalary(uint PlanetSalaryPercentage) public onlyOwner
+    function becomeAlly(address allyAddress) public
     {
-        db.setUint('planet_salary', PlanetSalaryPercentage);
+        parents.alliances(tx.origin, allyAddress);
     }
     
-    function destroyPlayer() public
+    function renounceAlliance() public
     {
-        require(db.getsString(tx.origin, 'player_name') != stringToBytes32(''));
-        uint256 id = db.getsUint(tx.origin, 'player_pob');
-        db.setsString(tx.origin, 'player_name', stringToBytes32(''));
-        db.setsUint(tx.origin, 'player_bob', 0);
-        db.setsUint(tx.origin, 'player_pob', 0);
-        db.setsUint(tx.origin, 'player_dna', 0);
-        db.setsUint(tx.origin, 'player_ally', 0);
-        db.setsUint(tx.origin, 'player_cost', 0);
-        db.setUint('players', db.getUint('players').sub(1));
-        db.SetUint(id, 'players', db.GetUint(id, 'players').sub(1));
+        address allyAddress = parents.getAlly(tx.origin);
+        parents.alliances(tx.origin, tx.origin);
+        parents.alliances(allyAddress, allyAddress);
     }
     
-    function generatePlayer
-    (
-        string playerName,
-        uint xCoordinateOfHomeWorld,
-        uint yCoordinateOfHomeWorld,
-        uint zCoordinateOfHomeWorld,
-        address returnAddress
-    ) 
-    public payable
+    function becomeRebel() public
     {
-        uint minimum_donation = db.getUint('player_min_don');
-        if(msg.value >= minimum_donation)
-        {
-            address donation_address = planets.donationAddress();
-            uint256 id = planets.uid
-            (
-                xCoordinateOfHomeWorld, 
-                yCoordinateOfHomeWorld,
-                zCoordinateOfHomeWorld
-            );
-            require(planets.exists
-            (
-                xCoordinateOfHomeWorld, 
-                yCoordinateOfHomeWorld,
-                zCoordinateOfHomeWorld
-            ));
-            require(db.getsString(tx.origin, 'player_name') == stringToBytes32(''));
-            db.setsString(tx.origin, 'player_name', stringToBytes32(playerName));
-            db.setsUint(tx.origin, 'player_bob', block.number);
-            db.setsUint(tx.origin, 'player_pob', id);
-            db.setsUint(tx.origin, 'player_cost', msg.value);
-            db.setsUint(tx.origin, 'player_dna', uint256(keccak256
-            (
-                xCoordinateOfHomeWorld, 
-                yCoordinateOfHomeWorld, 
-                zCoordinateOfHomeWorld, 
-                tx.origin, 
-                bytes32ToString(planets.universeBytes())
-            )));
-            db.setUint('players', db.getUint('players').add(1));
-            db.SetUint(id, 'players', db.GetUint(id, 'players').add(1));
-            bumpPlayerDonations();
-            address planet_address = assets.ownerOf(id, 'planet');
-            uint salary = msg.value.div(db.getUint('planet_salary'));
-            uint donation = msg.value.sub(salary);
-            planet_address.transfer(salary);
-            donation_address.transfer(donation);
-        }
-        else
-        {
-            bumpPlayerDonations();
-            returnAddress.transfer(msg.value);
-        }
+        db.setsBool(tx.origin, 'is_rebel', true);
     }
     
-    function bumpPlayerDonations() public
+    function renounceRebellion() public
     {
-        uint this_block = block.number;
-        uint checkpoint = db.getUint('player_don_check');
-        uint interval = db.getUint('player_block_int');
-        if(this_block > (checkpoint + interval))
-        {
-            uint ppp = db.getUint('player_price');
-            db.setUint('player_don_check', this_block);
-            db.setUint('player_min_don', (ppp * db.getUint('players')));
-        }
-    }
-    
-    function playerCount() public view returns(uint)
-    {
-        return db.getUint('players');
-    }
-    
-    function planetPlayerCount(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(uint)
-    {
-        uint256 id = planets.uid(xCoordinate, yCoordinate, zCoordinate);
-        return db.GetUint(id, 'players');
-    }
-    
-    function getPlayer
-    (
-        address playerAddress
-    ) 
-    public view returns
-    (
-        string playerName,
-        uint256 playerDNA,
-        uint playerAge,
-        string planetOfBirth,
-        bool playerIsRebel,
-        address ally
-    )
-    {
-        return
-        (
-            bytes32ToString(db.getsString(playerAddress, 'player_name')),
-            db.getsUint(playerAddress, 'player_dna'),
-            (block.number - db.getsUint(playerAddress, 'player_bob')),
-            bytes32ToString(assets.metabytes(db.getsUint(playerAddress, 'player_pob'), 'planet')),
-            isRebel(playerAddress),
-            db.getsAddress(playerAddress, 'player_ally')
-        );
-    }
-    
-    function getSalary() public view returns(uint)
-    {
-        return db.getUint('planet_salary');
-    }
-    
-    function getAlly
-    (
-        address playerAddress
-    ) 
-    public view returns
-    (
-        string allyName,
-        uint256 allyDNA,
-        uint allyAge,
-        string allyPlanetOfBirth,
-        bool allyIsRebel
-    )
-    {
-        address allyAddress = db.getsAddress(playerAddress, 'player_ally');
-        return
-        (
-            bytes32ToString(db.getsString(allyAddress, 'player_name')),
-            db.getsUint(allyAddress, 'player_dna'),
-            (block.number - db.getsUint(allyAddress, 'player_bob')),
-            bytes32ToString(assets.metabytes(db.getsUint(allyAddress, 'player_pob'), 'planet')),
-            isRebel(allyAddress)
-        );
-    }
-    
-    function playerLocation(address playerAddress) public view returns
-    (
-        string planet
-    )
-    {
-        if(assets.metabytes(db.getsUint(playerAddress, 'player_planet'), 'planet') == stringToBytes32(''))
-        {
-            return bytes32ToString(assets.metabytes(db.getsUint(playerAddress, 'player_pob'), 'planet'));
-        }
-        else
-        {
-            return bytes32ToString(assets.metabytes(db.getsUint(playerAddress, 'player_planet'), 'planet'));
-        }
-    }
-    
-    function switchPlanets(uint xCoordinate, uint yCoordinate, uint zCoordinate) public
-    {
-        require(planets.exists(xCoordinate, yCoordinate, zCoordinate));
-        uint256 id = planets.uid(xCoordinate, yCoordinate, zCoordinate);
-        db.setsUint(tx.origin, 'player_planet', id);
-    }
-    
-    function updatePlayerName(string playerName) public
-    {
-        require(db.getsString(tx.origin, 'player_name') != stringToBytes32(''));
-        db.setsString(tx.origin, 'player_name', stringToBytes32(playerName));
-    }
-    
-    function updatePlayerAlly(address allyAddress) public
-    {
-        require(db.getsString(tx.origin, 'player_name') != stringToBytes32(''));
-        require(db.getsString(allyAddress, 'player_name') != stringToBytes32(''));
-        db.setsAddress(tx.origin, 'player_ally', allyAddress);
-        db.setsAddress(allyAddress, 'player_ally', tx.origin);
-    }
-    
-    function getPlayerCost(address playerAddress) public view returns(uint)
-    {
-        return db.getsUint(playerAddress, 'player_cost');
+        db.setsBool(tx.origin, 'is_rebel', false);
     }
     
     function isRebel(address playerAddress) public view returns(bool)
@@ -483,62 +320,9 @@ contract PlanetPlayers is Upgradable
         return db.getsBool(playerAddress, 'is_rebel');
     }
     
-    function amRebel(bool value) public
+    function isRebelPlanet(uint planetID) public view returns(bool)
     {
-        if(value)
-        {
-            db.setsBool(tx.origin, 'is_rebel', value);
-        }
-    }
-    
-    function rebelPlanet(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns(bool)
-    {
-        uint256 id = planets.uid(xCoordinate, yCoordinate, zCoordinate);
-        address planetAddress = assets.ownerOf(id, 'planet');
-        return db.getsBool(planetAddress, 'is_rebel');
-    }
-    
-    function planetStatus(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns
-    (
-        string planetName,
-        uint256 tokenID,
-        bool ruledByRebels,
-        uint playersBorn
-    )
-    {
-        uint256 id = planets.uid(xCoordinate, yCoordinate, zCoordinate);
-        return
-        (
-            bytes32ToString(assets.metabytes(id, 'planet')),
-            id,
-            rebelPlanet(xCoordinate, yCoordinate, zCoordinate),
-            db.GetUint(id, 'players')
-        );
-    }
-    
-    function minimumPlayerDonation() public view returns(uint)
-    {
-        return db.getUint('player_min_don');
-    }
-    
-    function playerBlockIntervals() public view returns(uint)
-    {
-        return db.getUint('player_block_int');
-    }
-    
-    function blocksToGoUntilPlayerPriceIncrease() public view returns(uint)
-    {
-        uint this_block = block.number;
-        uint checkpoint = db.getUint('player_don_check');
-        uint interval = db.getUint('player_block_int');
-        uint next_block = checkpoint + interval;
-        if(this_block < next_block)
-        {
-            return next_block - this_block;
-        }
-        else
-        {
-            return 0;
-        }
+        address playerAddress = assets.ownerOf(planetID, 'planet');
+        return db.getsBool(playerAddress, 'is_rebel');
     }
 }
