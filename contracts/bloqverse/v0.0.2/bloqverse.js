@@ -3,6 +3,8 @@ pragma solidity ^0.4.18;
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 // v0.0.2 = 0x2e7B6E0614CE391bAC87A81A3CF7Aa19055D77A6 = 0.41
 
+// v0.0.2 = 0x67E2409450eC2e08378A20Eea3Fe7E942106aE96
+
 /*
 
 BloqVerse: Intergalactic Construct Framework
@@ -11,16 +13,35 @@ URI: http://bce.asia
 
 Instructions:
 
+Bloqverse ...
 Step 1 -    Initiate Bloqverse()
-Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
-Step 3 -    Initiate PlanetTokens() -- linking to Proxy Contract Address
-Step 4 -    Initiate PlanetMeta() - linking to Proxy AND PlanetTokens Contract Addresses
 
-Step 5 -    Enable external minting:
-            Call ActivateMeta() within PlanetTokens() contract linking to PlanetMeta contract address
-            
-Step 6 -    Only way to issue tokens / planets ...
-            Call the Genesis() function in PlanetMeta contract
+Proxy ...
+Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
+
+Assets ...
+Step 3 -    Initiate ERC721() -- linking to Proxy Contract Address
+Step 4 -    Add ERC721 to Proxy Whitelist
+Step 5 -    Run updateDefaultSymbol('PT') from ERC721 Contract
+Step 6 -    Run updateSupplyName('PT', 'Planet Tokens') from ERC721 Contract
+
+Planets ...
+Step 7 -    Initiate Planets() -- linking to Proxy & ERC721 Contract Addresses
+Step 8 -    Add Planets to Proxy Whitelist
+Step 9 -    Add Planets to ERC721 Write List
+Step 10 -   Generate Planets using Genesis()
+
+Tokens ...
+Step 11 -   Initiate ERC20() -- linking to Proxy Contract
+Step 12 -   Add ERC20 to Proxy Whitelist
+Step 13 -   Run updateDefaultSymbol('CT') from ERC20 Contract
+Step 14 -   Run updateSupplyName('CT', 'Credit Tokens') from ERC20 Contract
+
+Players ...
+Step 15 -   Initiate Parents() - linking to Proxy, ERC721, ERC20 & Planets
+Step 16 -   Add Parents to Proxy Whitelist
+Step 17 -   Add Parents to ERC721 Write List
+Step 18 -   Add Parents to ERC20 Write List
 
 */
 

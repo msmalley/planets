@@ -1,15 +1,13 @@
 pragma solidity ^0.4.18;
 
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
-// Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
-// Private Test = 0x0c87C4132C11B273Db805876CA2d2f0BD60f4C24
-// Private John Smith = 0x5DE0d9a57875B867043d82b2441af94AeeAE596B
+// John Smith = 0xA0d2736e921249278dA7E872694Ae25a38FB050f
 
 // Interval = 15120
 // Wei = 10000000000000
 // Ether = 0.00001
 
-// v0.0.2 = 0xd5fE8023aDd606603a60C27739891b5ACd646638 = 0.83
+// bloq002 = 0x085C438D6BDC3af81B7BdcFDC5C228dc0160E353
 
 /*
 
@@ -19,16 +17,44 @@ URI: http://bce.asia
 
 Instructions:
 
+Bloqverse ...
 Step 1 -    Initiate Bloqverse()
-Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
-Step 3 -    Initiate PlanetTokens() -- linking to Proxy Contract Address
-Step 4 -    Initiate PlanetMeta() - linking to Proxy AND PlanetTokens Contract Addresses
 
-Step 5 -    Enable external minting:
-            Call ActivateMeta() within PlanetTokens() contract linking to PlanetMeta contract address
-            
-Step 6 -    Only way to issue tokens / planets ...
-            Call the Genesis() function in PlanetMeta contract
+Proxy ...
+Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
+
+Assets ...
+Step 3 -    Initiate ERC721() -- linking to Proxy Contract Address
+Step 4 -    Add ERC721 to Proxy Whitelist
+Step 5 -    Run updateDefaultSymbol('PT') from ERC721 Contract
+Step 6 -    Run updateSupplyName('PT', 'Planet Tokens') from ERC721 Contract
+
+Planets ...
+Step 7 -    Initiate Planets() -- linking to Proxy & ERC721 Contract Addresses
+Step 8 -    Add Planets to Proxy Whitelist
+Step 9 -    Add Planets to ERC721 Write List
+Step 10 -   Generate Planets using Genesis()
+
+Tokens ...
+Step 11 -   Initiate ERC20() -- linking to Proxy Contract
+Step 12 -   Add ERC20 to Proxy Whitelist
+Step 13 -   Run updateDefaultSymbol('CT') from ERC20 Contract
+Step 14 -   Run updateSupplyName('CT', 'Credit Tokens') from ERC20 Contract
+
+Parents ...
+Step 15 -   Initiate Parents() - linking to Proxy, ERC721, ERC20 & Planets
+Step 16 -   Add Parents to Proxy Whitelist
+Step 17 -   Add Parents to ERC721 Write List
+Step 18 -   Add Parents to ERC20 Write List
+Step 19 -   Run SetupParents()
+Step 20 -   Can then GenerateParents() -- register players
+
+Choices ...
+Step 21 -   Initiate Choices() - linking to Parents contract address
+Step 22 -   Add Choices Address to Proxy Whitelist
+Step 23 -   Add Choices Address to Parents Write List
+Step 24 -   Can now form alliances and choose to become rebel ...
+
 
 */
 
@@ -230,10 +256,17 @@ contract Proxy is Upgradable
 contract ERC721 is Upgradable
 {
     function ownerOf(uint tokenId, string optionalResource) public view returns (address);
+    function balanceOf(address beneficiary, string optionalResource) public view returns (uint);
     function metabytes(uint256 tokenId, string optionalResource) public view returns (bytes32);
 }
 
-contract PlanetTokens is Upgradable
+contract ERC20 is Upgradable
+{
+    function balanceOf(address tokenOwner, string optionalResource) public constant returns (uint balance);
+    function makeTokens(address Address, uint amount, string optionalResource) public;
+}
+
+contract Planets is Upgradable
 {
     function exists(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (bool);
     function uid(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (uint256);
@@ -241,16 +274,16 @@ contract PlanetTokens is Upgradable
     function universeBytes() public view returns(bytes32);
 }
 
-contract PlanetParents is Upgradable
+contract Parents is Upgradable
 {
     Proxy db;
     ERC721 assets;
-    PlanetTokens planets;
+    ERC20 tokens;
+    Planets planets;
     
     using SafeMath for uint;
     
-    address public activeFamilyAddress;
-    address public activePlayerAddress;
+    mapping(address => bool) canWriteToParents;
     
     function() public payable
     {
@@ -258,51 +291,85 @@ contract PlanetParents is Upgradable
         donation_address.transfer(msg.value);
     }
     
-    function PlanetParents
+    function Parents
     (
         address proxyAddress,
         address assetContractAddress,
         address planetContractAddress,
-        address familyContractAddress,
-        address playerContractAddress,
-        uint StartingWeiDonation, 
-        uint WeiPerParent,
-        uint BlockIntervals, 
-        uint PlanetSalaryPercentage
+        address tokenContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
         assets = ERC721(assetContractAddress);
-        planets = PlanetTokens(planetContractAddress);
-        activeFamilyAddress = familyContractAddress;
-        activePlayerAddress = playerContractAddress;
+        tokens = ERC20(tokenContractAddress);
+        planets = Planets(planetContractAddress);
+    }
+    
+    function setupParents
+    (
+        uint StartingWeiDonation, 
+        uint WeiPerParent,
+        uint BlockIntervals, 
+        uint PlanetSalaryPercentage,
+        uint PlayerStartingCredits
+    ) 
+    public onlyOwner
+    {
+        require(db.getUint('parent_block_int') < 1);
         db.setUint('parent_block_int', BlockIntervals);
         db.setUint('parent_price', WeiPerParent);
         db.setUint('parent_min_don', StartingWeiDonation);
         db.setUint('parent_salary', PlanetSalaryPercentage);
+        db.setUint('parent_start', PlayerStartingCredits);
     }
     
     function updateProxy
     (
-        address proxyAddress, 
-        address assetContractAddress,
-        address planetContractAddress,
-        address familyContractAddress,
-        address playerContractAddress
+        address proxyAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
-        assets = ERC721(assetContractAddress);
-        planets = PlanetTokens(planetContractAddress);
-        activeFamilyAddress = familyContractAddress;
-        activePlayerAddress = playerContractAddress;
     }
     
-    function updateSalary(uint PlanetSalaryPercentage) public onlyOwner
+    function updateAssets
+    (
+        address assetAddress
+    ) 
+    public onlyOwner
     {
-        db.setUint('planet_salary', PlanetSalaryPercentage);
+        assets = ERC721(assetAddress);
+    }
+    
+    function updateTokens
+    (
+        address tokenAddress
+    ) 
+    public onlyOwner
+    {
+        tokens = ERC20(tokenAddress);
+    }
+
+    function updatePlanets
+    (
+        address planetAddress
+    ) 
+    public onlyOwner
+    {
+        planets = Planets(planetAddress);
+    }
+    
+    function addWriteAddress(address Address) public onlyOwner
+    {
+        require(canWriteToParents[Address] == false);
+        canWriteToParents[Address] = true;
+    }
+    
+    function removeWriteAddress(address Address) public onlyOwner
+    {
+        require(canWriteToParents[Address] == true);
+        canWriteToParents[Address] = false;
     }
     
     function destroyParent() public
@@ -324,11 +391,11 @@ contract PlanetParents is Upgradable
         string parentName,
         uint xCoordinateOfHomeWorld,
         uint yCoordinateOfHomeWorld,
-        uint zCoordinateOfHomeWorld,
-        address returnAddress
+        uint zCoordinateOfHomeWorld
     ) 
     public payable
     {
+        uint starting_credits = db.getUint('parent_start');
         uint minimum_donation = db.getUint('parent_min_don');
         if(msg.value >= minimum_donation)
         {
@@ -344,7 +411,7 @@ contract PlanetParents is Upgradable
                 xCoordinateOfHomeWorld, 
                 yCoordinateOfHomeWorld,
                 zCoordinateOfHomeWorld
-            ));
+            ) == true);
             require(db.getsString(tx.origin, 'parent_name') == stringToBytes32(''));
             db.setsString(tx.origin, 'parent_name', stringToBytes32(parentName));
             db.setsUint(tx.origin, 'parent_bob', block.number);
@@ -360,7 +427,8 @@ contract PlanetParents is Upgradable
             db.setUint('parents', db.getUint('parents').add(1));
             db.SetUint(id, 'parents', db.GetUint(id, 'parents').add(1));
             bumpParentDonations();
-            address planet_address = assets.ownerOf(id, 'planet');
+            address planet_address = assets.ownerOf(id, 'PT');
+            tokens.makeTokens(tx.origin, starting_credits, 'CT');
             uint salary = msg.value.div(db.getUint('planet_salary'));
             uint donation = msg.value.sub(salary);
             planet_address.transfer(salary);
@@ -368,8 +436,7 @@ contract PlanetParents is Upgradable
         }
         else
         {
-            bumpParentDonations();
-            returnAddress.transfer(msg.value);
+            revert();
         }
     }
     
@@ -378,11 +445,11 @@ contract PlanetParents is Upgradable
         uint this_block = block.number;
         uint checkpoint = db.getUint('parent_don_check');
         uint interval = db.getUint('parent_block_int');
-        if(this_block > (checkpoint + interval))
+        if(this_block > (checkpoint.add(interval)))
         {
             uint ppp = db.getUint('parent_price');
             db.setUint('parent_don_check', this_block);
-            db.setUint('parent_min_don', (ppp * db.getUint('parents')));
+            db.setUint('parent_min_don', (db.getUint('parents').mul(ppp)));
         }
     }
     
@@ -397,11 +464,6 @@ contract PlanetParents is Upgradable
         return db.GetUint(id, 'parents');
     }
     
-    function getParentDNA(address parentAddress) public view returns(uint256 parentDNA)
-    {
-        return(db.getsUint(parentAddress, 'parent_dna'));
-    }
-    
     function getParent
     (
         address parentAddress
@@ -409,8 +471,29 @@ contract PlanetParents is Upgradable
     public view returns
     (
         string parentName,
+        uint creditBalance,
+        uint planetsOwned,
         uint256 parentDNA,
-        uint parentAge,
+        uint parentAge
+    )
+    {
+        return
+        (
+            getParentName(parentAddress),
+            tokens.balanceOf(parentAddress, 'CT'),
+            assets.balanceOf(parentAddress, 'PT'),
+            getParentDNA(parentAddress),
+            getParentAge(parentAddress)
+        );
+    }
+    
+    function getRelationships
+    (
+        address parentAddress
+    ) 
+    public view returns
+    (
+        string parentName,
         string planetOfBirth,
         address ally,
         address spouse
@@ -418,13 +501,21 @@ contract PlanetParents is Upgradable
     {
         return
         (
-            bytes32ToString(db.getsString(parentAddress, 'parent_name')),
-            db.getsUint(parentAddress, 'parent_dna'),
-            (block.number - db.getsUint(parentAddress, 'parent_bob')),
-            bytes32ToString(assets.metabytes(db.getsUint(parentAddress, 'parent_pob'), 'planet')),
-            db.getsAddress(parentAddress, 'parent_ally'),
-            db.getsAddress(parentAddress, 'parent_spouse')
+            getParentName(parentAddress),
+            getPlanetOfBirth(parentAddress),
+            getAlly(parentAddress),
+            getParentSpouse(parentAddress)
         );
+    }
+    
+    function getPlanetOfBirth(address Address) public view returns(string)
+    {
+        return bytes32ToString(getPlanetOfBytes(Address));
+    }
+    
+    function getPlanetOfBytes(address Address) public view returns(bytes32)
+    {
+        return assets.metabytes(db.getsUint(Address, 'parent_pob'), 'PT');
     }
     
     function getSalary() public view returns(uint)
@@ -435,6 +526,21 @@ contract PlanetParents is Upgradable
     function getParentBytes(address parentAddress) public view returns(bytes32)
     {
         return db.getsString(parentAddress, 'parent_name');
+    }
+    
+    function getParentDNA(address parentAddress) public view returns(uint256)
+    {
+        return db.getsUint(parentAddress, 'parent_dna');
+    }
+    
+    function getParentAge(address parentAddress) public view returns(uint)
+    {
+        return (block.number - db.getsUint(parentAddress, 'parent_bob'));
+    }
+    
+    function getParentName(address parentAddress) public view returns(string)
+    {
+        return bytes32ToString(getParentBytes(parentAddress));
     }
     
     function updateParentName(string parentName) public
@@ -452,30 +558,26 @@ contract PlanetParents is Upgradable
     {
         require
         (
-            activeFamilyAddress == msg.sender
-            || activeFamilyAddress == tx.origin
+            canWriteToParents[msg.sender] == true
+            || canWriteToParents[tx.origin] == true
         );
-        db.setsAddress(parent1, 'parent_spouse', parent2);
-        db.setsAddress(parent2, 'parent_spouse', parent1);
-    }
-    
-    function updateMarriageStatus(address parent1, address parent2) public onlyOwner
-    {
+        require(getParentBytes(parent1) != stringToBytes32(''));
+        require(getParentBytes(parent2) != stringToBytes32(''));
         db.setsAddress(parent1, 'parent_spouse', parent2);
         db.setsAddress(parent2, 'parent_spouse', parent1);
     }
     
     function getAlly(address parentAddress) public view returns(address)
     {
-        return db.setsAddress(parentAddress, 'parent_ally');
+        return db.getsAddress(parentAddress, 'parent_ally');
     }
     
     function alliances(address ally1, address ally2) public
     {
         require
         (
-            activePlayerAddress == msg.sender
-            || activePlayerAddress == tx.origin
+            canWriteToParents[msg.sender] == true
+            || canWriteToParents[tx.origin] == true
         );
         if(ally1 == ally2)
         {

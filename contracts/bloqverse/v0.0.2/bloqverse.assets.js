@@ -1,10 +1,11 @@
 pragma solidity ^0.4.18;
 
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
-// Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
+// John Smith = 0xA0d2736e921249278dA7E872694Ae25a38FB050f
 
-// v0.0.2 = Tokens ERC721 Only = 0x9a9C533b76cd5a61882cc11CFf227A68D1bcF752 = 0.99
-// - Missing "approve", "takeOwnership", and all Events ...
+// v0.0.2 = 0x37Da9D8acc8c7D63ba9a0FB41D0a89b247c31385
+
+// bloq002 = 0x8AD72C1FE21472df02f767Bf7445703b87EDA656
 
 /*
 
@@ -12,18 +13,48 @@ BloqVerse: Intergalactic Construct Framework
 Developer: The Blockchain Embassy
 URI: http://bce.asia
 
+- Missing "approve", "takeOwnership", and all Events ...
+-- Can view whitelist and blacklist ?
+
 Instructions:
 
+Bloqverse ...
 Step 1 -    Initiate Bloqverse()
-Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
-Step 3 -    Initiate PlanetTokens() -- linking to Proxy Contract Address
-Step 4 -    Initiate PlanetMeta() - linking to Proxy AND PlanetTokens Contract Addresses
 
-Step 5 -    Enable external minting:
-            Call ActivateMeta() within PlanetTokens() contract linking to PlanetMeta contract address
-            
-Step 6 -    Only way to issue tokens / planets ...
-            Call the Genesis() function in PlanetMeta contract
+Proxy ...
+Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
+
+Assets ...
+Step 3 -    Initiate ERC721() -- linking to Proxy Contract Address
+Step 4 -    Add ERC721 to Proxy Whitelist
+Step 5 -    Run updateDefaultSymbol('PT') from ERC721 Contract
+Step 6 -    Run updateSupplyName('PT', 'Planet Tokens') from ERC721 Contract
+
+Planets ...
+Step 7 -    Initiate Planets() -- linking to Proxy & ERC721 Contract Addresses
+Step 8 -    Add Planets to Proxy Whitelist
+Step 9 -    Add Planets to ERC721 Write List
+Step 10 -   Generate Planets using Genesis()
+
+Tokens ...
+Step 11 -   Initiate ERC20() -- linking to Proxy Contract
+Step 12 -   Add ERC20 to Proxy Whitelist
+Step 13 -   Run updateDefaultSymbol('CT') from ERC20 Contract
+Step 14 -   Run updateSupplyName('CT', 'Credit Tokens') from ERC20 Contract
+
+Players ...
+Step 15 -   Initiate Parents() - linking to Proxy, ERC721, ERC20 & Planets
+Step 16 -   Add Parents to Proxy Whitelist
+Step 17 -   Add Parents to ERC721 Write List
+Step 18 -   Add Parents to ERC20 Write List
+Step 19 -   Run SetupParents()
+Step 20 -   Can then GenerateParents() -- register players
+
+Choices ...
+Step 21 -   Initiate Choices() - linking to Parents contract address
+Step 22 -   Add Choices Address to Proxy Whitelist
+Step 23 -   Add Choices Address to Parents Write List
+Step 24 -   Can now form alliances and choose to become rebel ...
 
 */
 
@@ -176,11 +207,13 @@ contract Upgradable is AbleToUtilizeStrings
 contract Proxy is Upgradable
 {
     function setUint(string key, uint256 value) public;
+    function setString(string key, bytes32 value) public;
     function setsUint(address addressKey, string param, uint256 value) public;
     function SetAddress(uint256 key, string param, address value) public;
     function SetString(uint256 key, string param, bytes32 value) public;
     function SetUint(uint256 key, string param, uint256 value) public;
     function getUint(string key) public view returns(uint256);
+    function getString(string key) public view returns(bytes32);
     function getsUint(address addressKey, string param) public view returns(uint256);
     function GetAddress(uint256 key, string param) public view returns(address);
     function GetString(uint256 key, string param) public view returns(bytes32);
@@ -189,29 +222,13 @@ contract Proxy is Upgradable
 
 contract ERC721 is Upgradable
 {
-    function totalSupply(string optionalResource) public view returns (uint);
-    function balanceOf(address tokenOwner, string optionalResource) public view returns (uint);
-    function tokenOfOwnerByIndex(address beneficiary, uint index, string optionalResource) public view returns (uint);
-    function ownerOf(uint tokenId, string optionalResource) public view returns (address);
-    function transfer(address to, uint tokenId, string optionalResource) public;
-    function updateTokenMetadata(uint tokenId, string meta, string optionalResource) public returns(bool);
-    function metadata(uint256 tokenId, string optionalResource) public view returns (string);
-    function metabytes(uint256 tokenId, string optionalResource) public view returns (bytes32);
-}
-
-contract UniversalAssets is ERC721
-{
     Proxy db;
     
     using SafeMath for uint;
     
-    string public name = 'Universal Assets';
-    string public symbol = 'UA';
+    mapping(address => bool) canWriteToERC721;
     
-    address public activePlanetAddress;
-    address public activeChildAddress;
-    
-    function UniversalAssets
+    function ERC721
     (
         address proxyAddress
     ) 
@@ -225,60 +242,98 @@ contract UniversalAssets is ERC721
         db = Proxy(proxyAddress);
     }
     
-    function updatePlanetContract(address planetContractAddress) public onlyOwner
+    function updateSupplyName(string symbol, string name) public onlyOwner
     {
-        activePlanetAddress = planetContractAddress;
+        db.setString(combine('ERC721', '_', symbol, '_', 'NAME'), stringToBytes32(name));
     }
     
-    function updateChildContract(address childContractAddress) public onlyOwner
+    function updateDefaultSymbol(string defaultSymbol) public onlyOwner
     {
-        activeChildAddress = childContractAddress;
+        db.setString('ERC721_symbol', stringToBytes32(defaultSymbol));
+    }
+    
+    function addWriteAddress(address Address) public onlyOwner
+    {
+        require(canWriteToERC721[Address] == false);
+        canWriteToERC721[Address] = true;
+    }
+    
+    function removeWriteAddress(address Address) public onlyOwner
+    {
+        require(canWriteToERC721[Address] == true);
+        canWriteToERC721[Address] = false;
+    }
+    
+    function name(string optionalResource) public view returns(string)
+    {
+        if(stringToBytes32(optionalResource) == stringToBytes32(''))
+        {
+            optionalResource = bytes32ToString(db.getString('ERC721_symbol'));
+        }
+        return bytes32ToString(db.getString(combine('ERC721', '_', optionalResource, '_', 'NAME')));
+    }
+    
+    function symbol(string optionalResource) public view returns(string)
+    {
+        if(stringToBytes32(optionalResource) == stringToBytes32(''))
+        {
+            return bytes32ToString(db.getString('ERC721_symbol'));
+        }
+        else
+        {
+            return optionalResource;
+        }
+    }
+    
+    function token_id(string key, string optionalResource) public view returns(string)
+    {
+        if(stringToBytes32(optionalResource) == stringToBytes32(''))
+        {
+            optionalResource = bytes32ToString(db.getString('ERC721_symbol'));
+        }
+        return combine(optionalResource, '_', key, '', '');
+    }
+    
+    function metabytes(uint256 id, string optionalResource) public view returns(bytes32) 
+    {
+        return db.GetString(id, token_id('meta', optionalResource));
     }
     
     /*
     
-    ADVANCED ERC721 FUNCTIONS
+    MULTI-DIMENSIONAL ERC721 FUNCTIONS
     
-    -- STANDARD FUNCTIONS PROVIDED FOR PLANETS
-    -- ADDED "RESOURCE" VARIABLE FOR ASSETS OTHER THAN "PLANET" - SUCH AS "SPACESHIP", "BUILDING", ETC ...
+    -- ADDED OPTIONALRESOURCE KEY SWITCHES SUPPLIES
     
     */
-    function token_id(string key, string optionalResource) public pure returns(string)
-    {
-        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            return combine(optionalResource, '_', key, '', '');
-        }
-        else
-        {
-            return combine('planet', '_', key, '', '');
-        }
-    }
     
     function totalSupply(string optionalResource) public view returns (uint) 
     {
-        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
         return db.getUint(token_id('total', optionalResource));
     }
     
     function balanceOf(address beneficiary, string optionalResource) public view returns (uint) 
     {
-        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
         return db.getsUint(beneficiary, token_id('balance', optionalResource));
     }
     
     function tokenOfOwnerByIndex(address beneficiary, uint index, string optionalResource) public view returns (uint) 
     {
-        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
         require(index >= 0);
         require(index < balanceOf(beneficiary, optionalResource));
+        if(stringToBytes32(optionalResource) == stringToBytes32(''))
+        {
+            optionalResource = bytes32ToString(db.getString('ERC721_symbol'));
+        }
         return db.getsUint(beneficiary, combine('owned', '_', uintToString(index), '_', optionalResource));
     }
     
     function getAllTokens(address beneficiary, string optionalResource) public view returns (uint[]) 
     {
-        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
+        if(stringToBytes32(optionalResource) == stringToBytes32(''))
+        {
+            optionalResource = bytes32ToString(db.getString('ERC721_symbol'));
+        }
         uint size = db.getsUint(beneficiary, token_id('balance', optionalResource));
         uint[] memory result = new uint[](size);
         for (uint index = 0; index < size; index++) 
@@ -290,13 +345,11 @@ contract UniversalAssets is ERC721
     
     function ownerOf(uint id, string optionalResource) public view returns (address) 
     {
-        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
         return db.GetAddress(id, token_id('owner', optionalResource));
     }
     
     function transfer(address to, uint id, string optionalResource) public
     {
-        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
         require(
             db.GetAddress(id, token_id('owner', optionalResource)) == msg.sender
             || db.GetAddress(id, token_id('owner', optionalResource)) == tx.origin
@@ -306,19 +359,11 @@ contract UniversalAssets is ERC721
     
     function metadata(uint256 id, string optionalResource) public view returns(string) 
     {
-        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
-        return bytes32ToString(db.GetString(id, token_id('meta', optionalResource)));
+        return bytes32ToString(metabytes(id, optionalResource));
     }  
-    
-    function metabytes(uint256 id, string optionalResource) public view returns(bytes32) 
-    {
-        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
-        return db.GetString(id, token_id('meta', optionalResource));
-    }
     
     function updateTokenMetadata(uint id, string meta, string optionalResource) public returns(bool)
     {
-        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
         require(
             db.GetAddress(id, token_id('owner', optionalResource)) == msg.sender
             || db.GetAddress(id, token_id('owner', optionalResource)) == tx.origin
@@ -330,26 +375,29 @@ contract UniversalAssets is ERC721
     function mint(address beneficiary, uint256 id, string meta, string optionalResource) public
     {
         require(
-            activePlanetAddress == msg.sender
-            || activePlanetAddress == tx.origin
-            || activeChildAddress == msg.sender
-            || activeChildAddress == tx.origin
+            canWriteToERC721[msg.sender] == true
+            || canWriteToERC721[tx.origin] == true
         );
-        if(stringToBytes32(optionalResource) == stringToBytes32(''))
-        {
-            optionalResource = 'planet';
-        }
-        require(db.GetString(id, token_id('meta', optionalResource)) == stringToBytes32(''));
-        db.SetString(id, token_id('meta', optionalResource), stringToBytes32(meta));
-        db.SetUint(id, token_id('bob', optionalResource), block.number);
+        make(id, beneficiary, meta, optionalResource);
+    }
+    
+    /*
+    
+    INTERNALS
+    
+    */
+    
+    function make(uint256 assetId, address Address, string key, string optionalResource) internal
+    {
+        require(db.GetString(assetId, token_id('meta', optionalResource)) == stringToBytes32(''));
+        db.SetString(assetId, token_id('meta', optionalResource), stringToBytes32(key));
+        db.SetUint(assetId, token_id('bob', optionalResource), block.number);
         db.setUint(token_id('total', optionalResource), db.getUint(token_id('total', optionalResource)).add(1));
-        _addTokenTo(beneficiary, id, optionalResource);
+        _addTokenTo(Address, assetId, optionalResource);
     }
 
     function _transfer(address from, address to, uint id, string optionalResource) internal returns(bool)
     {
-        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
-        db.SetAddress(id, token_id('allowed', optionalResource), 0);
         _removeTokenFrom(from, id, optionalResource);
         _addTokenTo(to, id, optionalResource);
         return true;
@@ -357,19 +405,25 @@ contract UniversalAssets is ERC721
 
     function _removeTokenFrom(address from, uint id, string optionalResource) internal 
     {
-        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
+        if(stringToBytes32(optionalResource) == stringToBytes32(''))
+        {
+            optionalResource = bytes32ToString(db.getString('ERC721_symbol'));
+        }
         require(db.getsUint(from, token_id('balance', optionalResource)) > 0);
         uint length = db.getsUint(from, token_id('balance', optionalResource));
         uint index = db.GetUint(id, token_id('index', optionalResource));
         uint swapToken = db.getsUint(from, combine('owned', '_', uintToString(length.sub(1)), '_', optionalResource));
-        db.setsUint(from, combine('owned', '_', uintToString(length.sub(1)), '_', optionalResource), 0);
+        db.setsUint(from, combine('owned', '_', uintToString(index), '_', optionalResource), swapToken);
         db.SetUint(swapToken, token_id('index', optionalResource), index);
-        db.setsUint(from, token_id('balance', optionalResource), db.getsUint(from, token_id('balance', optionalResource)).sub(1));
+        db.setsUint(from, token_id('balance', optionalResource), length.sub(1));
     }
 
     function _addTokenTo(address beneficiary, uint id, string optionalResource) internal 
     {
-        if(stringToBytes32(optionalResource) == stringToBytes32('')) optionalResource = 'planet';
+        if(stringToBytes32(optionalResource) == stringToBytes32(''))
+        {
+            optionalResource = bytes32ToString(db.getString('ERC721_symbol'));
+        }
         uint length = db.getsUint(beneficiary, token_id('balance', optionalResource));
         db.setsUint(beneficiary, combine('owned', '_', uintToString(length), '_', optionalResource), id);
         db.SetAddress(id, token_id('owner', optionalResource), beneficiary);

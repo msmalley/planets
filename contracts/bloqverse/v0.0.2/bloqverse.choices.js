@@ -1,13 +1,9 @@
 pragma solidity ^0.4.18;
 
 // Private Floyd = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
-// Private FooFoo = 0x0c87C4132C11B273Db805876CA2d2f0BD60f4C24
-// Private John = 0x5DE0d9a57875B867043d82b2441af94AeeAE596B
+// Private FooFoo = 0xA0d2736e921249278dA7E872694Ae25a38FB050f
 
-// Genesis Prime ID = 111289844878109423708526826116317304238808005787352761159317502897542254661420
-// Belly Bell Pogo = 61180885501244754967191768054861305480108144323349454664641026835878947931466
-
-// v0.0.2 = 0x90A5fAce70C3C2F5B1C3d49135b63617dB023805 = 0.18
+// bloq002 = 0x34310BDBc8bbD9e383ef21d962A8aD41C7ec2dA0
 
 /*
 
@@ -17,16 +13,43 @@ URI: http://bce.asia
 
 Instructions:
 
+Bloqverse ...
 Step 1 -    Initiate Bloqverse()
-Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
-Step 3 -    Initiate PlanetTokens() -- linking to Proxy Contract Address
-Step 4 -    Initiate PlanetMeta() - linking to Proxy AND PlanetTokens Contract Addresses
 
-Step 5 -    Enable external minting:
-            Call ActivateMeta() within PlanetTokens() contract linking to PlanetMeta contract address
-            
-Step 6 -    Only way to issue tokens / planets ...
-            Call the Genesis() function in PlanetMeta contract
+Proxy ...
+Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
+
+Assets ...
+Step 3 -    Initiate ERC721() -- linking to Proxy Contract Address
+Step 4 -    Add ERC721 to Proxy Whitelist
+Step 5 -    Run updateDefaultSymbol('PT') from ERC721 Contract
+Step 6 -    Run updateSupplyName('PT', 'Planet Tokens') from ERC721 Contract
+
+Planets ...
+Step 7 -    Initiate Planets() -- linking to Proxy & ERC721 Contract Addresses
+Step 8 -    Add Planets to Proxy Whitelist
+Step 9 -    Add Planets to ERC721 Write List
+Step 10 -   Generate Planets using Genesis()
+
+Tokens ...
+Step 11 -   Initiate ERC20() -- linking to Proxy Contract
+Step 12 -   Add ERC20 to Proxy Whitelist
+Step 13 -   Run updateDefaultSymbol('CT') from ERC20 Contract
+Step 14 -   Run updateSupplyName('CT', 'Credit Tokens') from ERC20 Contract
+
+Parents ...
+Step 15 -   Initiate Parents() - linking to Proxy, ERC721, ERC20 & Planets
+Step 16 -   Add Parents to Proxy Whitelist
+Step 17 -   Add Parents to ERC721 Write List
+Step 18 -   Add Parents to ERC20 Write List
+Step 19 -   Run SetupParents()
+Step 20 -   Can then GenerateParents() -- register players
+
+Choices ...
+Step 21 -   Initiate Choices() - linking to Parents contract address
+Step 22 -   Add Choices Address to Proxy Whitelist
+Step 23 -   Add Choices Address to Parents Write List
+Step 24 -   Can now form alliances and choose to become rebel ...
 
 */
 
@@ -225,81 +248,106 @@ contract Proxy is Upgradable
     function tokenUintCount(uint256 key) public view returns(uint);
 }
 
-contract ERC721 is Upgradable
-{
-    function ownerOf(uint tokenId, string optionalResource) public view returns (address);
-    function totalSupply(string optionalResource) public view returns (uint);
-    function balanceOf(address tokenOwner, string optionalResource) public view returns (uint);
-    function metabytes(uint256 tokenId, string optionalResource) public view returns (bytes32);
-    function mint(address beneficiary, uint256 id, string meta, string optionalResource) public;
-}
-
-contract PlanetTokens is Upgradable
-{
-    function donationAddress() public view returns(address);
-    function universeBytes() public view returns(bytes32);
-}
-
-contract PlanetParents is Upgradable
+contract Parents is Upgradable
 {
     function getAlly(address parentAddress) public view returns(address);
     function alliances(address ally1, address ally2) public;
-    function getParentDNA(address parentAddress) public view returns(uint256 parentDNA);
     function getParentBytes(address parentAddress) public view returns(bytes32);
+    function getPlanetOfBytes(address Address) public view returns(bytes32);
 }
 
-contract UniversalPlayers is Upgradable
+contract Planets is Upgradable
+{
+    function uid(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (uint256);
+    function exists(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (bool);
+}
+
+contract ERC721 is Upgradable
+{
+    function ownerOf(uint id, string optionalResource) public view returns (address);
+    function metabytes(uint256 id, string optionalResource) public view returns(bytes32);
+}
+
+contract Choices is Upgradable
 {
     Proxy db;
+    Parents parents;
+    Planets planets;
     ERC721 assets;
-    PlanetTokens planets;
-    PlanetParents parents;
     
     using SafeMath for uint;
     
     function() public payable
     {
-        address donation_address = planets.donationAddress();
-        donation_address.transfer(msg.value);
+        revert();
     }
     
-    function UniversalPlayers
+    function Choices
     (
         address proxyAddress,
-        address assetContractAddress,
+        address parentContractAddress,
         address planetContractAddress,
-        address parentContractAddress
+        address assetContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
+        parents = Parents(parentContractAddress);
+        planets = Planets(planetContractAddress);
         assets = ERC721(assetContractAddress);
-        planets = PlanetTokens(planetContractAddress);
-        parents = PlanetParents(parentContractAddress);
     }
     
     function updateProxy
     (
-        address proxyAddress, 
-        address assetContractAddress,
-        address planetContractAddress,
-        address parentContractAddress
+        address proxyAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
+    }
+    
+    function updateParents
+    (
+        address parentContractAddress
+    ) 
+    public onlyOwner
+    {
+        parents = Parents(parentContractAddress);
+    }
+    
+    function updatePlanets
+    (
+        address planetContractAddress
+    ) 
+    public onlyOwner
+    {
+        planets = Planets(planetContractAddress);
+    }
+    
+    function updateAssets
+    (
+        address assetContractAddress
+    ) 
+    public onlyOwner
+    {
         assets = ERC721(assetContractAddress);
-        planets = PlanetTokens(planetContractAddress);
-        parents = PlanetParents(parentContractAddress);
+    }
+    
+    function isActivePlayer(address Address) public view returns(bool)
+    {
+        require(stringToBytes32(getPlayerName(Address)) != stringToBytes32(''));
+        return true;
     }
     
     function becomeAlly(address allyAddress) public
     {
+        require(isActivePlayer(tx.origin) == true);
         parents.alliances(tx.origin, allyAddress);
     }
     
     function renounceAlliance() public
     {
+        require(isActivePlayer(tx.origin) == true);
         address allyAddress = parents.getAlly(tx.origin);
         parents.alliances(tx.origin, tx.origin);
         parents.alliances(allyAddress, allyAddress);
@@ -307,11 +355,15 @@ contract UniversalPlayers is Upgradable
     
     function becomeRebel() public
     {
+        require(isActivePlayer(tx.origin) == true);
+        require(db.getsBool(tx.origin, 'is_rebel') == false);
         db.setsBool(tx.origin, 'is_rebel', true);
     }
     
     function renounceRebellion() public
     {
+        require(isActivePlayer(tx.origin) == true);
+        require(db.getsBool(tx.origin, 'is_rebel') == true);
         db.setsBool(tx.origin, 'is_rebel', false);
     }
     
@@ -320,9 +372,89 @@ contract UniversalPlayers is Upgradable
         return db.getsBool(playerAddress, 'is_rebel');
     }
     
-    function isRebelPlanet(uint planetID) public view returns(bool)
+    function currentPlanet(address playerAddress) public view returns(string)
     {
-        address playerAddress = assets.ownerOf(planetID, 'planet');
-        return db.getsBool(playerAddress, 'is_rebel');
+        return bytes32ToString(currentPlanetBytes(playerAddress));
+    }
+    
+    function currentPlanetBytes(address playerAddress) public view returns(bytes32)
+    {
+        uint256 location = db.getsUint(playerAddress, 'location');
+        if(location > 0)
+        {
+            return assets.metabytes(location, 'PT');
+        }
+        else
+        {
+            return parents.getPlanetOfBytes(playerAddress);
+        }
+    }
+    
+    function switchPlanet(uint xCoordinates, uint yCoordinates, uint zCoordinates) public 
+    {
+        require(isActivePlayer(tx.origin) == true);
+        uint256 planet = planets.uid(xCoordinates, yCoordinates, zCoordinates);
+        require(planets.exists(xCoordinates, yCoordinates, zCoordinates) == true);
+        db.setsUint(tx.origin, 'location', planet);
+    }
+    
+    function isRebelPlanet(uint xCoordinates, uint yCoordinates, uint zCoordinates) public view returns(bool) 
+    {
+        uint256 planet = planets.uid(xCoordinates, yCoordinates, zCoordinates);
+        require(planets.exists(xCoordinates, yCoordinates, zCoordinates) == true);
+        address planetOwner = assets.ownerOf(planet, 'PT');
+        return isRebel(planetOwner);
+    }
+    
+    function hasAlly(address playerAddress) public view returns(bool)
+    {
+        require(parents.getAlly(playerAddress) > 0);
+        return true;
+    }
+    
+    function playerChoices(address Address) public view returns
+    (
+        string name,
+        string playerLocation,
+        bool rebel,
+        bool gotAlly,
+        string allyName,
+        bool allyIsRebel,
+        string allyLocation
+    )
+    {
+        return
+        (
+            getPlayerName(Address),
+            currentPlanet(Address),
+            isRebel(Address),
+            hasAlly(Address),
+            getPlayerAllyName(Address),
+            isPlayerAllyRebel(Address),
+            currentAllyPlanet(Address)
+        );
+    }
+    
+    function currentAllyPlanet(address playerAddress) public view returns(string)
+    {
+        address allyAddress = parents.getAlly(playerAddress);
+        return currentPlanet(allyAddress);
+    }
+    
+    function getPlayerAllyName(address playerAddress) public view returns(string)
+    {
+        address allyAddress = parents.getAlly(playerAddress);
+        return getPlayerName(allyAddress);
+    }
+    
+    function isPlayerAllyRebel(address playerAddress) public view returns(bool)
+    {
+        address allyAddress = parents.getAlly(playerAddress);
+        return isRebel(allyAddress);
+    }
+    
+    function getPlayerName(address Address) public view returns(string)
+    {
+        return bytes32ToString(parents.getParentBytes(Address));
     }
 }

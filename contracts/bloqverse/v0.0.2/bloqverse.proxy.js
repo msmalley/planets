@@ -3,6 +3,10 @@ pragma solidity ^0.4.18;
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 // v0.0.2 = 0xE1aC449E5cB74AB8D97CF61Dd6b7d3b658C22de3 = 0.49 = v002
 
+// v0.0.2 = 0xa71BC2284194f7C9943B1412fFE11586A38C173c
+
+// bloq002 = Secure = 0x37f40557ae34913f7f69C7A3C821fcd1E41d47F4
+
 /*
 
 BloqVerse: Intergalactic Construct Framework
@@ -11,16 +15,43 @@ URI: http://bce.asia
 
 Instructions:
 
+Bloqverse ...
 Step 1 -    Initiate Bloqverse()
-Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
-Step 3 -    Initiate PlanetTokens() -- linking to Proxy Contract Address
-Step 4 -    Initiate PlanetMeta() - linking to Proxy AND PlanetTokens Contract Addresses
 
-Step 5 -    Enable external minting:
-            Call ActivateMeta() within PlanetTokens() contract linking to PlanetMeta contract address
-            
-Step 6 -    Only way to issue tokens / planets ...
-            Call the Genesis() function in PlanetMeta contract
+Proxy ...
+Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
+
+Assets ...
+Step 3 -    Initiate ERC721() -- linking to Proxy Contract Address
+Step 4 -    Add ERC721 to Proxy Whitelist
+Step 5 -    Run updateDefaultSymbol('PT') from ERC721 Contract
+Step 6 -    Run updateSupplyName('PT', 'Planet Tokens') from ERC721 Contract
+
+Planets ...
+Step 7 -    Initiate Planets() -- linking to Proxy & ERC721 Contract Addresses
+Step 8 -    Add Planets to Proxy Whitelist
+Step 9 -    Add Planets to ERC721 Write List
+Step 10 -   Generate Planets using Genesis()
+
+Tokens ...
+Step 11 -   Initiate ERC20() -- linking to Proxy Contract
+Step 12 -   Add ERC20 to Proxy Whitelist
+Step 13 -   Run updateDefaultSymbol('CT') from ERC20 Contract
+Step 14 -   Run updateSupplyName('CT', 'Credit Tokens') from ERC20 Contract
+
+Players ...
+Step 15 -   Initiate Parents() - linking to Proxy, ERC721, ERC20 & Planets
+Step 16 -   Add Parents to Proxy Whitelist
+Step 17 -   Add Parents to ERC721 Write List
+Step 18 -   Add Parents to ERC20 Write List
+Step 19 -   Run SetupParents()
+Step 20 -   Can then GenerateParents() -- register players
+
+Choices ...
+Step 21 -   Initiate Choices() - linking to Parents contract address
+Step 22 -   Add Choices Address to Proxy Whitelist
+Step 23 -   Add Choices Address to Parents Write List
+Step 24 -   Can now form alliances and choose to become rebel ...
 
 */
 
@@ -149,7 +180,11 @@ contract AbleToUtilizeStrings
 contract Upgradable is AbleToUtilizeStrings
 {
     address public owner;
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event OwnershipTransferred
+    (
+        address indexed previousOwner, 
+        address indexed newOwner
+    );
     
     function Upgradable() public 
     {
@@ -224,6 +259,12 @@ contract Proxy is Upgradable
     Bloqverse bloq;
     bytes32 dbVersion;
     
+    mapping(address => bool) whitelist;
+    mapping(address => bool) blacklist;
+    
+    uint public whitelistCount;
+    uint public blacklistCount;
+    
     using SafeMath for uint;
     
     function Proxy(address bloqverseAddress, string databaseVersion) public onlyOwner
@@ -232,24 +273,96 @@ contract Proxy is Upgradable
         bloq = Bloqverse(bloqverseAddress);
     }
     
+    function updateVersion(string databaseVersion) public onlyOwner
+    {
+        dbVersion = stringToBytes32(databaseVersion);
+    }
+    
+    function addToWhitelist(address Address) public onlyOwner
+    {
+        require(whitelist[Address] == false);
+        whitelist[Address] = true;
+        whitelistCount.add(1);
+    }
+    
+    function addToBlacklist(address Address) public onlyOwner
+    {
+        require(blacklist[Address] == false);
+        blacklist[Address] = true;
+        blacklistCount.add(1);
+    }
+    
+    function removeFromWhitelist(address Address) public onlyOwner
+    {
+        require(whitelist[Address] == true);
+        whitelist[Address] = false;
+        whitelistCount.sub(1);
+    }
+    
+    function removeFromBlacklist(address Address) public onlyOwner
+    {
+        require(blacklist[Address] == true);
+        blacklist[Address] = false;
+        blacklistCount.sub(1);
+    }
+    
+    function isOnWhitelist(address Address) public view returns(bool)
+    {
+        return whitelist[Address];
+    }
+    
+    function isOnBlacklist(address Address) public view returns(bool)
+    {
+        return blacklist[Address];
+    }
+    
+    function isValidContract(address Address) public view returns(bool)
+    {
+        return isOnWhitelist(Address);
+    }
+    
+    function isValidUser(address Address) public view returns(bool)
+    {
+        if(isOnBlacklist(Address) == true)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    
+    function isValid(address contractAddress, address userAddress) internal view returns(bool)
+    {
+        require(msg.sender != tx.origin);
+        require(isValidContract(contractAddress) == true);
+        require(isValidUser(userAddress) == true);
+        return true;
+    }
+    
     // Set Contract Data
     function setAddress(string key, address value) public
     {
+        require(isValid(msg.sender, tx.origin) == true);
         bytes32 _key = stringToBytes32(key);
         bloq._setAddress(dbVersion, _key, value);
     }
     function setBool(string key, bool value) public
     {
+        require(isValid(msg.sender, tx.origin) == true);
         bytes32 _key = stringToBytes32(key);
         bloq._setBool(dbVersion, _key, value);
     }
     function setString(string key, bytes32 value) public
     {
+        require(isValid(msg.sender, tx.origin) == true);
         bytes32 _key = stringToBytes32(key);
         bloq._setString(dbVersion, _key, value);
     }
     function setUint(string key, uint256 value) public
     {
+        require(isValid(msg.sender, tx.origin) == true);
         bytes32 _key = stringToBytes32(key);
         bloq._setUint(dbVersion, _key, value);
     }
@@ -257,21 +370,25 @@ contract Proxy is Upgradable
     // Set Addressed Data
     function setsAddress(address addressKey, string param, address value) public
     {
+        require(isValid(msg.sender, tx.origin) == true);
         bytes32 _param = stringToBytes32(param);
         bloq._setsAddress(dbVersion, addressKey, _param, value);
     }
     function setsBool(address addressKey, string param, bool value) public
     {
+        require(isValid(msg.sender, tx.origin) == true);
         bytes32 _param = stringToBytes32(param);
         bloq._setsBool(dbVersion, addressKey, _param, value);
     }
     function setsString(address addressKey, string param, bytes32 value) public
     {
+        require(isValid(msg.sender, tx.origin) == true);
         bytes32 _param = stringToBytes32(param);
         bloq._setsString(dbVersion, addressKey, _param, value);
     }
     function setsUint(address addressKey, string param, uint256 value) public
     {
+        require(isValid(msg.sender, tx.origin) == true);
         bytes32 _param = stringToBytes32(param);
         bloq._setsUint(dbVersion, addressKey, _param, value);
     }
@@ -279,21 +396,25 @@ contract Proxy is Upgradable
     // Set Token Data
     function SetAddress(uint256 key, string param, address value) public
     {
+        require(isValid(msg.sender, tx.origin) == true);
         bytes32 _param = stringToBytes32(param);
         bloq._SetAddress(dbVersion, key, _param, value);
     }
     function SetBool(uint256 key, string param, bool value) public
     {
+        require(isValid(msg.sender, tx.origin) == true);
         bytes32 _param = stringToBytes32(param);
         bloq._SetBool(dbVersion, key, _param, value);
     }
     function SetString(uint256 key, string param, bytes32 value) public
     {
+        require(isValid(msg.sender, tx.origin) == true);
         bytes32 _param = stringToBytes32(param);
         bloq._SetString(dbVersion, key, _param, value);
     }
     function SetUint(uint256 key, string param, uint256 value) public
     {
+        require(isValid(msg.sender, tx.origin) == true);
         bytes32 _param = stringToBytes32(param);
         bloq._SetUint(dbVersion, key, _param, value);
     }
@@ -301,21 +422,25 @@ contract Proxy is Upgradable
     // Get Contract Data
     function getAddress(string key) public view returns(address)
     {
+        require(isValidContract(msg.sender) == true);
         bytes32 _key = stringToBytes32(key);
         return bloq._getAddress(dbVersion, _key);
     }
     function getBool(string key) public view returns(bool)
     {
+        require(isValidContract(msg.sender) == true);
         bytes32 _key = stringToBytes32(key);
         return bloq._getBool(dbVersion, _key);
     }
     function getString(string key) public view returns(bytes32)
     {
+        require(isValidContract(msg.sender) == true);
         bytes32 _key = stringToBytes32(key);
         return bloq._getString(dbVersion, _key);
     }
     function getUint(string key) public view returns(uint256)
     {
+        require(isValidContract(msg.sender) == true);
         bytes32 _key = stringToBytes32(key);
         return bloq._getUint(dbVersion, _key);
     }
@@ -323,21 +448,25 @@ contract Proxy is Upgradable
     // Get Addressed Data
     function getsAddress(address addressKey, string param) public view returns(address)
     {
+        require(isValidContract(msg.sender) == true);
         bytes32 _param = stringToBytes32(param);
         return bloq._getsAddress(dbVersion, addressKey, _param);
     }
     function getsBool(address addressKey, string param) public view returns(bool)
     {
+        require(isValidContract(msg.sender) == true);
         bytes32 _param = stringToBytes32(param);
         return bloq._getsBool(dbVersion, addressKey, _param);
     }
     function getsString(address addressKey, string param) public view returns(bytes32)
     {
+        require(isValidContract(msg.sender) == true);
         bytes32 _param = stringToBytes32(param);
         return bloq._getsString(dbVersion, addressKey, _param);
     }
     function getsUint(address addressKey, string param) public view returns(uint256)
     {
+        require(isValidContract(msg.sender) == true);
         bytes32 _param = stringToBytes32(param);
         return bloq._getsUint(dbVersion, addressKey, _param);
     }
@@ -345,21 +474,25 @@ contract Proxy is Upgradable
     // Get Token Data
     function GetAddress(uint256 key, string param) public view returns(address)
     {
+        require(isValidContract(msg.sender) == true);
         bytes32 _param = stringToBytes32(param);
         return bloq._GetAddress(dbVersion, key, _param);
     }
     function GetBool(uint256 key, string param) public view returns(bool)
     {
+        require(isValidContract(msg.sender) == true);
         bytes32 _param = stringToBytes32(param);
         return bloq._GetBool(dbVersion, key, _param);
     }
     function GetString(uint256 key, string param) public view returns(bytes32)
     {
+        require(isValidContract(msg.sender) == true);
         bytes32 _param = stringToBytes32(param);
         return bloq._GetString(dbVersion, key, _param);
     }
     function GetUint(uint256 key, string param) public view returns(uint256)
     {
+        require(isValidContract(msg.sender) == true);
         bytes32 _param = stringToBytes32(param);
         return bloq._GetUint(dbVersion, key, _param);
     }
@@ -367,54 +500,66 @@ contract Proxy is Upgradable
     // Get Contract Data Counts
     function contractAddressCount() public view returns(uint)
     {
+        require(isValidContract(msg.sender) == true);
         return bloq._contractAddressCount(dbVersion);
     }
     function contractBoolCount() public view returns(uint)
     {
+        require(isValidContract(msg.sender) == true);
         return bloq._contractBoolCount(dbVersion);
     }
     function contractStringCount() public view returns(uint)
     {
+        require(isValidContract(msg.sender) == true);
         return bloq._contractStringCount(dbVersion);
     }
     function contractUintCount() public view returns(uint)
     {
+        require(isValidContract(msg.sender) == true);
         return bloq._contractUintCount(dbVersion);
     }
     
     // Get Addressed Data Counts
     function addressAddressCount(address addressKey) public view returns(uint)
     {
+        require(isValidContract(msg.sender) == true);
         return bloq._addressAddressCount(dbVersion, addressKey);
     }
     function addressBoolCount(address addressKey) public view returns(uint)
     {
+        require(isValidContract(msg.sender) == true);
         return bloq._addressBoolCount(dbVersion, addressKey);
     }
     function addressStringCount(address addressKey) public view returns(uint)
     {
+        require(isValidContract(msg.sender) == true);
         return bloq._addressStringCount(dbVersion, addressKey);
     }
     function addressUintCount(address addressKey) public view returns(uint)
     {
+        require(isValidContract(msg.sender) == true);
         return bloq._addressUintCount(dbVersion, addressKey);
     }
     
     // Get Token Data Counts
     function tokenAddressCount(uint256 key) public view returns(uint)
     {
+        require(isValidContract(msg.sender) == true);
         return bloq._tokenAddressCount(dbVersion, key);
     }
     function tokenBoolCount(uint256 key) public view returns(uint)
     {
+        require(isValidContract(msg.sender) == true);
         return bloq._tokenAddressCount(dbVersion, key);
     }
     function tokenStringCount(uint256 key) public view returns(uint)
     {
+        require(isValidContract(msg.sender) == true);
         return bloq._tokenAddressCount(dbVersion, key);
     }
     function tokenUintCount(uint256 key) public view returns(uint)
     {
+        require(isValidContract(msg.sender) == true);
         return bloq._tokenAddressCount(dbVersion, key);
     }
 }

@@ -1,29 +1,51 @@
 pragma solidity ^0.4.18;
 
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
-// Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
-// Private Test = 0x0c87C4132C11B273Db805876CA2d2f0BD60f4C24
+// John Smith = 0xA0d2736e921249278dA7E872694Ae25a38FB050f
 
-// v0.0.2 = Advanced ERC20 Tokens = 0x6A7Ada36f1AA9468D6048dE1808CEf6b0B1db445 = 0.90
+// bloq002 = 0x0AEE5fB82dcA635a608B3379AeC83b4CD94B649A
 
 /*
 
-BloqVerse: Intergalactic Construct Framework
-Developer: The Blockchain Embassy
-URI: http://bce.asia
-
 Instructions:
 
+Bloqverse ...
 Step 1 -    Initiate Bloqverse()
-Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
-Step 3 -    Initiate PlanetTokens() -- linking to Proxy Contract Address
-Step 4 -    Initiate PlanetMeta() - linking to Proxy AND PlanetTokens Contract Addresses
 
-Step 5 -    Enable external minting:
-            Call ActivateMeta() within PlanetTokens() contract linking to PlanetMeta contract address
-            
-Step 6 -    Only way to issue tokens / planets ...
-            Call the Genesis() function in PlanetMeta contract
+Proxy ...
+Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
+
+Assets ...
+Step 3 -    Initiate ERC721() -- linking to Proxy Contract Address
+Step 4 -    Add ERC721 to Proxy Whitelist
+Step 5 -    Run updateDefaultSymbol('PT') from ERC721 Contract
+Step 6 -    Run updateSupplyName('PT', 'Planet Tokens') from ERC721 Contract
+
+Planets ...
+Step 7 -    Initiate Planets() -- linking to Proxy & ERC721 Contract Addresses
+Step 8 -    Add Planets to Proxy Whitelist
+Step 9 -    Add Planets to ERC721 Write List
+Step 10 -   Generate Planets using Genesis()
+
+Tokens ...
+Step 11 -   Initiate ERC20() -- linking to Proxy Contract
+Step 12 -   Add ERC20 to Proxy Whitelist
+Step 13 -   Run updateDefaultSymbol('CT') from ERC20 Contract
+Step 14 -   Run updateSupplyName('CT', 'Credit Tokens') from ERC20 Contract
+
+Players ...
+Step 15 -   Initiate Parents() - linking to Proxy, ERC721, ERC20 & Planets
+Step 16 -   Add Parents to Proxy Whitelist
+Step 17 -   Add Parents to ERC721 Write List
+Step 18 -   Add Parents to ERC20 Write List
+Step 19 -   Run SetupParents()
+Step 20 -   Can then GenerateParents() -- register players
+
+Choices ...
+Step 21 -   Initiate Choices() - linking to Parents contract address
+Step 22 -   Add Choices Address to Proxy Whitelist
+Step 23 -   Add Choices Address to Parents Write List
+Step 24 -   Can now form alliances and choose to become rebel ...
 
 */
 
@@ -222,80 +244,71 @@ contract Proxy is Upgradable
     function tokenUintCount(uint256 key) public view returns(uint);
 }
 
-contract ERC20 is Upgradable
-{
-    function totalSupply(string optionalResource) public constant returns (uint);
-    function balanceOf(address tokenOwner, string optionalResource) public constant returns (uint balance);
-    function allowance(address tokenOwner, address spender, string optionalResource) public constant returns (uint remaining);
-    function transfer(address to, uint units, string optionalResource) public returns (bool success);
-    function approve(address spender, uint units, string optionalResource) public returns (bool success);
-    function transferFrom(address from, address to, uint units, string optionalResource) public returns (bool success);
-    function destroy(address target, uint amount, string optionalResource) public;
-    function make(address beneficary, uint amount, string optionalResource) public;
-    function mint(address beneficary, uint amount, string optionalResource) public;
-    event Transfer(address indexed from, address indexed to, uint units);
-    event Approval(address indexed tokenOwner, address indexed spender, uint units);
-}
-
-contract PlanetTokens is Upgradable
-{
-    function universeBytes() public view returns(bytes32);
-}
-
 contract ApproveAndCallFallBack 
 {
     function receiveApproval(address from, uint256 tokens, address token, bytes data) public;
 }
 
-contract UniversalTokens is ERC20
+contract ERC20 is Upgradable
 {
     Proxy db;
-    PlanetTokens planets;
     
     using SafeMath for uint;
     
-    string public name = 'Universal Tokens';
-    string public symbol = 'UT';
-    string public universe;
+    mapping(address => bool) canWriteToERC20;
     
-    address public activeAtomsAddress;
-    address public activeItemsAddress;
-    
-    function UniversalTokens
+    function ERC20
     (
-        address proxyAddress,
-        address planetContractAddress,
-        address atomsContractAddress,
-        address itemsContractAddress
+        address proxyAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
-        planets = PlanetTokens(planetContractAddress);
-        universe = bytes32ToString(planets.universeBytes());
-        activeAtomsAddress = atomsContractAddress;
-        activeItemsAddress = itemsContractAddress;
     }
     
     function updateProxy
     (
-        address proxyAddress,
-        address planetContractAddress,
-        address atomsContractAddress,
-        address itemsContractAddress
+        address proxyAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
-        planets = PlanetTokens(planetContractAddress);
-        universe = bytes32ToString(planets.universeBytes());
-        activeAtomsAddress = atomsContractAddress;
-        activeItemsAddress = itemsContractAddress;
     }
     
-    function uid(string id) public view returns(uint256)
+    function updateSupplyName(string symbol, string name) public onlyOwner
     {
-        return uint256(keccak256(universe, '|', id));
+        db.setString(combine('ERC20', '_', symbol, '_', 'NAME'), stringToBytes32(name));
+    }
+    
+    function updateSupplyDecimals(string symbol, uint decimals) public onlyOwner
+    {
+        db.setUint(combine('ERC20', '_', symbol, '_', 'DECIMALS'), decimals);
+    }
+    
+    function updateDefaultSymbol(string defaultSymbol) public onlyOwner
+    {
+        db.setString('ERC20_symbol', stringToBytes32(defaultSymbol));
+    }
+    
+    function addWriteAddress(address Address) public onlyOwner
+    {
+        require(canWriteToERC20[Address] == false);
+        canWriteToERC20[Address] = true;
+    }
+    
+    function removeWriteAddress(address Address) public onlyOwner
+    {
+        require(canWriteToERC20[Address] == true);
+        canWriteToERC20[Address] = false;
+    }
+    
+    function uid(string id, string optionalResource) public view returns(string)
+    {
+        if(stringToBytes32(optionalResource) == stringToBytes32(''))
+        {
+            optionalResource = symbol(optionalResource);
+        }
+        return combine(optionalResource, '_', id, '', '');
     }
     
     /*
@@ -307,158 +320,98 @@ contract UniversalTokens is ERC20
     
     */
     
+    function name(string optionalResource) public view returns(string)
+    {
+        if(stringToBytes32(optionalResource) == stringToBytes32(''))
+        {
+            optionalResource = bytes32ToString(db.getString('ERC20_symbol'));
+        }
+        return bytes32ToString(db.getString(combine('ERC20', '_', optionalResource, '_', 'NAME')));
+    }
+    
+    function decimals(string optionalResource) public view returns(uint)
+    {
+        if(stringToBytes32(optionalResource) == stringToBytes32(''))
+        {
+            optionalResource = bytes32ToString(db.getString('ERC20_symbol'));
+        }
+        return db.getUint(combine('ERC20', '_', optionalResource, '_', 'DECIMALS'));
+    }
+    
+    function symbol(string optionalResource) public view returns(string)
+    {
+        if(stringToBytes32(optionalResource) == stringToBytes32(''))
+        {
+            return bytes32ToString(db.getString('ERC20_symbol'));
+        }
+        else
+        {
+            return optionalResource;
+        }
+    }
+    
     function totalSupply(string optionalResource) public constant returns (uint) 
     {
-        string memory id = 'credit_total';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'total', '', '');
-        }
-        return db.getUint(id);
+        return db.getUint(uid('total', optionalResource));
     }
 
     function balanceOf(address tokenOwner, string optionalResource) public constant returns (uint balance) 
     {
-        string memory id = 'credit_balance';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'balance', '', '');
-        }
-        return db.getsUint(tokenOwner, id);
+        return db.getsUint(tokenOwner, uid('balance', optionalResource));
     }
     
     function transfer(address to, uint units, string optionalResource) public returns (bool success) 
     {
-        string memory id = 'credit_balance';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'balance', '', '');
-        }
-        require(db.getsUint(tx.origin, id) >= units);
-        db.setsUint(tx.origin, id, db.getsUint(tx.origin, id).sub(units));
-        db.setsUint(to, id, db.getsUint(to, id).add(units));
-        emit Transfer(msg.sender, to, units);
+        require(db.getsUint(tx.origin, uid('balance', optionalResource)) >= units);
+        db.setsUint(tx.origin, uid('balance', optionalResource), db.getsUint(tx.origin, uid('balance', optionalResource)).sub(units));
+        db.setsUint(to, uid('balance', optionalResource), db.getsUint(to, uid('balance', optionalResource)).add(units));
         return true;
     }
-    
-    function approve(address spender, uint units, string optionalResource) public returns (bool success) 
+        
+    function generateTokens(address Address, uint amount, string optionalResource) public onlyOwner
     {
-        string memory id = 'credit_allowed';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'allowed', '_', toString(spender));
-        }
-        db.setsUint(tx.origin, id, units);
-        emit Approval(tx.origin, spender, units);
-        return true;
+        mintTokens(Address, amount, optionalResource);
     }
-    
-    function transferFrom(address from, address to, uint units, string optionalResource) public returns (bool success) 
-    {
-        string memory id = 'credit_allowed';
-        string memory key = 'credit_balance';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'allowed', '_', toString(msg.sender));
-            key = combine(optionalResource, '_', 'balance', '', '');
-        }
-        require(db.getsUint(from, id) >= units);
-        db.setsUint(msg.sender, id, db.getsUint(msg.sender, id).sub(units));
-        db.setsUint(from, key, db.getsUint(from, key).sub(units));
-        db.setsUint(to, key, db.getsUint(to, key).add(units));
-        emit Transfer(from, to, units);
-        return true;
-    }
-    
-    function allowance
-    (
-        address tokenOwner, 
-        address spender, 
-        string optionalResource
-    ) 
-    public constant returns (uint remaining) 
-    {
-        string memory id = 'credit_allowed';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'allowed', '_', toString(spender));
-        }
-        return db.getsUint(tokenOwner, id);
-    }
-    
-    function approveAndCall
-    (
-        address spender, 
-        uint units, 
-        bytes data, 
-        string optionalResource
-    ) 
-    public returns (bool success) 
-    {
-        string memory id = 'credit_allowed';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'allowed', '_', toString(spender));
-        }
-        db.setsUint(msg.sender, id, units);
-        emit Approval(msg.sender, spender, units);
-        ApproveAndCallFallBack(spender).receiveApproval(msg.sender, units, this, data);
-        return true;
-    }
-    
-    function mint(address beneficary, uint amount, string optionalResource) public onlyOwner
-    {
-        string memory id = 'credit_balance';
-        string memory key = 'credit_total';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'balance', '', '');
-            key = combine(optionalResource, '_', 'total', '', '');
-        }
-        db.setsUint(beneficary, id, db.getsUint(beneficary, id).add(amount));
-        db.setUint(key, db.getUint(key).add(amount));
-    }
-    
-    function make(address beneficary, uint amount, string optionalResource) public
+        
+    function makeTokens(address Address, uint amount, string optionalResource) public
     {
         require
         (
-            activeAtomsAddress == msg.sender
-            || activeItemsAddress == msg.sender
-            || activeAtomsAddress == tx.origin
-            || activeItemsAddress == tx.origin
+            canWriteToERC20[msg.sender] == true
+            || canWriteToERC20[tx.origin] == true
         );
-        string memory id = 'credit_balance';
-        string memory key = 'credit_total';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'balance', '', '');
-            key = combine(optionalResource, '_', 'total', '', '');
-        }
-        db.setsUint(beneficary, id, db.getsUint(beneficary, id).add(amount));
-        db.setUint(key, db.getUint(key).add(amount));
+        db.setsUint(Address, uid('balance', optionalResource), db.getsUint(Address, uid('balance', optionalResource)).add(amount));
+        db.setUint(uid('total', optionalResource), db.getUint(uid('total', optionalResource)).add(amount));
     }
-    
-    function destroy(address target, uint amount, string optionalResource) public
+        
+    function destroyTokens(address Address, uint amount, string optionalResource) public
     {
+        require(db.getsUint(Address, uid('balance', optionalResource)) >= amount);
         require
         (
-            activeAtomsAddress == msg.sender
-            || activeItemsAddress == msg.sender
+            canWriteToERC20[msg.sender] == true
+            || canWriteToERC20[tx.origin] == true
         );
-        string memory id = 'credit_balance';
-        string memory key = 'credit_total';
-        if(stringToBytes32(optionalResource) != stringToBytes32(''))
-        {
-            id = combine(optionalResource, '_', 'balance', '', '');
-            key = combine(optionalResource, '_', 'total', '', '');
-        }
-        db.setsUint(target, id, db.getsUint(target, id).sub(amount));
-        db.setUint(key, db.getUint(key).sub(amount));
+        db.setsUint(Address, uid('balance', optionalResource), db.getsUint(Address, uid('balance', optionalResource)).sub(amount));
+        db.setUint(uid('total', optionalResource), db.getUint(uid('total', optionalResource)).sub(amount));
+    }
+        
+    /*
+    
+    INTERNALS
+    
+    */
+        
+    function mintTokens(address Address, uint amount, string optionalResource) internal
+    {
+        db.setsUint(Address, uid('balance', optionalResource), db.getsUint(Address, uid('balance', optionalResource)).add(amount));
+        db.setUint(uid('total', optionalResource), db.getUint(uid('total', optionalResource)).add(amount));
     }
 
     function () public payable 
     {
         revert();
     }
+        
+    
 }

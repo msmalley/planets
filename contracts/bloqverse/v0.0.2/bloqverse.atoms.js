@@ -5,6 +5,7 @@ pragma solidity ^0.4.18;
 // Private Test = 0x0c87C4132C11B273Db805876CA2d2f0BD60f4C24
 
 // v0.0.2 = 0x1C3377688Fd8dc11910be88e20FEE71EfdBE9Ef6 = 0.93
+// v0.0.2 = 0x703fa86A4B014Eb394dC85E53CfD5A5f46e47111 = 0.93
 
 // Periodic element list = https://www.science.co.il/elements/
 // Prices = https://en.wikipedia.org/wiki/Prices_of_elements_and_their_compounds

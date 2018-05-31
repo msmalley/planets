@@ -1,14 +1,15 @@
 pragma solidity ^0.4.18;
 
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
-// Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
-// Private Test = 0x0c87C4132C11B273Db805876CA2d2f0BD60f4C24
+// John Smith = 0xA0d2736e921249278dA7E872694Ae25a38FB050f
 
 // Interval = 15120
 // Wei = 100000000000000
 // Ether = 0.0001
 
-// v0.0.2 = 0xafFe20d3fa1118c986604b02d5Ae887ef4129637 = 0.91
+// v0.0.2 = 0x377f8Fb89B5b39D204D6C883ceFa607d0Cf8cA36
+
+// bloq002 = 0x35C6DcC0B4394c65387082d84b5b939Bc5268D24
 
 /*
 
@@ -18,17 +19,43 @@ URI: http://bce.asia
 
 Instructions:
 
+Bloqverse ...
 Step 1 -    Initiate Bloqverse()
+
+Proxy ...
 Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
-Step 3 -    Initiate PlanetTokens() -- linking to Proxy Contract Address
-Step 4 -    Initiate PlanetMeta() - linking to Proxy AND PlanetTokens Contract Addresses
 
-Step 5 -    Enable external minting:
-            Call ActivateMeta() within PlanetTokens() contract linking to PlanetMeta contract address
-            
-Step 6 -    Only way to issue tokens / planets ...
-            Call the Genesis() function in PlanetMeta contract
+Assets ...
+Step 3 -    Initiate ERC721() -- linking to Proxy Contract Address
+Step 4 -    Add ERC721 to Proxy Whitelist
+Step 5 -    Run updateDefaultSymbol('PT') from ERC721 Contract
+Step 6 -    Run updateSupplyName('PT', 'Planet Tokens') from ERC721 Contract
 
+Planets ...
+Step 7 -    Initiate Planets() -- linking to Proxy & ERC721 Contract Addresses
+Step 8 -    Add Planets to Proxy Whitelist
+Step 9 -    Add Planets to ERC721 Write List
+Step 10 -   Generate Planets using Genesis()
+
+Tokens ...
+Step 11 -   Initiate ERC20() -- linking to Proxy Contract
+Step 12 -   Add ERC20 to Proxy Whitelist
+Step 13 -   Run updateDefaultSymbol('CT') from ERC20 Contract
+Step 14 -   Run updateSupplyName('CT', 'Credit Tokens') from ERC20 Contract
+
+Players ...
+Step 15 -   Initiate Parents() - linking to Proxy, ERC721, ERC20 & Planets
+Step 16 -   Add Parents to Proxy Whitelist
+Step 17 -   Add Parents to ERC721 Write List
+Step 18 -   Add Parents to ERC20 Write List
+Step 19 -   Run SetupParents()
+Step 20 -   Can then GenerateParents() -- register players
+
+Choices ...
+Step 21 -   Initiate Choices() - linking to Parents contract address
+Step 22 -   Add Choices Address to Proxy Whitelist
+Step 23 -   Add Choices Address to Parents Write List
+Step 24 -   Can now form alliances and choose to become rebel ...
 */
 
 library SafeMath 
@@ -231,15 +258,13 @@ contract ERC721 is Upgradable
     function ownerOf(uint tokenId, string optionalResource) public view returns (address);
     function mint(address beneficiary, uint256 id, string meta, string optionalResource) public;
     function updateTokenMetadata(uint tokenId, string meta, string optionalResource) public returns(bool);
+    function metabytes(uint tokenId, string optionalResource) public view returns(bytes32);
 }
 
-contract PlanetTokens is Upgradable
+contract Planets is Upgradable
 {
     Proxy db;
     ERC721 assets;
-    
-    string public name = 'Planet Tokens';
-    string public symbol = 'PT';
     
     using SafeMath for uint;
     
@@ -249,10 +274,29 @@ contract PlanetTokens is Upgradable
         donation_address.transfer(msg.value);
     }
     
-    function PlanetTokens
+    function Planets
     (
         address proxyAddress,
-        address assetAddress,
+        address assetAddress
+    ) 
+    public onlyOwner
+    {
+        db = Proxy(proxyAddress);
+        assets = ERC721(assetAddress);
+    }
+    
+    function updateProxy(address proxyAddress) public onlyOwner
+    {
+        db = Proxy(proxyAddress);
+    }
+    
+    function updateAssets(address assetAddress) public onlyOwner
+    {
+        assets = ERC721(assetAddress);
+    }
+    
+    function setupUniverse
+    (
         string UniverseName, 
         uint StartingWeiDonation, 
         uint CoordinateLimit, 
@@ -262,36 +306,7 @@ contract PlanetTokens is Upgradable
     ) 
     public onlyOwner
     {
-        db = Proxy(proxyAddress);
-        assets = ERC721(assetAddress);
-        setup_universe
-        (
-            UniverseName, 
-            StartingWeiDonation, 
-            CoordinateLimit, 
-            BlockIntervals, 
-            WeiPerPlanet, 
-            DonationAddress
-        );
-    }
-    
-    function updateProxy(address proxyAddress, address assetAddress) public onlyOwner
-    {
-        db = Proxy(proxyAddress);
-        assets = ERC721(assetAddress);
-    }
-    
-    function setup_universe
-    (
-        string UniverseName, 
-        uint StartingWeiDonation, 
-        uint CoordinateLimit, 
-        uint BlockIntervals, 
-        uint WeiPerPlanet, 
-        address DonationAddress
-    ) 
-    internal
-    {
+        require(db.getString('planet_universe') == stringToBytes32(''));
         db.setString('planet_universe', stringToBytes32(UniverseName));
         db.setUint('planet_coord_limit', CoordinateLimit);
         db.setUint('planet_block_int', BlockIntervals);
@@ -305,41 +320,11 @@ contract PlanetTokens is Upgradable
     PLANET SPECIFIC FUNCTIONALITY
     
     */
+    
     function uid(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (uint256)
     {
         string memory universe = bytes32ToString(db.getString('planet_universe'));
         return uint256(keccak256(xCoordinate, '|', yCoordinate, '|', zCoordinate, '|', universe));
-    }
-    
-    function generate_token(address beneficiary, uint256 id, string planetName) internal
-    {
-        assets.mint(beneficiary, id, planetName, 'planet');
-    }
-    
-    function generate_planet
-    (
-        uint xCoordinate, 
-        uint yCoordinate, 
-        uint zCoordinate, 
-        uint value, 
-        string planetName, 
-        string liason, 
-        string url
-    ) 
-    internal
-    {
-        string memory universe = bytes32ToString(db.getString('planet_universe'));
-        uint256 id = uid(xCoordinate, yCoordinate, zCoordinate);
-        db.SetUint(id, 'planet_x_coord', xCoordinate);
-        db.SetUint(id, 'planet_y_coord', yCoordinate);
-        db.SetUint(id, 'planet_z_coord', zCoordinate);
-        db.SetUint(id, 'planet_d_life', uint256(keccak256(xCoordinate, '|x|', msg.sender, '|', universe)));
-        db.SetUint(id, 'planet_n_life', uint256(keccak256(yCoordinate, '|y|', msg.sender, '|', universe)));
-        db.SetUint(id, 'planet_a_life', uint256(keccak256(zCoordinate, '|z|', msg.sender, '|', universe)));
-        db.SetUint(id, 'planet_cost', value);
-        db.SetString(id, 'planet_liaison', stringToBytes32(liason));
-        db.SetString(id, 'planet_url', stringToBytes32(url));
-        assets.updateTokenMetadata(id, planetName, 'planet');
     }
     
     function genesis
@@ -362,7 +347,7 @@ contract PlanetTokens is Upgradable
         uint coordinate_limit = db.getUint('planet_coord_limit');
 
         // Check required paramters
-        require(assets.ownerOf(id, 'planet') == 0);
+        require(assets.ownerOf(id, 'PT') == 0);
         if(msg.value >= minimum_donation)
         {
             require(xCoordinate < coordinate_limit);
@@ -390,7 +375,7 @@ contract PlanetTokens is Upgradable
         {
             uint ppp = db.getUint('planet_price');
             db.setUint('planet_don_check', this_block);
-            db.setUint('planet_min_don', (ppp * assets.totalSupply('planet')));
+            db.setUint('planet_min_don', (ppp * assets.totalSupply('PT')));
         }
     }
     
@@ -441,10 +426,10 @@ contract PlanetTokens is Upgradable
             db.GetUint(id, 'planet_n_life'),
             db.GetUint(id, 'planet_a_life'),
             getPlanetAge(xCoordinate, yCoordinate, zCoordinate),
-            bytes32ToString(db.GetString(id, 'planet_meta')),
+            bytes32ToString(assets.metabytes(id, 'PT')),
             bytes32ToString(db.GetString(id, 'planet_liaison')),
             bytes32ToString(db.GetString(id, 'planet_url')),
-            assets.ownerOf(id, 'planet')
+            assets.ownerOf(id, 'PT')
         );
     }
     
@@ -460,26 +445,26 @@ contract PlanetTokens is Upgradable
 
     function ownerOfPlanet(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (address) 
     {
-        return assets.ownerOf(uid(xCoordinate, yCoordinate, zCoordinate), 'planet');
+        return assets.ownerOf(uid(xCoordinate, yCoordinate, zCoordinate), 'PT');
     }
     
     function updatePlanetName(uint xCoordinate, uint yCoordinate, uint zCoordinate, string planetName) public 
     {
         uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        assets.updateTokenMetadata(id, planetName, 'planet');
+        assets.updateTokenMetadata(id, planetName, 'PT');
     }
 
     function updatePlanetLiason(uint xCoordinate, uint yCoordinate, uint zCoordinate, string LiasonName) public 
     {
         uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        require(msg.sender == assets.ownerOf(id, 'planet'));
+        require(msg.sender == assets.ownerOf(id, 'PT'));
         db.SetString(id, 'planet_liaison', stringToBytes32(LiasonName));
     }
 
     function updatePlanetURL(uint xCoordinate, uint yCoordinate, uint zCoordinate, string LiasonURL) public 
     {
         uint id = uid(xCoordinate, yCoordinate, zCoordinate);
-        require(msg.sender == assets.ownerOf(id, 'planet'));
+        require(msg.sender == assets.ownerOf(id, 'PT'));
         db.SetString(id, 'planet_url', stringToBytes32(LiasonURL));
     }
     
@@ -511,12 +496,49 @@ contract PlanetTokens is Upgradable
     
     function planetsDiscovered() public view returns(uint)
     {
-        return assets.totalSupply('planet');
+        return assets.totalSupply('PT');
     }
     
     function planetsUndiscovered() public view returns(uint)
     {
         uint limit = db.getUint('planet_coord_limit');
-        return ((limit * limit * limit) - assets.totalSupply('planet'));
+        return ((limit * limit * limit) - assets.totalSupply('PT'));
+    }
+    
+    /*
+    
+    INTERNAL FUNCTIONS
+    
+    */
+    
+    function generate_token(address beneficiary, uint256 id, string planetName) internal
+    {
+        assets.mint(beneficiary, id, planetName, 'PT');
+    }
+    
+    function generate_planet
+    (
+        uint xCoordinate, 
+        uint yCoordinate, 
+        uint zCoordinate, 
+        uint value, 
+        string planetName, 
+        string liason, 
+        string url
+    ) 
+    internal
+    {
+        string memory universe = bytes32ToString(db.getString('planet_universe'));
+        uint256 id = uid(xCoordinate, yCoordinate, zCoordinate);
+        db.SetUint(id, 'planet_x_coord', xCoordinate);
+        db.SetUint(id, 'planet_y_coord', yCoordinate);
+        db.SetUint(id, 'planet_z_coord', zCoordinate);
+        db.SetUint(id, 'planet_d_life', uint256(keccak256(xCoordinate, '|x|', msg.sender, '|', universe)));
+        db.SetUint(id, 'planet_n_life', uint256(keccak256(yCoordinate, '|y|', msg.sender, '|', universe)));
+        db.SetUint(id, 'planet_a_life', uint256(keccak256(zCoordinate, '|z|', msg.sender, '|', universe)));
+        db.SetUint(id, 'planet_cost', value);
+        db.SetString(id, 'planet_liaison', stringToBytes32(liason));
+        db.SetString(id, 'planet_url', stringToBytes32(url));
+        assets.updateTokenMetadata(id, planetName, 'PT');
     }
 }

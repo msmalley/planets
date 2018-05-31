@@ -1,13 +1,15 @@
 pragma solidity ^0.4.18;
 
 // Private Floyd = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
-// Private FooFoo = 0x0c87C4132C11B273Db805876CA2d2f0BD60f4C24
-// Private John = 0x5DE0d9a57875B867043d82b2441af94AeeAE596B
+// Private FooFoo = 0xA0d2736e921249278dA7E872694Ae25a38FB050f
 
-// Genesis Prime ID = 111289844878109423708526826116317304238808005787352761159317502897542254661420
-// Belly Bell Pogo = 61180885501244754967191768054861305480108144323349454664641026835878947931466
+// NOT ME = 0xFC08F50a8B157f26102F1392346D78C4d132af9c
 
-// v0.0.2 = 0x09f4C4cFc8Fa998Cf025d5BA5FeB99E692Da322E = 0.46
+// Genesis Prime = 111289844878109423708526826116317304238808005787352761159317502897542254661420
+
+// Belly Pop Boo = 94011976869775928030958177182292812687116659522861038973095974402452914434165
+
+// bloq002 = 0xd0F6c5eE251c046D9E729E072Ad605a802360990
 
 /*
 
@@ -17,16 +19,53 @@ URI: http://bce.asia
 
 Instructions:
 
+Bloqverse ...
 Step 1 -    Initiate Bloqverse()
-Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
-Step 3 -    Initiate PlanetTokens() -- linking to Proxy Contract Address
-Step 4 -    Initiate PlanetMeta() - linking to Proxy AND PlanetTokens Contract Addresses
 
-Step 5 -    Enable external minting:
-            Call ActivateMeta() within PlanetTokens() contract linking to PlanetMeta contract address
-            
-Step 6 -    Only way to issue tokens / planets ...
-            Call the Genesis() function in PlanetMeta contract
+Proxy ...
+Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
+
+Assets ...
+Step 3 -    Initiate ERC721() -- linking to Proxy Contract Address
+Step 4 -    Add ERC721 to Proxy Whitelist
+Step 5 -    Run updateDefaultSymbol('PT') from ERC721 Contract
+Step 6 -    Run updateSupplyName('PT', 'Planet Tokens') from ERC721 Contract
+
+Planets ...
+Step 7 -    Initiate Planets() -- linking to Proxy & ERC721 Contract Addresses
+Step 8 -    Add Planets to Proxy Whitelist
+Step 9 -    Add Planets to ERC721 Write List
+Step 10 -   Generate Planets using Genesis()
+
+Tokens ...
+Step 11 -   Initiate ERC20() -- linking to Proxy Contract
+Step 12 -   Add ERC20 to Proxy Whitelist
+Step 13 -   Run updateDefaultSymbol('CT') from ERC20 Contract
+Step 14 -   Run updateSupplyName('CT', 'Credit Tokens') from ERC20 Contract
+
+Parents ...
+Step 15 -   Initiate Parents() - linking to Proxy, ERC721, ERC20 & Planets
+Step 16 -   Add Parents to Proxy Whitelist
+Step 17 -   Add Parents to ERC721 Write List
+Step 18 -   Add Parents to ERC20 Write List
+Step 19 -   Run SetupParents()
+Step 20 -   Can then GenerateParents() -- register players
+
+Choices ...
+Step 21 -   Initiate Choices() - linking to Parents contract address
+Step 22 -   Add Choices Address to Proxy Whitelist
+Step 23 -   Add Choices Address to Parents Write List
+Step 24 -   Can now form alliances and choose to become rebel ...
+
+Families ...
+Step 25 -   Initiate Families() - linking to Proxy, Asset, Planet & Parents
+Step 26 -   Add Families Address to Proxy Whitelist
+Step 27 -   Add Families Address to Assets Write List
+Step 27 -   Add Families Address to Parents Write List
+Step 28 -   Administrators can now use ForcedMarriage() to generate children!
+
+
+
 
 */
 
@@ -231,26 +270,37 @@ contract ERC721 is Upgradable
     function balanceOf(address tokenOwner, string optionalResource) public view returns (uint);
     function metabytes(uint256 tokenId, string optionalResource) public view returns (bytes32);
     function mint(address beneficiary, uint256 id, string meta, string optionalResource) public;
+    function ownerOf(uint id, string optionalResource) public view returns (address);
 }
 
-contract PlanetTokens is Upgradable
+contract Planets is Upgradable
 {
     function donationAddress() public view returns(address);
     function universeBytes() public view returns(bytes32);
 }
 
-contract PlanetParents is Upgradable
+contract Parents is Upgradable
 {
     function getParentDNA(address parentAddress) public view returns(uint256 parentDNA);
     function getParentBytes(address parentAddress) public view returns(bytes32);
+    function getMarried(address parent1, address parent2) public;
+    function getParentSpouse(address parentAddress) public view returns(address);
+    function getParentAge(address parentAddress) public view returns(uint);
+    function getPlanetOfBytes(address Address) public view returns(bytes32);
 }
 
-contract UniversalFamilies is Upgradable
+contract Choices is Upgradable
+{
+    function currentPlanetBytes(address playerAddress) public view returns(bytes32);
+}
+
+contract Families is Upgradable
 {
     Proxy db;
     ERC721 assets;
-    PlanetTokens planets;
-    PlanetParents parents;
+    Planets planets;
+    Parents parents;
+    Choices choices;
     
     using SafeMath for uint;
     
@@ -260,60 +310,100 @@ contract UniversalFamilies is Upgradable
         donation_address.transfer(msg.value);
     }
     
-    function UniversalFamilies
+    function Families
     (
         address proxyAddress,
         address assetContractAddress,
         address planetContractAddress,
-        address parentContractAddress
+        address parentContractAddress,
+        address choicesContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
         assets = ERC721(assetContractAddress);
-        planets = PlanetTokens(planetContractAddress);
-        parents = PlanetParents(parentContractAddress);
+        planets = Planets(planetContractAddress);
+        parents = Parents(parentContractAddress);
+        choices = Choices(choicesContractAddress);
     }
     
     function updateProxy
     (
-        address proxyAddress, 
-        address assetContractAddress,
-        address planetContractAddress,
-        address parentContractAddress
+        address proxyAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
-        assets = ERC721(assetContractAddress);
-        planets = PlanetTokens(planetContractAddress);
-        parents = PlanetParents(parentContractAddress);
     }
     
-    function childDNA(address mother, address father, uint256 planetID, string childName) public view returns(uint256)
+    function updateAssets
+    (
+        address assetContractAddress
+    ) 
+    public onlyOwner
+    {
+        assets = ERC721(assetContractAddress);
+    }
+    
+    function updatePlanets
+    (
+        address planetContractAddress
+    ) 
+    public onlyOwner
+    {
+        planets = Planets(planetContractAddress);
+    }
+    
+    function updateParents
+    (
+        address parentContractAddress
+    ) 
+    public onlyOwner
+    {
+        parents = Parents(parentContractAddress);
+    }
+    
+    function updateChoices
+    (
+        address choicesContractAddress
+    ) 
+    public onlyOwner
+    {
+        choices = Choices(choicesContractAddress);
+    }
+    
+    function childDNA(address mother, address father, uint256 planetID) public view returns(uint256)
     {
         uint256 parent1DNA = parents.getParentDNA(mother);
         uint256 parent2DNA = parents.getParentDNA(father);
         string memory universe = bytes32ToString(planets.universeBytes());
-        return uint256(keccak256(universe, '|', planetID, '|', parent1DNA, '|', parent2DNA, '|', childName));
+        return uint256(keccak256(universe, '|', planetID, '|', parent1DNA, '|', parent2DNA, '|', birthCount(mother)));
     }
     
     function generateChild(address mother, address father, uint256 planetID, string childName) internal
     {
-        uint256 dna = childDNA(mother, father, planetID, childName);
-        require(assets.metabytes(dna, 'children') == stringToBytes32(''));
-        require(assets.metabytes(planetID, 'planet') != stringToBytes32(''));
+        uint256 dna = childDNA(mother, father, planetID);
+        require(assets.metabytes(dna, 'KID') == stringToBytes32(''));
+        require(assets.metabytes(planetID, 'PT') != stringToBytes32(''));
         require(parents.getParentBytes(mother) != stringToBytes32(''));
         require(parents.getParentBytes(father) != stringToBytes32(''));
-        assets.mint(mother, dna, childName, 'children');
+        assets.mint(mother, dna, childName, 'KID');
         db.SetUint(dna, 'children_bob', block.number);
         db.SetUint(dna, 'children_pob', planetID);
         db.SetAddress(dna, 'children_mother', mother);
         db.SetAddress(dna, 'children_father', father);
         db.setsUint(mother, 'children_births', db.getsUint(mother, 'children_births').add(1));
+        db.setsUint(father, 'children_spawn', db.getsUint(father, 'children_spawn').add(1));
     }
     
-    function forcedMarriage(address mother, address father, uint256 planetID, string childName) public onlyOwner
+    function forcedMarriage
+    (
+        address mother, 
+        address father, 
+        uint256 planetID, 
+        string childName
+    ) 
+    public onlyOwner
     {
         parents.getMarried(mother, father);
         generateChild(mother, father, planetID, childName);
@@ -321,12 +411,12 @@ contract UniversalFamilies is Upgradable
     
     function childCount() public view returns(uint)
     {
-        return assets.totalSupply('children');
+        return assets.totalSupply('KID');
     }
     
     function childrenCount(address parent) public view returns(uint)
     {
-        return assets.balanceOf(parent, 'children');
+        return assets.balanceOf(parent, 'KID');
     }
     
     function birthCount(address parent) public view returns(uint)
@@ -334,27 +424,184 @@ contract UniversalFamilies is Upgradable
         return db.getsUint(parent, 'children_births');
     }
     
+    function spawnCount(address parent) public view returns(uint)
+    {
+        return db.getsUint(parent, 'children_spawn');
+    }
+    
     function getChildAge(uint256 dna) public view returns(uint)
     {
         return block.number.sub(db.GetUint(dna, 'children_bob'));
     }
     
-    function child(uint256 dna) public view returns
+    function getChild(uint256 dna) public view returns
     (
         string childName,
         uint childAge,
         string motherName,
         string fatherName,
-        string planetOfBirth
+        string planetOfBirth,
+        string currentGuardian
     )
     {
         return
         (
-            bytes32ToString(assets.metabytes(dna, 'children')),
+            getChildName(dna),
             getChildAge(dna),
-            bytes32ToString(parents.getParentBytes(db.GetAddress(dna, 'children_mother'))),
-            bytes32ToString(parents.getParentBytes(db.GetAddress(dna, 'children_father'))),
-            bytes32ToString(assets.metabytes(db.GetUint(dna, 'children_pob'), 'planet'))
+            getMotherName(dna),
+            getFatherName(dna),
+            getChildPlanet(dna),
+            getChildGuardian(dna)
+        );
+    }
+    
+    function childMother(uint256 dna) public view returns
+    (
+        string childName,
+        uint childAge,
+        string motherName,
+        uint motherAge,
+        string motherPlanetOfBirth,
+        string motherLocation
+    )
+    {
+        return
+        (
+            getChildName(dna),
+            getChildAge(dna),
+            getMotherName(dna),
+            getMotherAge(dna),
+            getMotherPlanetOfBirth(dna),
+            getMotherLocation(dna)
+        );
+    }
+    
+    function childFather(uint256 dna) public view returns
+    (
+        string childName,
+        uint childAge,
+        string fatherName,
+        uint fatherAge,
+        string fatherPlanetOfBirth,
+        string fatherLocation
+    )
+    {
+        return
+        (
+            getChildName(dna),
+            getChildAge(dna),
+            getFatherName(dna),
+            getFatherAge(dna),
+            getFatherPlanetOfBirth(dna),
+            getFatherLocation(dna)
+        );
+    }
+    
+    function getChildGuardian(uint256 dna) public view returns(string)
+    {
+        return bytes32ToString(getChildGuardianBytes(dna));
+    }
+    
+    function getChildGuardianBytes(uint256 dna) public view returns(bytes32)
+    {
+        return parents.getParentBytes(assets.ownerOf(dna, 'KID'));
+    }
+    
+    function getChildPlanet(uint256 dna) public view returns(string)
+    {
+        return bytes32ToString(getChildPlanetBytes(dna));
+    }
+    
+    function getChildPlanetBytes(uint256 dna) public view returns(bytes32)
+    {
+        return assets.metabytes(db.GetUint(dna, 'children_pob'), 'PT');
+    }
+    
+    function getChildName(uint256 dna) public view returns(string)
+    {
+        return bytes32ToString(getChildBytes(dna));
+    }
+    
+    function getChildBytes(uint256 dna) public view returns(bytes32)
+    {
+        return assets.metabytes(dna, 'KID');
+    }
+    
+    function getMotherAge(uint256 dna) public view returns(uint)
+    {
+        address parent = db.GetAddress(dna, 'children_mother');
+        return parents.getParentAge(parent);
+    }
+    
+    function getMotherPlanetOfBirth(uint256 dna) public view returns(string)
+    {
+        address parent = db.GetAddress(dna, 'children_mother');
+        return bytes32ToString(parents.getPlanetOfBytes(parent));
+    }
+    
+    function getMotherLocation(uint256 dna) public view returns(string)
+    {
+        address parent = db.GetAddress(dna, 'children_mother');
+        return bytes32ToString(choices.currentPlanetBytes(parent));
+    }
+    
+    function getMotherName(uint256 dna) public view returns(string)
+    {
+        return bytes32ToString(getMotherBytes(dna));
+    }
+    
+    function getMotherBytes(uint256 dna) public view returns(bytes32)
+    {
+        return parents.getParentBytes(db.GetAddress(dna, 'children_mother'));
+    }
+    
+    function getFatherAge(uint256 dna) public view returns(uint)
+    {
+        address parent = db.GetAddress(dna, 'children_father');
+        return parents.getParentAge(parent);
+    }
+    
+    function getFatherPlanetOfBirth(uint256 dna) public view returns(string)
+    {
+        address parent = db.GetAddress(dna, 'children_father');
+        return bytes32ToString(parents.getPlanetOfBytes(parent));
+    }
+    
+    function getFatherLocation(uint256 dna) public view returns(string)
+    {
+        address parent = db.GetAddress(dna, 'children_father');
+        return bytes32ToString(choices.currentPlanetBytes(parent));
+    }
+    
+    function getFatherName(uint256 dna) public view returns(string)
+    {
+        return bytes32ToString(getFatherBytes(dna));
+    }
+    
+    function getFatherBytes(uint256 dna) public view returns(bytes32)
+    {
+        return parents.getParentBytes(db.GetAddress(dna, 'children_father'));
+    }
+    
+    function familyTree(address parent) public view returns
+    (
+        string name,
+        string currentSpouse,
+        uint childrenBirthed,
+        uint childrenSpawn,
+        uint childrenInPossession,
+        uint childrenInSpousePossession
+    )
+    {
+        address spouse = parents.getParentSpouse(parent);
+        return
+        (
+            bytes32ToString(parents.getParentBytes(parent)),
+            bytes32ToString(parents.getParentBytes(spouse)),
+            birthCount(parent),
+            spawnCount(parent),
+            assets.balanceOf(parent, 'KID'),
+            assets.balanceOf(spouse, 'KID')
         );
     }
 }
