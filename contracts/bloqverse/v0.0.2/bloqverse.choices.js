@@ -51,6 +51,14 @@ Step 22 -   Add Choices Address to Proxy Whitelist
 Step 23 -   Add Choices Address to Parents Write List
 Step 24 -   Can now form alliances and choose to become rebel ...
 
+Families ...
+Step 25 -   Initiate Families() - linking to Proxy, Asset, Planet & Parents
+Step 26 -   Add Families Address to Proxy Whitelist
+Step 27 -   Add Families Address to Assets Write List
+Step 27 -   Add Families Address to Parents Write List
+Step 28 -   Administrators can now use ForcedMarriage() to generate children!
+
+
 */
 
 library SafeMath 
