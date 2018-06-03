@@ -1,10 +1,8 @@
 pragma solidity ^0.4.18;
 
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
-// Private Main = 0x8e04937F5743094df7A79CC0Bd0862c00c8590Ec
-// Private Test = 0x0c87C4132C11B273Db805876CA2d2f0BD60f4C24
 
-// v0.0.2 = 0x03d4fBB7b4E81d15986C6f25Ea2A41FFb35b5e6d = 0.79
+// bloq002 = 0x0beba211035e646c5B2b050E2587e52D9256Daef
 
 /*
 
@@ -14,16 +12,68 @@ URI: http://bce.asia
 
 Instructions:
 
+Bloqverse ...
 Step 1 -    Initiate Bloqverse()
-Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
-Step 3 -    Initiate PlanetTokens() -- linking to Proxy Contract Address
-Step 4 -    Initiate PlanetMeta() - linking to Proxy AND PlanetTokens Contract Addresses
 
-Step 5 -    Enable external minting:
-            Call ActivateMeta() within PlanetTokens() contract linking to PlanetMeta contract address
-            
-Step 6 -    Only way to issue tokens / planets ...
-            Call the Genesis() function in PlanetMeta contract
+Proxy ...
+Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
+
+Assets ...
+Step 3 -    Initiate ERC721() -- linking to Proxy Contract Address
+Step 4 -    Add ERC721 to Proxy Whitelist
+Step 5 -    Run updateDefaultSymbol('PT') from ERC721 Contract
+Step 6 -    Run updateSupplyName('PT', 'Planet Tokens') from ERC721 Contract
+
+Planets ...
+Step 7 -    Initiate Planets() -- linking to Proxy & ERC721 Contract Addresses
+Step 8 -    Add Planets to Proxy Whitelist
+Step 9 -    Add Planets to ERC721 Write List
+Step 10 -   Generate Planets using Genesis()
+
+Tokens ...
+Step 11 -   Initiate ERC20() -- linking to Proxy Contract
+Step 12 -   Add ERC20 to Proxy Whitelist
+Step 13 -   Run updateDefaultSymbol('CT') from ERC20 Contract
+Step 14 -   Run updateSupplyName('CT', 'Credit Tokens') from ERC20 Contract
+
+Parents ...
+Step 15 -   Initiate Parents() - linking to Proxy, ERC721, ERC20 & Planets
+Step 16 -   Add Parents to Proxy Whitelist
+Step 17 -   Add Parents to ERC721 Write List
+Step 18 -   Add Parents to ERC20 Write List
+Step 19 -   Run SetupParents()
+Step 20 -   Can then GenerateParents() -- register players
+
+Choices ...
+Step 21 -   Initiate Choices() - linking to Parents contract address
+Step 22 -   Add Choices Address to Proxy Whitelist
+Step 23 -   Add Choices Address to Parents Write List
+Step 24 -   Can now form alliances and choose to become rebel ...
+
+Families ...
+Step 25 -   Initiate Families() - linking to Proxy, Asset, Planet & Parents
+Step 26 -   Add Families Address to Proxy Whitelist
+Step 27 -   Add Families Address to Assets Write List
+Step 27 -   Add Families Address to Parents Write List
+Step 28 -   Administrators can now use ForcedMarriage() to generate children!
+
+Atoms ...
+Step 29 -   Initiate Atoms() - linking to Proxy & Token contracts
+Step 30 -   Add Atoms Address to Proxy Whitelist
+Step 31 -   Add Atoms Address to Tokens Write List
+Step 32 -   Can now start adding atomic structure ...
+Step 33 -   Administrators can now GenerateAtoms() for testing ...
+Step 34 -   Players can sell atoms to banks who converts to NRG
+Step 35 -   Players can buy atoms from bank if bank has enough NRG
+Step 36 -   Players can perform atomic swaps (based on weight)
+
+Items ...
+Step 37 -   Initiate Items() - linking to Proxy, Token & Atom contracts
+Step 38 -   Add Items Address to Proxy Whitelist
+Step 39 -   Add Items Address to Tokens Write List
+Step 40 -   Add Items Address to Atoms Write List
+Step 41 -   Players can now Craft Items (using atoms)
+Step 42 -   Or buy items from bank (if it has enough NRG to re-cycle)
 
 */
 
@@ -225,71 +275,87 @@ contract Proxy is Upgradable
 contract ERC20 is Upgradable
 {
     function balanceOf(address beneficary, string optionalResource) public view returns(uint);
-    function destroy(address target, uint amount, string optionalResource) public;
-    function make(address beneficary, uint amount, string optionalResource) public;
+    function makeTokens(address beneficary, uint amount, string optionalResource) public;
+    function totalSupply(string optionalResource) public constant returns (uint);
+    function transfer(address to, uint units, string optionalResource) public returns (bool success);
 }
 
-contract PlanetTokens is Upgradable
+contract Atoms is Upgradable
 {
-    function donationAddress() public view returns(address);
-}
-
-contract UniversalAtoms is Upgradable
-{
-    function atom(string atomicIndex) public view returns(bytes32);
     function atomPrice(string atomicIndex) public view returns(uint);
-    function atomSymbol(string atomicIndex) public view returns(bytes32);
-    function atomicConversion(string from, string to, uint amount) public;
+    function atomicSwap(string from, string to, uint amount) public;
+    function atomSymbolBytes(string atomicIndex) public view returns(bytes32);
+    function atomWeight(string atomicSymbol) public view returns(uint);
+    function atomNameBytes(string atomicSymbol) public view returns(bytes32);
 }
 
-contract UniversalItems is Upgradable
+contract Items is Upgradable
 {
     Proxy db;
     ERC20 tokens;
-    PlanetTokens public planets;
-    UniversalAtoms public atoms;
+    Atoms atoms;
     
     using SafeMath for uint;
     
+    address public centralBank;
+    
     function() public payable
     {
-        address donation_address = planets.donationAddress();
-        donation_address.transfer(msg.value);
+        revert();
     }
     
-    function UniversalItems
+    function Items
     (
         address proxyAddress,
         address tokenContractAddress,
-        address planetContractAddress,
         address atomContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
         tokens = ERC20(tokenContractAddress);
-        planets = PlanetTokens(planetContractAddress);
-        atoms = UniversalAtoms(atomContractAddress);
+        atoms = Atoms(atomContractAddress);
+        centralBank = proxyAddress;
     }
     
     function updateProxy
     (
-        address proxyAddress, 
-        address tokenContractAddress,
-        address planetContractAddress,
-        address atomContractAddress
+        address proxyAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
+        centralBank = proxyAddress;
+    }
+    
+    function updateTokens
+    (
+        address tokenContractAddress
+    ) 
+    public onlyOwner
+    {
         tokens = ERC20(tokenContractAddress);
-        planets = PlanetTokens(planetContractAddress);
-        atoms = UniversalAtoms(atomContractAddress);
+    }
+    
+    function updateAtoms
+    (
+        address atomContractAddress
+    ) 
+    public onlyOwner
+    {
+        atoms = Atoms(atomContractAddress);
     }
     
     function itemID(string id, string key) public pure returns(string)
     {
-        return combine('item', '_', id, '_', key);
+        if(stringToBytes32(key) == stringToBytes32(''))
+        {
+            return combine('item', '_', id, '', '');
+        }
+        else
+        {
+            return combine('item', '_', id, '_', key);
+        }
     }
     
     function itemTypeCount() public view returns(uint)
@@ -299,7 +365,12 @@ contract UniversalItems is Upgradable
     
     function itemCount(string key) public view returns(uint)
     {
-        return db.getUint(itemID(key, 'item_count'));
+        return tokens.totalSupply(itemID(key, ''));
+    }
+    
+    function itemBalance(address Address, string key) public view returns(uint)
+    {
+        return tokens.balanceOf(Address, itemID(key, ''));
     }
     
     function itemsCount() public view returns(uint)
@@ -331,50 +402,91 @@ contract UniversalItems is Upgradable
     function items(string key) public view returns
     (
         string description,
-        uint atomicCost,
+        uint creditCost,
+        uint atomicWeight,
         uint universalSupply,
         uint[] indexes,
         uint[] amounts
     ){
         uint cost;
+        uint weight;
         uint[] memory index = new uint[](db.getUint(itemID(key, 'indexes')));
         uint[] memory amount = new uint[](db.getUint(itemID(key, 'amounts')));
         for(uint i = 0; i < index.length; i++)
         {
             index[i] = db.getUint(itemID(key, combine('index', '_', uintToString(i.add(1)), '', '')));
             amount[i] = db.getUint(itemID(key, combine('amount', '_', uintToString(i.add(1)), '', '')));
-            cost = cost.add(atoms.atomPrice(uintToString(index[i].mul(amount[i]))));
+            cost = cost.add(atoms.atomPrice(bytes32ToString(atoms.atomSymbolBytes(uintToString(index[i])))).mul(amount[i]));
+            weight = weight.add(atoms.atomWeight(bytes32ToString(atoms.atomSymbolBytes(uintToString(index[i])))).mul(amount[i]));
         }
         return(
-            bytes32ToString(db.getString(itemID(key, 'description'))),
+            bytes32ToString(itemDescriptionBytes(key)),
             cost,
-            db.getUint(itemID(key, 'item_count')),
+            weight,
+            itemCount(key),
             index,
             amount
         );
     }
     
-    function craftItem(string key) public 
+    function itemDescriptionBytes(string key) public view returns(bytes32)
     {
+        return db.getString(itemID(key, 'description'));
+    }
+    
+    function craftItem(string key, uint amount) public returns(bool)
+    {
+        require(stringToBytes32(key) != stringToBytes32(''));
         require(db.getString(itemID(key, 'key')) == stringToBytes32(key));
         uint[] memory indexes = new uint[](db.getUint(itemID(key, 'indexes')));
         uint[] memory amounts = new uint[](db.getUint(itemID(key, 'amounts')));
         for(uint i = 0; i < indexes.length; i++)
         {
             indexes[i] = db.getUint(itemID(key, combine('index', '_', uintToString(i.add(1)), '', '')));
-            amounts[i] = db.getUint(itemID(key, combine('amount', '_', uintToString(i.add(1)), '', '')));
+            amounts[i] = db.getUint(itemID(key, combine('amount', '_', uintToString(i.add(1)), '', ''))).mul(amount);
         }
         for(uint index = 0; index < indexes.length; index++)
         {
-            require(tokens.balanceOf(tx.origin, bytes32ToString(atoms.atom(uintToString(indexes[index])))) >= amounts[index]);
-            atoms.atomicConversion(
-                bytes32ToString(atoms.atomSymbol(uintToString(indexes[index]))), 
-                bytes32ToString(atoms.atomSymbol(uintToString(indexes[index]))), 
+            bytes32 symbol = atoms.atomSymbolBytes(uintToString(indexes[index]));
+            require(tokens.balanceOf(tx.origin, bytes32ToString(atoms.atomNameBytes(bytes32ToString(symbol)))) >= amounts[index]);
+            atoms.atomicSwap(
+                bytes32ToString(symbol),
+                bytes32ToString(symbol), 
                 amounts[index]
             );
         }
-        tokens.make(tx.origin, 1, combine('item', '_', key, '', ''));
-        db.setUint('item_count', db.getUint('item_count').add(1));
-        db.setUint(itemID(key, 'item_count'), db.getUint(itemID(key, 'item_count')).add(1));
+        tokens.makeTokens(tx.origin, amount, itemID(key, ''));
+        db.setUint('item_count', db.getUint('item_count').add(amount));
+        return true;
+    }
+    
+    function buyItem(string key, uint amount) public returns(bool)
+    {
+        uint cost; uint weight;
+        uint length = db.getUint(itemID(key, 'indexes'));
+        require(stringToBytes32(key) != stringToBytes32(''));
+        bytes32[] memory symbols = new bytes32[](length);
+        uint[] memory amounts = new uint[](length);
+        for(uint i = 0; i < symbols.length; i++)
+        {
+            uint index = db.getUint(itemID(key, combine('index', '_', uintToString(i.add(1)), '', '')));
+            symbols[i] = atoms.atomSymbolBytes(uintToString(index));
+            amounts[i] = db.getUint(itemID(key, combine('amount', '_', uintToString(i.add(1)), '', ''))).mul(amount);
+            cost = cost.add(atoms.atomPrice(bytes32ToString(symbols[i])).mul(amounts[i]));
+            weight = weight.add(atoms.atomWeight(bytes32ToString(symbols[i])).mul(amounts[i]));
+        }
+        require(tokens.balanceOf(tx.origin, 'CT') >= cost);
+        require(tokens.balanceOf(centralBank, 'NRG') >= weight);
+        require(tokens.transfer(centralBank, cost, 'CT') == true);
+        for(uint Index = 0; Index < symbols.length; Index++)
+        {
+            atoms.atomicSwap(
+                bytes32ToString(symbols[Index]),
+                toString(centralBank), 
+                amounts[Index]
+            );
+        }
+        require(craftItem(key, amount) == true);
+        return true;
     }
 }

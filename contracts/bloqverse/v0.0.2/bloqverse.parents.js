@@ -62,7 +62,23 @@ Step 27 -   Add Families Address to Assets Write List
 Step 27 -   Add Families Address to Parents Write List
 Step 28 -   Administrators can now use ForcedMarriage() to generate children!
 
+Atoms ...
+Step 29 -   Initiate Atoms() - linking to Proxy & Token contracts
+Step 30 -   Add Atoms Address to Proxy Whitelist
+Step 31 -   Add Atoms Address to Tokens Write List
+Step 32 -   Can now start adding atomic structure ...
+Step 33 -   Administrators can now GenerateAtoms() for testing ...
+Step 34 -   Players can sell atoms to banks who converts to NRG
+Step 35 -   Players can buy atoms from bank if bank has enough NRG
+Step 36 -   Players can perform atomic swaps (based on weight)
 
+Items ...
+Step 37 -   Initiate Items() - linking to Proxy, Token & Atom contracts
+Step 38 -   Add Items Address to Proxy Whitelist
+Step 39 -   Add Items Address to Tokens Write List
+Step 40 -   Add Items Address to Atoms Write List
+Step 41 -   Players can now Craft Items (using atoms)
+Step 42 -   Or buy items from bank (if it has enough NRG to re-cycle)
 
 */
 

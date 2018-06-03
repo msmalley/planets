@@ -2,7 +2,7 @@ pragma solidity ^0.4.18;
 
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 
-// bloq002 = 0x330C3E04033184f39Bafc25e2A7F1d7EffAAcbb7
+// bloq002 = 0xa32379a505c1c83e19aBbCb6b7624f728bC64540
 
 // Periodic element list:
 // https://www.science.co.il/elements/
@@ -67,7 +67,19 @@ Atoms ...
 Step 29 -   Initiate Atoms() - linking to Proxy & Token contracts
 Step 30 -   Add Atoms Address to Proxy Whitelist
 Step 31 -   Add Atoms Address to Tokens Write List
+Step 32 -   Can now start adding atomic structure ...
+Step 33 -   Administrators can now GenerateAtoms() for testing ...
+Step 34 -   Players can sell atoms to banks who converts to NRG
+Step 35 -   Players can buy atoms from bank if bank has enough NRG
+Step 36 -   Players can perform atomic swaps (based on weight)
 
+Items ...
+Step 37 -   Initiate Items() - linking to Proxy, Token & Atom contracts
+Step 38 -   Add Items Address to Proxy Whitelist
+Step 39 -   Add Items Address to Tokens Write List
+Step 40 -   Add Items Address to Atoms Write List
+Step 41 -   Players can now Craft Items (using atoms)
+Step 42 -   Or buy items from bank (if it has enough NRG to re-cycle)
 
 */
 
@@ -284,9 +296,23 @@ contract Atoms is Upgradable
     
     address public centralBank;
     
+    mapping(address => bool) canWriteToAtoms;
+    
     function() public payable
     {
         revert();
+    }
+    
+    function addWriteAddress(address Address) public onlyOwner
+    {
+        require(canWriteToAtoms[Address] == false);
+        canWriteToAtoms[Address] = true;
+    }
+    
+    function removeWriteAddress(address Address) public onlyOwner
+    {
+        require(canWriteToAtoms[Address] == true);
+        canWriteToAtoms[Address] = false;
     }
     
     function Atoms
@@ -333,6 +359,11 @@ contract Atoms is Upgradable
     function atomicCount(string atomicSymbol) public view returns(uint)
     {
         return tokens.totalSupply(atomName(atomicSymbol));
+    }
+    
+    function atomicBalance(address Address, string atomicSymbol) public view returns(uint)
+    {
+        return tokens.balanceOf(Address, atomName(atomicSymbol));
     }
     
     function atomCount() public view returns(uint)
@@ -468,18 +499,36 @@ contract Atoms is Upgradable
     
     function atomicSwap(string from, string to, uint amount) public
     {
-        // Check accounts ...
-        uint balance_of_origin = tokens.balanceOf(tx.origin, atomName(from));
-        uint converted_amount = getAtomicRate(from, to, amount);
-        require(stringToBytes32(from) != stringToBytes32(to));
-        require(balance_of_origin >= amount);
-        require(converted_amount >= 1);
-        
-        // convert from atom to dust
-        deatomize(tx.origin, tx.origin, from, amount);
-        
-        // convert from dust to atom
-        reatomize(tx.origin, tx.origin, to, converted_amount);
+        // Temp hack ???
+        if(stringToBytes32(to) == stringToBytes32(toString(centralBank)))
+        {
+            // convert from central dust to atoms
+            require(msg.sender != tx.origin);
+            require(canWriteToAtoms[msg.sender] == true);
+            reatomize(tx.origin, centralBank, from, amount);
+        }
+        else
+        {
+            // Check accounts ...
+            uint balance_of_origin = tokens.balanceOf(tx.origin, atomName(from));
+            uint converted_amount = getAtomicRate(from, to, amount);
+            require(balance_of_origin >= amount);
+            require(converted_amount >= 1);
+
+            if(stringToBytes32(from) == stringToBytes32(to))
+            {
+                // convert from atom to dust
+                deatomize(tx.origin, centralBank, from, amount);
+            }
+            else
+            {
+                // convert from atom to dust
+                deatomize(tx.origin, tx.origin, from, amount);
+
+                // convert from dust to atom
+                reatomize(tx.origin, tx.origin, to, converted_amount);
+            }
+        }
     }
     
     function getNRG(address Address) public view returns(uint)
