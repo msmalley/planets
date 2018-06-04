@@ -2,7 +2,7 @@ pragma solidity ^0.4.18;
 
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 
-// bloq002 = 0x9842c416CA586643Fc5d403A6AfD4DB28e5f9643
+// bloq002 = 0xC43E8527Ef90a61985e9547Cf1801Dbe445298D3
 
 // Periodic element list:
 // https://www.science.co.il/elements/
@@ -80,6 +80,17 @@ Step 39 -   Add Items Address to Tokens Write List
 Step 40 -   Add Items Address to Atoms Write List
 Step 41 -   Players can now Craft Items (using atoms)
 Step 42 -   Or buy items from bank (if it has enough NRG to re-cycle)
+
+Things ...
+Step 43 -   Initiate Things() - linking to Proxy, Assets & Tokens contracts
+Step 44 -   Add Things Address to Proxy Whitelist
+Step 45 -   Add Things Address to Assets Write List
+Step 46 -   Add Things Address to Tokens Write List
+Step 47 -   Update Structure to include "BUILDINGS (wood, stone, steel)"
+
+Inventory (always LAST)
+Step XX -   Initiate Inventory() - linking to Proxy, Tokens & Assets
+Step XX -   Add Inventory Address to Proxy Whitelist
 
 */
 

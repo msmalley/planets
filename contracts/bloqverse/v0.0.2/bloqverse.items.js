@@ -75,6 +75,17 @@ Step 40 -   Add Items Address to Atoms Write List
 Step 41 -   Players can now Craft Items (using atoms)
 Step 42 -   Or buy items from bank (if it has enough NRG to re-cycle)
 
+Things ...
+Step 43 -   Initiate Things() - linking to Proxy, Assets & Tokens contracts
+Step 44 -   Add Things Address to Proxy Whitelist
+Step 45 -   Add Things Address to Assets Write List
+Step 46 -   Add Things Address to Tokens Write List
+Step 47 -   Update Structure to include "BUILDINGS (wood, stone, steel)"
+
+Inventory (always LAST)
+Step XX -   Initiate Inventory() - linking to Proxy, Tokens & Assets
+Step XX -   Add Inventory Address to Proxy Whitelist
+
 */
 
 library SafeMath 

@@ -3,11 +3,12 @@ pragma solidity ^0.4.18;
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 
 // Metallic HQ = 
-// 50828425710504467065371676546184894242207639619273079355697657823752347769406
+// 4263377855029254635302124537845462920131529810921053344418552495958601102900
 
-// bloq002 = 0x5d8B04EFf342134F5224893eD0BbE48ea546c46f
+// Genesis Prime =
+// 111289844878109423708526826116317304238808005787352761159317502897542254661420
 
-
+// bloq002 = 0xd1823127BC62457Fc8d2970Ce072FF5234Dcf0d4
 
 /*
 
@@ -84,7 +85,7 @@ Step 41 -   Players can now Craft Items (using atoms)
 Step 42 -   Or buy items from bank (if it has enough NRG to re-cycle)
 
 Buildings ...
-Step 43 -   Initiate Buildings() - linking to Proxy, Assets & Item contracts
+Step 43 -   Initiate Buildings() - linking to Proxy, Assets & Tokens contracts
 Step 44 -   Add Buildings Address to Proxy Whitelist
 Step 45 -   Add Buildings Address to Assets Write List
 Step 46 -   Add Buildings Address to Tokens Write List
@@ -300,16 +301,12 @@ contract ERC20 is Upgradable
 
 contract ERC721 is Upgradable
 {
+    function totalSupply(string optionalResource) public view returns (uint);
     function balanceOf(address beneficary, string optionalResource) public view returns(uint);
     function mint(address beneficiary, uint256 id, string meta, string optionalResource) public;
     function destroy(uint256 assetId, address Address, string optionalResource) public;
     function metabytes(uint tokenId, string optionalResource) public view returns(bytes32);
     function ownerOf(uint tokenId, string optionalResource) public view returns (address);
-}
-
-contract Items is Upgradable
-{
-    
 }
 
 contract Buildings is Upgradable
@@ -399,9 +396,9 @@ contract Buildings is Upgradable
     )
     public returns(uint256)
     {
-        require(wood >= 1);
-        require(stone >= 1);
-        require(steel >= 1);
+        require(wood >= 2);
+        require(stone >= 2);
+        require(steel >= 2);
         require(wood.add(stone).add(steel) == 100);
         uint id = bid
         (
@@ -488,12 +485,33 @@ contract Buildings is Upgradable
         require(tokens.balanceOf(centralTrustee, 'item_wood') >= getWood(id));
         require(tokens.balanceOf(centralTrustee, 'item_stone') >= getStone(id));
         require(tokens.balanceOf(centralTrustee, 'item_steel') >= getSteel(id));
-        tokens.destroyTokens(centralTrustee, getWood(id), 'item_wood');
-        tokens.destroyTokens(centralTrustee, getStone(id), 'item_stone');
-        tokens.destroyTokens(centralTrustee, getSteel(id), 'item_steel');
-        tokens.makeTokens(tx.origin, getWood(id), 'item_wood');
-        tokens.makeTokens(tx.origin, getStone(id), 'item_stone');
-        tokens.makeTokens(tx.origin, getSteel(id), 'item_steel');
+        tokens.destroyTokens(centralTrustee, getWood(id).sub(1), 'item_wood');
+        tokens.destroyTokens(centralTrustee, getStone(id).sub(1), 'item_stone');
+        tokens.destroyTokens(centralTrustee, getSteel(id).sub(1), 'item_steel');
+        tokens.makeTokens(centralTrustee, 1, 'BUILDING_PAYMENTS');
+        tokens.makeTokens(tx.origin, getWood(id).sub(1), 'item_wood');
+        tokens.makeTokens(tx.origin, getStone(id).sub(1), 'item_stone');
+        tokens.makeTokens(tx.origin, getSteel(id).sub(1), 'item_steel');
         assets.destroy(id, tx.origin, 'BUILDING');
+    }
+    
+    function buildingCount() public view returns(uint)
+    {
+        return assets.totalSupply('BUILDING');
+    }
+    
+    function inTrust() public view returns
+    (
+        uint wood,
+        uint stone,
+        uint steel
+    )
+    {
+        return
+        (
+            tokens.balanceOf(centralTrustee, 'item_wood'),
+            tokens.balanceOf(centralTrustee, 'item_stone'),
+            tokens.balanceOf(centralTrustee, 'item_steel')
+        );
     }
 }

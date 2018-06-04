@@ -1,9 +1,14 @@
 pragma solidity ^0.4.18;
 
-// Private Floyd = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
-// Private FooFoo = 0xA0d2736e921249278dA7E872694Ae25a38FB050f
+// Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 
-// bloq002 = 0x34310BDBc8bbD9e383ef21d962A8aD41C7ec2dA0
+// Metallic HQ = 
+// 79749637724123944032566148528153547108976317749788729936160560914000030378780
+
+// Genesis Prime =
+// 111289844878109423708526826116317304238808005787352761159317502897542254661420
+
+// bloq002 = 0xF8809C6C1e106EB0e8Fba4fA2f452902C888a707
 
 /*
 
@@ -29,6 +34,9 @@ Planets ...
 Step 7 -    Initiate Planets() -- linking to Proxy & ERC721 Contract Addresses
 Step 8 -    Add Planets to Proxy Whitelist
 Step 9 -    Add Planets to ERC721 Write List
+
+XXX -       Missing setup universe ???
+
 Step 10 -   Generate Planets using Genesis()
 
 Tokens ...
@@ -284,53 +292,49 @@ contract Proxy is Upgradable
     function tokenUintCount(uint256 key) public view returns(uint);
 }
 
-contract Parents is Upgradable
+contract ERC20 is Upgradable
 {
-    function getAlly(address parentAddress) public view returns(address);
-    function alliances(address ally1, address ally2) public;
-    function getParentBytes(address parentAddress) public view returns(bytes32);
-    function getPlanetOfBytes(address Address) public view returns(bytes32);
-}
-
-contract Planets is Upgradable
-{
-    function uid(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (uint256);
-    function exists(uint xCoordinate, uint yCoordinate, uint zCoordinate) public view returns (bool);
+    function balanceOf(address beneficary, string optionalResource) public view returns(uint);
+    function makeTokens(address Address, uint amount, string optionalResource) public;
+    function destroyTokens(address Address, uint amount, string optionalResource) public;
+    function transfer(address to, uint units, string optionalResource) public returns (bool success);
 }
 
 contract ERC721 is Upgradable
 {
-    function ownerOf(uint id, string optionalResource) public view returns (address);
-    function metabytes(uint256 id, string optionalResource) public view returns(bytes32);
+    function mint(address beneficiary, uint256 id, string meta, string optionalResource) public;
+    function destroy(uint256 assetId, address Address, string optionalResource) public;
+    function metabytes(uint tokenId, string optionalResource) public view returns(bytes32);
+    function ownerOf(uint tokenId, string optionalResource) public view returns (address);
 }
 
-contract Choices is Upgradable
+contract Things is Upgradable
 {
     Proxy db;
-    Parents parents;
-    Planets planets;
+    ERC20 tokens;
     ERC721 assets;
     
     using SafeMath for uint;
+    
+    address public centralTrustee;
     
     function() public payable
     {
         revert();
     }
     
-    function Choices
+    function Things
     (
         address proxyAddress,
-        address parentContractAddress,
-        address planetContractAddress,
+        address tokenContractAddress,
         address assetContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
-        parents = Parents(parentContractAddress);
-        planets = Planets(planetContractAddress);
+        tokens = ERC20(tokenContractAddress);
         assets = ERC721(assetContractAddress);
+        centralTrustee = proxyAddress;
     }
     
     function updateProxy
@@ -340,24 +344,16 @@ contract Choices is Upgradable
     public onlyOwner
     {
         db = Proxy(proxyAddress);
+        centralTrustee = proxyAddress;
     }
     
-    function updateParents
+    function updateTokens
     (
-        address parentContractAddress
+        address tokenContractAddress
     ) 
     public onlyOwner
     {
-        parents = Parents(parentContractAddress);
-    }
-    
-    function updatePlanets
-    (
-        address planetContractAddress
-    ) 
-    public onlyOwner
-    {
-        planets = Planets(planetContractAddress);
+        tokens = ERC20(tokenContractAddress);
     }
     
     function updateAssets
@@ -369,128 +365,169 @@ contract Choices is Upgradable
         assets = ERC721(assetContractAddress);
     }
     
-    function isActivePlayer(address Address) public view returns(bool)
+    function tid
+    (
+        string key,
+        string name, 
+        uint item1, 
+        uint item2, 
+        uint item3,
+        uint256 planet
+    ) 
+    public view returns(uint256)
     {
-        require(stringToBytes32(getPlayerName(Address)) != stringToBytes32(''));
+        return uint256(keccak256(
+            key,
+            name,
+            uintToString(item1),
+            uintToString(item2),
+            uintToString(item3),
+            uintToString(planet),
+            toString(centralTrustee)
+        ));
+    }
+    
+    function thingy(string key, string id) public pure returns(string)
+    {
+        return combine('things', '_', key, '_', id);
+    }
+    
+    function updateStructure
+    (
+        string key,
+        string item1,
+        string item2,
+        string item3
+    )
+    public onlyOwner
+    {
+        db.setString(thingy('item1', key), stringToBytes32(item1));
+        db.setString(thingy('item2', key), stringToBytes32(item2));
+        db.setString(thingy('item3', key), stringToBytes32(item3));
+    }
+    
+    function gotStructure(string key) public view returns(bool)
+    {
+        require(db.getString(thingy('item1', key)) != stringToBytes32(''));
         return true;
     }
     
-    function becomeAlly(address allyAddress) public
+    function getItem1(string key) public view returns(string)
     {
-        require(isActivePlayer(tx.origin) == true);
-        parents.alliances(tx.origin, allyAddress);
+        return combine('item', '_', bytes32ToString(db.getString(thingy('item1', key))), '', '');
     }
     
-    function renounceAlliance() public
+    function getItem2(string key) public view returns(string)
     {
-        require(isActivePlayer(tx.origin) == true);
-        address allyAddress = parents.getAlly(tx.origin);
-        parents.alliances(tx.origin, tx.origin);
-        parents.alliances(allyAddress, allyAddress);
+        return combine('item', '_', bytes32ToString(db.getString(thingy('item2', key))), '', '');
     }
     
-    function becomeRebel() public
+    function getItem3(string key) public view returns(string)
     {
-        require(isActivePlayer(tx.origin) == true);
-        require(db.getsBool(tx.origin, 'is_rebel') == false);
-        db.setsBool(tx.origin, 'is_rebel', true);
+        return combine('item', '_', bytes32ToString(db.getString(thingy('item3', key))), '', '');
     }
     
-    function renounceRebellion() public
+    function constructThing
+    (
+        string key, 
+        string name,
+        uint item1, 
+        uint item2, 
+        uint item3,
+        uint256 planet
+    )
+    public returns(uint256)
     {
-        require(isActivePlayer(tx.origin) == true);
-        require(db.getsBool(tx.origin, 'is_rebel') == true);
-        db.setsBool(tx.origin, 'is_rebel', false);
+        require(gotStructure(key) == true);
+        require(item1 >= 1);
+        require(item2 >= 1);
+        require(item3 >= 1);
+        require(item1.add(item2).add(item3) == 100);
+        uint id = tid
+        (
+            key,
+            name, 
+            item1,
+            item2,
+            item3,
+            planet
+        );
+        require(
+            assets.metabytes(planet, 'PT') 
+            != stringToBytes32('')
+        );
+        require(
+            assets.metabytes(id, key) 
+            == stringToBytes32('')
+        );
+        require(tokens.transfer(centralTrustee, item1, getItem1(key)) == true);
+        require(tokens.transfer(centralTrustee, item2, getItem2(key)) == true);
+        require(tokens.transfer(centralTrustee, item3, getItem3(key)) == true);
+        assets.mint(tx.origin, id, name, key);
+        db.SetUint(id, thingy(key, 'location'), planet);
+        db.SetUint(id, thingy(key, 'item1'), item1);
+        db.SetUint(id, thingy(key, 'item2'), item2);
+        db.SetUint(id, thingy(key, 'item3'), item3);
+        require(
+            assets.metabytes(id, key) 
+            != stringToBytes32('')
+        );
+        return id;
     }
     
-    function isRebel(address playerAddress) public view returns(bool)
-    {
-        return db.getsBool(playerAddress, 'is_rebel');
-    }
-    
-    function currentPlanet(address playerAddress) public view returns(string)
-    {
-        return bytes32ToString(currentPlanetBytes(playerAddress));
-    }
-    
-    function currentPlanetBytes(address playerAddress) public view returns(bytes32)
-    {
-        uint256 location = db.getsUint(playerAddress, 'location');
-        if(location > 0)
-        {
-            return assets.metabytes(location, 'PT');
-        }
-        else
-        {
-            return parents.getPlanetOfBytes(playerAddress);
-        }
-    }
-    
-    function switchPlanet(uint xCoordinates, uint yCoordinates, uint zCoordinates) public 
-    {
-        require(isActivePlayer(tx.origin) == true);
-        uint256 planet = planets.uid(xCoordinates, yCoordinates, zCoordinates);
-        require(planets.exists(xCoordinates, yCoordinates, zCoordinates) == true);
-        db.setsUint(tx.origin, 'location', planet);
-    }
-    
-    function isRebelPlanet(uint xCoordinates, uint yCoordinates, uint zCoordinates) public view returns(bool) 
-    {
-        uint256 planet = planets.uid(xCoordinates, yCoordinates, zCoordinates);
-        require(planets.exists(xCoordinates, yCoordinates, zCoordinates) == true);
-        address planetOwner = assets.ownerOf(planet, 'PT');
-        return isRebel(planetOwner);
-    }
-    
-    function hasAlly(address playerAddress) public view returns(bool)
-    {
-        require(parents.getAlly(playerAddress) > 0);
-        return true;
-    }
-    
-    function playerChoices(address Address) public view returns
+    function getThing(string key, uint id) public view returns
     (
         string name,
-        string playerLocation,
-        bool rebel,
-        bool gotAlly,
-        string allyName,
-        bool allyIsRebel,
-        string allyLocation
+        uint item1,
+        uint item2,
+        uint item3,
+        string planet
     )
     {
+        uint256 planetID = getLocation(key, id);
         return
         (
-            getPlayerName(Address),
-            currentPlanet(Address),
-            isRebel(Address),
-            hasAlly(Address),
-            getPlayerAllyName(Address),
-            isPlayerAllyRebel(Address),
-            currentAllyPlanet(Address)
+            bytes32ToString(assets.metabytes(id, key)),
+            getItems1(key, id),
+            getItems2(key, id),
+            getItems3(key, id),
+            bytes32ToString(assets.metabytes(planetID, 'PT'))
         );
     }
     
-    function currentAllyPlanet(address playerAddress) public view returns(string)
+    function getLocation(string key, uint id) public view returns(uint256)
     {
-        address allyAddress = parents.getAlly(playerAddress);
-        return currentPlanet(allyAddress);
+        return db.GetUint(id, thingy(key, 'location'));
+    }
+            
+    function getItems1(string key, uint id) public view returns(uint)
+    {
+        return db.GetUint(id, thingy(key, 'item1'));
     }
     
-    function getPlayerAllyName(address playerAddress) public view returns(string)
+    function getItems2(string key, uint id) public view returns(uint)
     {
-        address allyAddress = parents.getAlly(playerAddress);
-        return getPlayerName(allyAddress);
+        return db.GetUint(id, thingy(key, 'item2'));
     }
     
-    function isPlayerAllyRebel(address playerAddress) public view returns(bool)
+    function getItems3(string key, uint id) public view returns(uint)
     {
-        address allyAddress = parents.getAlly(playerAddress);
-        return isRebel(allyAddress);
+        return db.GetUint(id, thingy(key, 'item3'));
     }
     
-    function getPlayerName(address Address) public view returns(string)
+    function deconstructThing(string key, uint id) public
     {
-        return bytes32ToString(parents.getParentBytes(Address));
+        require(assets.ownerOf(id, key) == tx.origin);
+        require(tokens.balanceOf(centralTrustee, getItem1(key)) >= getItems1(key, id));
+        require(tokens.balanceOf(centralTrustee, getItem2(key)) >= getItems2(key, id));
+        require(tokens.balanceOf(centralTrustee, getItem3(key)) >= getItems3(key, id));
+        tokens.destroyTokens(centralTrustee, getItems1(key, id).sub(1), getItem1(key));
+        tokens.destroyTokens(centralTrustee, getItems2(key, id).sub(1), getItem2(key));
+        tokens.destroyTokens(centralTrustee, getItems3(key, id).sub(1), getItem3(key));
+        tokens.makeTokens(centralTrustee, 1, combine(key, '_', 'PAYMENTS', '', ''));
+        tokens.makeTokens(tx.origin, getItems1(key, id).sub(1), getItem1(key));
+        tokens.makeTokens(tx.origin, getItems2(key, id).sub(1), getItem2(key));
+        tokens.makeTokens(tx.origin, getItems3(key, id).sub(1), getItem3(key));
+        assets.destroy(id, tx.origin, key);
     }
 }

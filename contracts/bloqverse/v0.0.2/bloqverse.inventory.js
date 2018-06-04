@@ -3,7 +3,7 @@ pragma solidity ^0.4.18;
 // Private Floyd = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 // Private FooFoo = 0xA0d2736e921249278dA7E872694Ae25a38FB050f
 
-// bloq002 = 0x1ba241FB510d11C182445ed7073D9143CBe3CC9b
+// bloq002 = 0xA48A56D818Ae7fcC14f0Be0Ab0aE93cd3A2f492d
 
 /*
 
@@ -76,10 +76,12 @@ Step 40 -   Add Items Address to Atoms Write List
 Step 41 -   Players can now Craft Items (using atoms)
 Step 42 -   Or buy items from bank (if it has enough NRG to re-cycle)
 
-Buildings ...
-Step 43 -   Initiate Buildings() - linking to Proxy, Assets & Item contracts
-Step 44 -   Add Buildings Address to Proxy Whitelist
-Step 45 -   Add Buildings Address to Assets Write List
+Things ...
+Step 43 -   Initiate Things() - linking to Proxy, Assets & Tokens contracts
+Step 44 -   Add Things Address to Proxy Whitelist
+Step 45 -   Add Things Address to Assets Write List
+Step 46 -   Add Things Address to Tokens Write List
+Step 47 -   Update Structure to include "BUILDINGS (wood, stone, steel)"
 
 Inventory (always LAST)
 Step XX -   Initiate Inventory() - linking to Proxy, Tokens & Assets
@@ -294,11 +296,18 @@ contract ERC721 is Upgradable
     function totalSupply(string optionalResource) public view returns(uint);
 }
 
+contract Atoms is Upgradable
+{
+    function atomNameBytes(string atomicSymbol) public view returns(bytes32);
+    function atomSymbolBytes(string atomicIndex) public view returns(bytes32);
+}
+
 contract Inventory is Upgradable
 {
     Proxy db;
     ERC20 tokens;
     ERC721 assets;
+    Atoms atoms;
     
     using SafeMath for uint;
     
@@ -313,13 +322,15 @@ contract Inventory is Upgradable
     (
         address proxyAddress,
         address tokenContractAddress,
-        address assetContractAddress
+        address assetContractAddress,
+        address atomContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
         tokens = ERC20(tokenContractAddress);
         assets = ERC721(assetContractAddress);
+        atoms = Atoms(atomContractAddress);
         centralBank = proxyAddress;
     }
     
@@ -349,6 +360,15 @@ contract Inventory is Upgradable
     public onlyOwner
     {
         assets = ERC721(assetContractAddress);
+    }
+    
+    function updateAtoms
+    (
+        address atomContractAddress
+    ) 
+    public onlyOwner
+    {
+        atoms = Atoms(atomContractAddress);
     }
     
     function centralSupply() public view returns
@@ -388,6 +408,33 @@ contract Inventory is Upgradable
             tokens.balanceOf(Address, 'item_steel')
         );
     }
+    
+    function centralBuildingTrustee() public view returns
+    (
+        uint wood,
+        uint stone,
+        uint steel
+    )
+    {
+        uint payments = tokens.totalSupply('BUILDING_PAYMENTS');
+        return
+        (
+            payments,
+            payments,
+            payments
+        );
+    }
+    
+    function getAssets(address Address) public view returns
+    (
+        uint buildings
+    )
+    {
+        return
+        (
+            assets.balanceOf(Address, 'BUILDING')
+        );
+    }
             
     function getOrganics(address Address) public view returns
     (
@@ -404,5 +451,17 @@ contract Inventory is Upgradable
             assets.totalSupply('PT'),
             assets.totalSupply('KID')
         );
+    }
+    
+    function atomsHarnessed(address Address) public view returns(uint[])
+    {
+        uint[] memory results = new uint[](26);
+        for(uint i = 0; i < 26; i++)
+        {
+            string memory symbol = bytes32ToString(atoms.atomSymbolBytes(uintToString(i.add(1))));
+            string memory name = bytes32ToString(atoms.atomNameBytes(symbol));
+            results[i] = tokens.balanceOf(Address, name);
+        }
+        return results;
     }
 }
