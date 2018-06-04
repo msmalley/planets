@@ -1,17 +1,12 @@
 pragma solidity ^0.4.18;
 
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
+// Private FooFoo = 0xA0d2736e921249278dA7E872694Ae25a38FB050f
 
-// Metallic HQ = 
-// 79749637724123944032566148528153547108976317749788729936160560914000030378780
+// MegaUberCorp Intergalactic = 
+// 51903284510384126512393640998007292375040233478966863102742712281380896609667
 
-// The Foo Bowl =
-// 56233951280438263134293449249286268691915385385200323544533588425545301638212
-
-// Genesis Prime =
-// 111289844878109423708526826116317304238808005787352761159317502897542254661420
-
-// bloq002 = 0xF8809C6C1e106EB0e8Fba4fA2f452902C888a707
+// bloq002 = 0x875B5a9CAf188343B3385E4265d4c81617361f8D
 
 /*
 
@@ -93,6 +88,11 @@ Step 44 -   Add Things Address to Proxy Whitelist
 Step 45 -   Add Things Address to Assets Write List
 Step 46 -   Add Things Address to Tokens Write List
 Step 47 -   Update Structure to include "BUILDINGS (wood, stone, steel)"
+
+Corporations ...
+Step 48 -   Initiate Corporations() - linking to Proxy & Asset Contracts
+Step 49 -   Add Corporations to Proxy Whitelist
+Step 50 -   Add Corporations to Assets Write List
 
 Inventory (always LAST)
 Step XX -   Initiate Inventory() - linking to Proxy, Tokens & Assets
@@ -295,26 +295,18 @@ contract Proxy is Upgradable
     function tokenUintCount(uint256 key) public view returns(uint);
 }
 
-contract ERC20 is Upgradable
-{
-    function balanceOf(address beneficary, string optionalResource) public view returns(uint);
-    function makeTokens(address Address, uint amount, string optionalResource) public;
-    function destroyTokens(address Address, uint amount, string optionalResource) public;
-    function transfer(address to, uint units, string optionalResource) public returns (bool success);
-}
-
 contract ERC721 is Upgradable
 {
     function mint(address beneficiary, uint256 id, string meta, string optionalResource) public;
     function destroy(uint256 assetId, address Address, string optionalResource) public;
     function metabytes(uint tokenId, string optionalResource) public view returns(bytes32);
     function ownerOf(uint tokenId, string optionalResource) public view returns (address);
+    function transfer(address to, uint id, string optionalResource) public;
 }
 
-contract Things is Upgradable
+contract Corporations is Upgradable
 {
     Proxy db;
-    ERC20 tokens;
     ERC721 assets;
     
     using SafeMath for uint;
@@ -326,16 +318,14 @@ contract Things is Upgradable
         revert();
     }
     
-    function Things
+    function Corporations
     (
         address proxyAddress,
-        address tokenContractAddress,
         address assetContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
-        tokens = ERC20(tokenContractAddress);
         assets = ERC721(assetContractAddress);
         centralTrustee = proxyAddress;
     }
@@ -350,15 +340,6 @@ contract Things is Upgradable
         centralTrustee = proxyAddress;
     }
     
-    function updateTokens
-    (
-        address tokenContractAddress
-    ) 
-    public onlyOwner
-    {
-        tokens = ERC20(tokenContractAddress);
-    }
-    
     function updateAssets
     (
         address assetContractAddress
@@ -368,91 +349,35 @@ contract Things is Upgradable
         assets = ERC721(assetContractAddress);
     }
     
-    function tid
+    function cid
     (
-        string key,
-        string name, 
-        uint item1, 
-        uint item2, 
-        uint item3,
+        string name,
+        uint256 founder,
         uint256 planet
     ) 
     public view returns(uint256)
     {
         return uint256(keccak256(
-            key,
             name,
-            uintToString(item1),
-            uintToString(item2),
-            uintToString(item3),
+            uintToString(founder),
             uintToString(planet),
             toString(centralTrustee)
         ));
     }
     
-    function thingy(string key, string id) public pure returns(string)
-    {
-        return combine('things', '_', key, '_', id);
-    }
-    
-    function updateStructure
+    function incorporate
     (
-        string key,
-        string item1,
-        string item2,
-        string item3
-    )
-    public onlyOwner
-    {
-        db.setString(thingy('item1', key), stringToBytes32(item1));
-        db.setString(thingy('item2', key), stringToBytes32(item2));
-        db.setString(thingy('item3', key), stringToBytes32(item3));
-    }
-    
-    function gotStructure(string key) public view returns(bool)
-    {
-        require(db.getString(thingy('item1', key)) != stringToBytes32(''));
-        return true;
-    }
-    
-    function getItem1(string key) public view returns(string)
-    {
-        return combine('item', '_', bytes32ToString(db.getString(thingy('item1', key))), '', '');
-    }
-    
-    function getItem2(string key) public view returns(string)
-    {
-        return combine('item', '_', bytes32ToString(db.getString(thingy('item2', key))), '', '');
-    }
-    
-    function getItem3(string key) public view returns(string)
-    {
-        return combine('item', '_', bytes32ToString(db.getString(thingy('item3', key))), '', '');
-    }
-    
-    function constructThing
-    (
-        string key, 
         string name,
-        uint item1, 
-        uint item2, 
-        uint item3,
-        uint256 planet
+        uint256 planet,
+        uint256 building,
+        uint256 foundingChild
     )
     public returns(uint256)
     {
-        require(gotStructure(key) == true);
-        require(item1 >= 1);
-        require(item2 >= 1);
-        require(item3 >= 1);
-        require(item1.add(item2).add(item3) == 100);
-        uint id = tid
+        uint id = cid
         (
-            key,
             name, 
-            item1,
-            item2,
-            item3,
+            foundingChild,
             planet
         );
         require(
@@ -460,77 +385,110 @@ contract Things is Upgradable
             != stringToBytes32('')
         );
         require(
-            assets.metabytes(id, key) 
+            assets.metabytes(id, 'CORPORATION') 
             == stringToBytes32('')
         );
-        require(tokens.transfer(centralTrustee, item1, getItem1(key)) == true);
-        require(tokens.transfer(centralTrustee, item2, getItem2(key)) == true);
-        require(tokens.transfer(centralTrustee, item3, getItem3(key)) == true);
-        assets.mint(tx.origin, id, name, key);
-        db.SetUint(id, thingy(key, 'location'), planet);
-        db.SetUint(id, thingy(key, 'item1'), item1);
-        db.SetUint(id, thingy(key, 'item2'), item2);
-        db.SetUint(id, thingy(key, 'item3'), item3);
-        require(
-            assets.metabytes(id, key) 
-            != stringToBytes32('')
-        );
+        addEmployee(id, foundingChild);
+        addBuilding(id, building);
+        db.SetUint(id, 'location', planet);
+        db.SetUint(id, 'founder', foundingChild);
+        db.SetUint(id, 'bob', block.number);
+        assets.mint(tx.origin, id, name, 'CORPORATION');
         return id;
     }
     
-    function getThing(string key, uint id) public view returns
+    function getCompany(uint company) public view returns
     (
         string name,
-        uint item1,
-        uint item2,
-        uint item3,
-        string planet
+        string founder,
+        string planetOfIncorporation,
+        uint employees,
+        uint buildings,
+        uint age
     )
     {
-        uint256 planetID = getLocation(key, id);
+        uint256 planetID = getLocation(company);
         return
         (
-            bytes32ToString(assets.metabytes(id, key)),
-            getItems1(key, id),
-            getItems2(key, id),
-            getItems3(key, id),
-            bytes32ToString(assets.metabytes(planetID, 'PT'))
+            bytes32ToString(assets.metabytes(company, 'CORPORATION')),
+            getFounder(company),
+            bytes32ToString(assets.metabytes(planetID, 'PT')),
+            getEmployees(company),
+            getBuildings(company),
+            getAge(company)
         );
     }
     
-    function getLocation(string key, uint id) public view returns(uint256)
+    function getLocation(uint company) public view returns(uint256)
     {
-        return db.GetUint(id, thingy(key, 'location'));
-    }
-            
-    function getItems1(string key, uint id) public view returns(uint)
-    {
-        return db.GetUint(id, thingy(key, 'item1'));
+        return db.GetUint(company, 'location');
     }
     
-    function getItems2(string key, uint id) public view returns(uint)
+    function getFounder(uint company) public view returns(string)
     {
-        return db.GetUint(id, thingy(key, 'item2'));
+        return bytes32ToString(getFounderBytes(company));
     }
     
-    function getItems3(string key, uint id) public view returns(uint)
+    function getFounderBytes(uint company) public view returns(bytes32)
     {
-        return db.GetUint(id, thingy(key, 'item3'));
+        return assets.metabytes(db.GetUint(company, 'founder'), 'KID');
     }
     
-    function deconstructThing(string key, uint id) public
+    function getEmployees(uint company) public view returns(uint)
     {
-        require(assets.ownerOf(id, key) == tx.origin);
-        require(tokens.balanceOf(centralTrustee, getItem1(key)) >= getItems1(key, id));
-        require(tokens.balanceOf(centralTrustee, getItem2(key)) >= getItems2(key, id));
-        require(tokens.balanceOf(centralTrustee, getItem3(key)) >= getItems3(key, id));
-        tokens.destroyTokens(centralTrustee, getItems1(key, id).sub(1), getItem1(key));
-        tokens.destroyTokens(centralTrustee, getItems2(key, id).sub(1), getItem2(key));
-        tokens.destroyTokens(centralTrustee, getItems3(key, id).sub(1), getItem3(key));
-        tokens.makeTokens(centralTrustee, 1, combine(key, '_', 'PAYMENTS', '', ''));
-        tokens.makeTokens(tx.origin, getItems1(key, id).sub(1), getItem1(key));
-        tokens.makeTokens(tx.origin, getItems2(key, id).sub(1), getItem2(key));
-        tokens.makeTokens(tx.origin, getItems3(key, id).sub(1), getItem3(key));
-        assets.destroy(id, tx.origin, key);
+        return db.GetUint(company, 'employees');
+    }
+    
+    function getBuildings(uint company) public view returns(uint)
+    {
+        return db.GetUint(company, 'buildings');
+    }
+    
+    function getAge(uint company) public view returns(uint)
+    {
+        return block.number.sub(db.GetUint(company, 'bob'));
+    }
+    
+    function addEmployee(uint256 company, uint256 child) public
+    {
+        require(assets.ownerOf(child, 'KID') == tx.origin);
+        assets.transfer(centralTrustee, child, 'KID');
+        db.SetUint(company, 'employees', db.GetUint(company, 'employees').add(1));
+        string memory id = combine('employee', '_', uintToString(db.GetUint(company, 'employees')), '', '');
+        db.SetUint(company, id, child); 
+    }
+    
+    function addBuilding(uint256 company, uint256 building) public
+    {
+        require(assets.ownerOf(building, 'BUILDING') == tx.origin);
+        assets.transfer(centralTrustee, building, 'BUILDING');
+        db.SetUint(company, 'buildings', db.GetUint(company, 'buildings').add(1));
+        string memory id = combine('building', '_', uintToString(db.GetUint(company, 'buildings')), '', '');
+        db.SetUint(company, id, building);
+    }
+    
+    function unincorporate(uint256 company) public
+    {
+        require(
+            assets.metabytes(company, 'CORPORATION') 
+            != stringToBytes32('')
+        );
+        require(assets.ownerOf(company, 'CORPORATION') == tx.origin);
+        uint[] memory employees = new uint[](getEmployees(company));
+        uint[] memory buildings = new uint[](getBuildings(company));
+        for(uint employee = 0; employee < employees.length; employee++)
+        {
+            uint employeeID = db.GetUint(company, combine('employee', '_', uintToString(employee.add(1)), '', ''));
+            bytes32 employeeMeta = assets.metabytes(employeeID, 'KID');
+            assets.destroy(employeeID, centralTrustee, 'KID');
+            assets.mint(tx.origin, employeeID, bytes32ToString(employeeMeta), 'KID');
+        }
+        for(uint building = 0; building < buildings.length; building++)
+        {
+            uint buildingID = db.GetUint(company, combine('building', '_', uintToString(building.add(1)), '', ''));
+            bytes32 buildingMeta = assets.metabytes(buildingID, 'BUILDING');
+            assets.destroy(buildingID, centralTrustee, 'BUILDING');
+            assets.mint(tx.origin, buildingID, bytes32ToString(buildingMeta), 'BUILDING');
+        }
     }
 }
