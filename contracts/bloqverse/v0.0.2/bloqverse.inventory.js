@@ -3,7 +3,7 @@ pragma solidity ^0.4.18;
 // Private Floyd = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 // Private FooFoo = 0xA0d2736e921249278dA7E872694Ae25a38FB050f
 
-// bloq002 = 0xA48A56D818Ae7fcC14f0Be0Ab0aE93cd3A2f492d
+// bloq002 = XXX
 
 /*
 
@@ -376,7 +376,8 @@ contract Inventory is Upgradable
         uint totalSupply,
         uint centralReserve,
         uint totalHarnessedEnergy,
-        uint centralEnergyReserve
+        uint centralEnergyReserve,
+        uint universalIncorporations
     )
     {
         return
@@ -384,7 +385,8 @@ contract Inventory is Upgradable
             tokens.totalSupply('CT'),
             tokens.balanceOf(centralBank, 'CT'),
             tokens.totalSupply('NRG'),
-            tokens.balanceOf(centralBank, 'NRG')
+            tokens.balanceOf(centralBank, 'NRG'),
+            assets.totalSupply('CORPORATION')
         );
     }
     
@@ -425,14 +427,29 @@ contract Inventory is Upgradable
         );
     }
     
-    function getAssets(address Address) public view returns
+    function centralCorporationTrustee() public view returns
     (
-        uint buildings
+        uint buildings,
+        uint employees
     )
     {
         return
         (
-            assets.balanceOf(Address, 'BUILDING')
+            assets.balanceOf(centralBank, 'BUILDING'),
+            assets.balanceOf(centralBank, 'KID')
+        );
+    }
+    
+    function getAssets(address Address) public view returns
+    (
+        uint buildings,
+        uint companies
+    )
+    {
+        return
+        (
+            assets.balanceOf(Address, 'BUILDING'),
+            assets.balanceOf(Address, 'CORPORATION')
         );
     }
             
