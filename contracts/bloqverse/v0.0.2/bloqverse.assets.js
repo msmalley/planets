@@ -5,7 +5,7 @@ pragma solidity ^0.4.18;
 
 // v0.0.2 = 0x37Da9D8acc8c7D63ba9a0FB41D0a89b247c31385
 
-// bloq002 = 0x8AD72C1FE21472df02f767Bf7445703b87EDA656
+// bloq002 = 0x8dDE667b6Ed800f4326F2822A3A49fe31A0E62E2
 
 /*
 
@@ -267,6 +267,7 @@ contract ERC721 is Upgradable
         db = Proxy(proxyAddress);
     }
     
+    /*
     function updateSupplyName(string symbol, string name) public onlyOwner
     {
         db.setString(combine('ERC721', '_', symbol, '_', 'NAME'), stringToBytes32(name));
@@ -276,6 +277,7 @@ contract ERC721 is Upgradable
     {
         db.setString('ERC721_symbol', stringToBytes32(defaultSymbol));
     }
+    */
     
     function addWriteAddress(address Address) public onlyOwner
     {
@@ -283,11 +285,13 @@ contract ERC721 is Upgradable
         canWriteToERC721[Address] = true;
     }
     
+    /*
     function removeWriteAddress(address Address) public onlyOwner
     {
         require(canWriteToERC721[Address] == true);
         canWriteToERC721[Address] = false;
     }
+    */
     
     function name(string optionalResource) public view returns(string)
     {
@@ -342,6 +346,7 @@ contract ERC721 is Upgradable
         return db.getsUint(beneficiary, token_id('balance', optionalResource));
     }
     
+    /*
     function tokenOfOwnerByIndex(address beneficiary, uint index, string optionalResource) public view returns (uint) 
     {
         require(index >= 0);
@@ -352,6 +357,7 @@ contract ERC721 is Upgradable
         }
         return db.getsUint(beneficiary, combine('owned', '_', uintToString(index), '_', optionalResource));
     }
+    */
     
     function getAllTokens(address beneficiary, string optionalResource) public view returns (uint[]) 
     {
@@ -379,7 +385,8 @@ contract ERC721 is Upgradable
             db.GetAddress(id, token_id('owner', optionalResource)) == msg.sender
             || db.GetAddress(id, token_id('owner', optionalResource)) == tx.origin
         );
-        _transfer(db.GetAddress(id, token_id('owner', optionalResource)), to, id, optionalResource);
+        _removeTokenFrom(db.GetAddress(id, token_id('owner', optionalResource)), id, optionalResource);
+        _addTokenTo(to, id, optionalResource);
     }
     
     function metadata(uint256 id, string optionalResource) public view returns(string) 
@@ -403,7 +410,24 @@ contract ERC721 is Upgradable
             canWriteToERC721[msg.sender] == true
             || canWriteToERC721[tx.origin] == true
         );
-        make(id, beneficiary, meta, optionalResource);
+        require(db.GetString(id, token_id('meta', optionalResource)) == stringToBytes32(''));
+        db.SetString(id, token_id('meta', optionalResource), stringToBytes32(meta));
+        db.SetUint(id, token_id('bob', optionalResource), block.number);
+        db.setUint(token_id('total', optionalResource), db.getUint(token_id('total', optionalResource)).add(1));
+        _addTokenTo(beneficiary, id, optionalResource);
+    }
+    
+    function destroy(uint256 assetId, address Address, string optionalResource) public
+    {
+        require(
+            canWriteToERC721[msg.sender] == true
+            || canWriteToERC721[tx.origin] == true
+        );
+        require(db.GetString(assetId, token_id('meta', optionalResource)) != stringToBytes32(''));
+        db.SetString(assetId, token_id('meta', optionalResource), '');
+        db.SetUint(assetId, token_id('bob', optionalResource), 0);
+        db.setUint(token_id('total', optionalResource), db.getUint(token_id('total', optionalResource)).sub(1));
+        _removeTokenFrom(Address, assetId, optionalResource);
     }
     
     /*
@@ -411,22 +435,6 @@ contract ERC721 is Upgradable
     INTERNALS
     
     */
-    
-    function make(uint256 assetId, address Address, string key, string optionalResource) internal
-    {
-        require(db.GetString(assetId, token_id('meta', optionalResource)) == stringToBytes32(''));
-        db.SetString(assetId, token_id('meta', optionalResource), stringToBytes32(key));
-        db.SetUint(assetId, token_id('bob', optionalResource), block.number);
-        db.setUint(token_id('total', optionalResource), db.getUint(token_id('total', optionalResource)).add(1));
-        _addTokenTo(Address, assetId, optionalResource);
-    }
-
-    function _transfer(address from, address to, uint id, string optionalResource) internal returns(bool)
-    {
-        _removeTokenFrom(from, id, optionalResource);
-        _addTokenTo(to, id, optionalResource);
-        return true;
-    }
 
     function _removeTokenFrom(address from, uint id, string optionalResource) internal 
     {

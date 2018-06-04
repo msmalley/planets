@@ -2,13 +2,12 @@ pragma solidity ^0.4.18;
 
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 
-// bloq002 = 0x9842c416CA586643Fc5d403A6AfD4DB28e5f9643
+// Metallic HQ = 
+// 50828425710504467065371676546184894242207639619273079355697657823752347769406
 
-// Periodic element list:
-// https://www.science.co.il/elements/
+// bloq002 = 0x5d8B04EFf342134F5224893eD0BbE48ea546c46f
 
-// Periodic Prices:
-// https://en.wikipedia.org/wiki/Prices_of_elements_and_their_compounds
+
 
 /*
 
@@ -34,6 +33,9 @@ Planets ...
 Step 7 -    Initiate Planets() -- linking to Proxy & ERC721 Contract Addresses
 Step 8 -    Add Planets to Proxy Whitelist
 Step 9 -    Add Planets to ERC721 Write List
+
+XXX -       Missing setup universe ???
+
 Step 10 -   Generate Planets using Genesis()
 
 Tokens ...
@@ -80,6 +82,16 @@ Step 39 -   Add Items Address to Tokens Write List
 Step 40 -   Add Items Address to Atoms Write List
 Step 41 -   Players can now Craft Items (using atoms)
 Step 42 -   Or buy items from bank (if it has enough NRG to re-cycle)
+
+Buildings ...
+Step 43 -   Initiate Buildings() - linking to Proxy, Assets & Item contracts
+Step 44 -   Add Buildings Address to Proxy Whitelist
+Step 45 -   Add Buildings Address to Assets Write List
+Step 46 -   Add Buildings Address to Tokens Write List
+
+Inventory (always LAST)
+Step XX -   Initiate Inventory() - linking to Proxy, Tokens & Assets
+Step XX -   Add Inventory Address to Proxy Whitelist
 
 */
 
@@ -281,50 +293,52 @@ contract Proxy is Upgradable
 contract ERC20 is Upgradable
 {
     function balanceOf(address beneficary, string optionalResource) public view returns(uint);
-    function destroyTokens(address target, uint amount, string optionalResource) public;
-    function makeTokens(address beneficary, uint amount, string optionalResource) public;
+    function makeTokens(address Address, uint amount, string optionalResource) public;
+    function destroyTokens(address Address, uint amount, string optionalResource) public;
     function transfer(address to, uint units, string optionalResource) public returns (bool success);
-    function totalSupply(string optionalResource) public constant returns (uint);
 }
 
-contract Atoms is Upgradable
+contract ERC721 is Upgradable
+{
+    function balanceOf(address beneficary, string optionalResource) public view returns(uint);
+    function mint(address beneficiary, uint256 id, string meta, string optionalResource) public;
+    function destroy(uint256 assetId, address Address, string optionalResource) public;
+    function metabytes(uint tokenId, string optionalResource) public view returns(bytes32);
+    function ownerOf(uint tokenId, string optionalResource) public view returns (address);
+}
+
+contract Items is Upgradable
+{
+    
+}
+
+contract Buildings is Upgradable
 {
     Proxy db;
     ERC20 tokens;
+    ERC721 assets;
     
     using SafeMath for uint;
     
-    address public centralBank;
-    
-    mapping(address => bool) canWriteToAtoms;
+    address public centralTrustee;
     
     function() public payable
     {
         revert();
     }
     
-    function addWriteAddress(address Address) public onlyOwner
-    {
-        require(canWriteToAtoms[Address] == false);
-        canWriteToAtoms[Address] = true;
-    }
-    
-    function removeWriteAddress(address Address) public onlyOwner
-    {
-        require(canWriteToAtoms[Address] == true);
-        canWriteToAtoms[Address] = false;
-    }
-    
-    function Atoms
+    function Buildings
     (
         address proxyAddress,
-        address tokenContractAddress
+        address tokenContractAddress,
+        address assetContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
         tokens = ERC20(tokenContractAddress);
-        centralBank = proxyAddress;
+        assets = ERC721(assetContractAddress);
+        centralTrustee = proxyAddress;
     }
     
     function updateProxy
@@ -334,7 +348,7 @@ contract Atoms is Upgradable
     public onlyOwner
     {
         db = Proxy(proxyAddress);
-        centralBank = proxyAddress;
+        centralTrustee = proxyAddress;
     }
     
     function updateTokens
@@ -346,243 +360,140 @@ contract Atoms is Upgradable
         tokens = ERC20(tokenContractAddress);
     }
     
-    function atomicID(string atomicSymbol, string key) public pure returns(string)
-    {
-        return combine('atomic', '_', atomicSymbol, '_', key);
-    }
-    
-    function atomicTypeCount() public view returns(uint)
-    {
-        return db.getUint('atom_type_count');
-    }
-    
-    function atomicCount(string atomicSymbol) public view returns(uint)
-    {
-        return tokens.totalSupply(atomName(atomicSymbol));
-    }
-    
-    function atomicBalance(address Address, string atomicSymbol) public view returns(uint)
-    {
-        return tokens.balanceOf(Address, atomName(atomicSymbol));
-    }
-    
-    function atomCount() public view returns(uint)
-    {
-        return db.getUint('atom_count');
-    }
-    
-    function addAtomicStructure(string atomicSymbol, string atomicName, uint atomicIndex, uint atomicWeight, uint atomicPricePerKG) public onlyOwner
-    {
-        db.setString(atomicID(atomicSymbol, 'name'), stringToBytes32(atomicName));
-        db.setString(atomicID(uintToString(atomicIndex), 'index'), stringToBytes32(atomicSymbol));
-        db.setUint(atomicID(atomicSymbol, 'weight'), atomicWeight);
-        db.setUint(atomicID(atomicSymbol, 'index'), atomicIndex);
-        db.setUint(atomicID(atomicSymbol, 'price'), atomicPricePerKG);
-        db.setString(atomicID(atomicSymbol, 'symbol'), stringToBytes32(atomicSymbol));
-        db.setUint('atom_type_count', db.getUint('atom_type_count').add(1));
-    }
-    
-    // Temporary function to retro-fit old data ...
-    function updateAtomicIndex(string atomicSymbol, uint atomicIndex) public
-    {
-        db.setString(atomicID(uintToString(atomicIndex), 'index'), stringToBytes32(atomicSymbol));
-        db.setUint(atomicID(atomicSymbol, 'index'), atomicIndex);
-    }
-    
-    function updateAtomicPrice(string atomicSymbol, uint atomicPricePerKG) public
-    {
-        db.setUint(atomicID(atomicSymbol, 'price'), atomicPricePerKG);
-    }
-    
-    function removeAtomicStructure(string atomicSymbol) public onlyOwner
-    {
-        db.setString(atomicID(atomicSymbol, 'name'), '');
-        db.setUint(atomicID(atomicSymbol, 'weight'), 0);
-        db.setUint(atomicID(atomicSymbol, 'price'), 0);
-        db.setString(atomicID(atomicSymbol, 'symbol'), '');
-        db.setUint('atom_type_count', db.getUint('atom_type_count').sub(1));
-    }
-
-    function atomName(string atomicSymbol) public view returns(string)
-    {
-        return bytes32ToString(atomNameBytes(atomicSymbol));
-    }
-    
-    function atomNameBytes(string atomicSymbol) public view returns(bytes32)
-    {
-        return db.getString(atomicID(atomicSymbol, 'name'));
-    }
-    
-    function atomIndex(string atomicSymbol) public view returns(uint)
-    {
-        return db.getUint(atomicID(atomicSymbol, 'index'));
-    }
-    
-    function atomSymbol(string atomicIndex) public view returns(string)
-    {
-        return bytes32ToString(atomSymbolBytes(atomicIndex));
-    }
-    
-    function atomSymbolBytes(string atomicIndex) public view returns(bytes32)
-    {
-        string memory symbol = bytes32ToString(db.getString(atomicID(atomicIndex, 'index')));
-        return db.getString(atomicID(symbol, 'symbol'));
-    }
-    
-    function atomPrice(string atomicSymbol) public view returns(uint)
-    {
-        return db.getUint(atomicID(atomicSymbol, 'price'));
-    }
-    
-    function atomWeight(string atomicSymbol) public view returns(uint)
-    {
-        return db.getUint(atomicID(atomicSymbol, 'weight'));
-    }
-        
-    function atoms(string atomicSymbol) public view returns
+    function updateAssets
     (
-        string atomicName,
-        uint atomicIndex,
-        uint atomicWeight,
-        uint pricePerKG,
-        uint universalSupply
-    ){
-        return(
-            atomName(atomicSymbol),
-            atomIndex(atomicSymbol),
-            atomWeight(atomicSymbol),
-            atomPrice(atomicSymbol),
-            atomicCount(atomicSymbol)
+        address assetContractAddress
+    ) 
+    public onlyOwner
+    {
+        assets = ERC721(assetContractAddress);
+    }
+    
+    function bid
+    (
+        string name, 
+        uint wood, 
+        uint stone, 
+        uint steel,
+        uint256 planet
+    ) 
+    public view returns(uint256)
+    {
+        return uint256(keccak256(
+            name,
+            uintToString(wood),
+            uintToString(stone),
+            uintToString(steel),
+            uintToString(planet),
+            toString(centralTrustee)
+        ));
+    }
+    
+    function constructBuilding
+    (
+        string name, 
+        uint wood, 
+        uint stone, 
+        uint steel,
+        uint256 planet
+    )
+    public returns(uint256)
+    {
+        require(wood >= 1);
+        require(stone >= 1);
+        require(steel >= 1);
+        require(wood.add(stone).add(steel) == 100);
+        uint id = bid
+        (
+            name, 
+            wood,
+            stone,
+            steel,
+            planet
+        );
+        require(
+            assets.metabytes(planet, 'PT') 
+            != stringToBytes32('')
+        );
+        require(
+            assets.metabytes(id, 'BUILDING') 
+            == stringToBytes32('')
+        );
+        require(tokens.transfer(centralTrustee, wood, 'item_wood') == true);
+        require(tokens.transfer(centralTrustee, stone, 'item_stone') == true);
+        require(tokens.transfer(centralTrustee, steel, 'item_steel') == true);
+        assets.mint(tx.origin, id, name, 'BUILDING');
+        db.SetUint(id, 'building_location', planet);
+        db.SetUint(id, 'building_wood', wood);
+        db.SetUint(id, 'building_stone', stone);
+        db.SetUint(id, 'building_steel', steel);
+        db.SetUint(id, 'building_bob', block.number);
+        require(
+            assets.metabytes(id, 'BUILDING') 
+            != stringToBytes32('')
+        );
+        return id;
+    }
+    
+    function getBuilding(uint id) public view returns
+    (
+        string name,
+        uint wood,
+        uint stone,
+        uint steel,
+        string planet,
+        uint age
+    )
+    {
+        uint256 planetID = getLocation(id);
+        return
+        (
+            bytes32ToString(assets.metabytes(id, 'BUILDING')),
+            getWood(id),
+            getStone(id),
+            getSteel(id),
+            bytes32ToString(assets.metabytes(planetID, 'PT')),
+            getAge(id)
         );
     }
     
-    function getAtomicRate(string from, string to, uint amount) public view returns(uint)
+    function getLocation(uint id) public view returns(uint256)
     {
-        uint weight = atomWeight(from).mul(amount);
-        return weight.div(atomWeight(to));
+        return db.GetUint(id, 'building_location');
+    }
+            
+    function getWood(uint id) public view returns(uint)
+    {
+        return db.GetUint(id, 'building_wood');
     }
     
-    function buyAtomsFromCentralBank(string atomicSymbol, uint amount) public returns(uint cost)
+    function getStone(uint id) public view returns(uint)
     {
-        cost = atomPrice(atomicSymbol).mul(amount);
-        uint weight = atomWeight(atomicSymbol).mul(amount);
-        require(tokens.balanceOf(tx.origin, 'CT') >= cost);
-        require(tokens.balanceOf(centralBank, 'NRG') >= weight);
-        require(tokens.transfer(centralBank, cost, 'CT') == true);
-        reatomize(tx.origin, centralBank, atomicSymbol, amount);
+        return db.GetUint(id, 'building_stone');
     }
     
-    function sellAtomsToCentralBank(string atomicSymbol, uint amount) public returns(uint credits)
+    function getSteel(uint id) public view returns(uint)
     {
-        uint balance = tokens.balanceOf(tx.origin, atomName(atomicSymbol));
-        uint price = atomPrice(atomicSymbol).mul(amount);
-        require(balance >= amount);
-        deatomize(tx.origin, centralBank, atomicSymbol, amount);
-        tokens.makeTokens(tx.origin, price, 'CT');
-        return price;
+        return db.GetUint(id, 'building_steel');
     }
     
-    function centralBankBalance() public view returns(uint)
+    function getAge(uint id) public view returns(uint)
     {
-        return tokens.balanceOf(centralBank, 'CT');
+        return (block.number - db.GetUint(id, 'building_bob'));
     }
     
-    function creditBalance(address Address) public view returns(uint)
+    function deconstructBuilding(uint id) public
     {
-        return tokens.balanceOf(Address, 'CT');
-    }
-    
-    function totalCreditSupply() public view returns(uint)
-    {
-        return tokens.totalSupply('CT');
-    }
-    
-    function atomicSwap(string from, string to, uint amount) public
-    {
-        // Temp hack ???
-        if(stringToBytes32(to) == stringToBytes32(toString(centralBank)))
-        {
-            // convert from central dust to atoms
-            require(msg.sender != tx.origin);
-            require(canWriteToAtoms[msg.sender] == true);
-            reatomize(tx.origin, centralBank, from, amount);
-        }
-        else
-        {
-            // Check accounts ...
-            uint balance_of_origin = tokens.balanceOf(tx.origin, atomName(from));
-            require(balance_of_origin >= amount);
-
-            if(stringToBytes32(from) == stringToBytes32(to))
-            {
-                // convert from atom to dust
-                deatomize(tx.origin, centralBank, from, amount);
-            }
-            else
-            {
-                uint converted_amount = getAtomicRate(from, to, amount);
-                require(converted_amount >= 1);
-                
-                // convert from atom to dust
-                deatomize(tx.origin, tx.origin, from, amount);
-
-                // convert from dust to atom
-                reatomize(tx.origin, tx.origin, to, converted_amount);
-            }
-        }
-    }
-    
-    function getNRG(address Address) public view returns(uint)
-    {
-        return tokens.balanceOf(Address, 'NRG');
-    }
-    
-    function totalHarnessedNRG() public view returns(uint)
-    {
-        return tokens.totalSupply('NRG');
-    }
-    
-    /*
-
-    TEMPORARY ADMIN RIGHTS
-    
-    */
-    
-    function generateAtoms(string atomicSymbol, address beneficary, uint amount) public onlyOwner
-    {
-        tokens.makeTokens(beneficary, amount, atomName(atomicSymbol));
-        db.setUint('atom_count', db.getUint('atom_count').add(amount));
-    }
-    
-    /*
-
-    INTERNALS
-    
-    */
-    
-    function deatomize(address Address, address energyAddress, string from, uint amount) internal
-    {
-        uint weight = atomWeight(from).mul(amount);
-        atomicDestruction(Address, from, amount);
-        tokens.makeTokens(energyAddress, weight, 'NRG');
-    }
-    
-    function reatomize(address Address, address energyAddress, string to, uint amount) internal
-    {
-        uint weight = atomWeight(to).mul(amount);
-        atomicCreation(Address, to, amount);
-        tokens.destroyTokens(energyAddress, weight, 'NRG');
-    }
-    
-    function atomicCreation(address Address, string to, uint amount) internal
-    {
-        db.setUint('atom_count', atomCount().add(amount));
-        tokens.makeTokens(Address, amount, atomName(to));
-    }
-    
-    function atomicDestruction(address Address, string from, uint amount) internal
-    {
-        db.setUint('atom_count', atomCount().sub(amount));
-        tokens.destroyTokens(Address, amount, atomName(from));
+        require(assets.ownerOf(id, 'BUILDING') == tx.origin);
+        require(tokens.balanceOf(centralTrustee, 'item_wood') >= getWood(id));
+        require(tokens.balanceOf(centralTrustee, 'item_stone') >= getStone(id));
+        require(tokens.balanceOf(centralTrustee, 'item_steel') >= getSteel(id));
+        tokens.destroyTokens(centralTrustee, getWood(id), 'item_wood');
+        tokens.destroyTokens(centralTrustee, getStone(id), 'item_stone');
+        tokens.destroyTokens(centralTrustee, getSteel(id), 'item_steel');
+        tokens.makeTokens(tx.origin, getWood(id), 'item_wood');
+        tokens.makeTokens(tx.origin, getStone(id), 'item_stone');
+        tokens.makeTokens(tx.origin, getSteel(id), 'item_steel');
+        assets.destroy(id, tx.origin, 'BUILDING');
     }
 }
