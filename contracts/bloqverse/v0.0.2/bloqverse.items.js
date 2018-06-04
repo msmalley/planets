@@ -2,7 +2,7 @@ pragma solidity ^0.4.18;
 
 // Private Owner = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 
-// bloq002 = 0x0beba211035e646c5B2b050E2587e52D9256Daef
+// bloq002 = 0xEBC4A41B6b1e85fd7e4c604d7Fd5f2b8dD0C8767
 
 /*
 
@@ -392,14 +392,12 @@ contract Items is Upgradable
     function addItemStructure
     (
         string key, 
-        string description, 
         uint[] requiredAtomicIndexes,
         uint[] requiredAtomicAmounts
     ) 
     public onlyOwner
     {
         db.setString(itemID(key, 'key'), stringToBytes32(key));
-        db.setString(itemID(key, 'description'), stringToBytes32(description));
         db.setUint(itemID(key, 'indexes'), requiredAtomicIndexes.length);
         db.setUint(itemID(key, 'amounts'), requiredAtomicAmounts.length);
         for(uint index = 0; index < requiredAtomicIndexes.length; index++)
@@ -412,14 +410,12 @@ contract Items is Upgradable
     
     function items(string key) public view returns
     (
-        string description,
         uint creditCost,
         uint atomicWeight,
         uint universalSupply,
         uint[] indexes,
         uint[] amounts
     ){
-        uint cost;
         uint weight;
         uint[] memory index = new uint[](db.getUint(itemID(key, 'indexes')));
         uint[] memory amount = new uint[](db.getUint(itemID(key, 'amounts')));
@@ -427,12 +423,10 @@ contract Items is Upgradable
         {
             index[i] = db.getUint(itemID(key, combine('index', '_', uintToString(i.add(1)), '', '')));
             amount[i] = db.getUint(itemID(key, combine('amount', '_', uintToString(i.add(1)), '', '')));
-            cost = cost.add(atoms.atomPrice(bytes32ToString(atoms.atomSymbolBytes(uintToString(index[i])))).mul(amount[i]));
             weight = weight.add(atoms.atomWeight(bytes32ToString(atoms.atomSymbolBytes(uintToString(index[i])))).mul(amount[i]));
         }
         return(
-            bytes32ToString(itemDescriptionBytes(key)),
-            cost,
+            itemCost(key),
             weight,
             itemCount(key),
             index,
@@ -440,9 +434,16 @@ contract Items is Upgradable
         );
     }
     
-    function itemDescriptionBytes(string key) public view returns(bytes32)
+    function itemCost(string key) public view returns(uint)
     {
-        return db.getString(itemID(key, 'description'));
+        uint cost;
+        for(uint i = 0; i < db.getUint(itemID(key, 'indexes')); i++)
+        {
+            uint index = db.getUint(itemID(key, combine('index', '_', uintToString(i.add(1)), '', '')));
+            uint amount = db.getUint(itemID(key, combine('amount', '_', uintToString(i.add(1)), '', '')));
+            cost = cost.add(atoms.atomPrice(bytes32ToString(atoms.atomSymbolBytes(uintToString(index)))).mul(amount));
+        }
+        return cost;
     }
     
     function craftItem(string key, uint amount) public returns(bool)
@@ -473,7 +474,7 @@ contract Items is Upgradable
     
     function buyItem(string key, uint amount) public returns(bool)
     {
-        uint cost; uint weight;
+        uint weight;
         uint length = db.getUint(itemID(key, 'indexes'));
         require(stringToBytes32(key) != stringToBytes32(''));
         bytes32[] memory symbols = new bytes32[](length);
@@ -483,12 +484,11 @@ contract Items is Upgradable
             uint index = db.getUint(itemID(key, combine('index', '_', uintToString(i.add(1)), '', '')));
             symbols[i] = atoms.atomSymbolBytes(uintToString(index));
             amounts[i] = db.getUint(itemID(key, combine('amount', '_', uintToString(i.add(1)), '', ''))).mul(amount);
-            cost = cost.add(atoms.atomPrice(bytes32ToString(symbols[i])).mul(amounts[i]));
             weight = weight.add(atoms.atomWeight(bytes32ToString(symbols[i])).mul(amounts[i]));
         }
-        require(tokens.balanceOf(tx.origin, 'CT') >= cost);
+        require(tokens.balanceOf(tx.origin, 'CT') >= itemCost(key));
         require(tokens.balanceOf(centralBank, 'NRG') >= weight);
-        require(tokens.transfer(centralBank, cost, 'CT') == true);
+        require(tokens.transfer(centralBank, itemCost(key), 'CT') == true);
         for(uint Index = 0; Index < symbols.length; Index++)
         {
             atoms.atomicSwap(

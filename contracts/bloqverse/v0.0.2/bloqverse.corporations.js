@@ -6,7 +6,7 @@ pragma solidity ^0.4.18;
 // MegaUberCorp Intergalactic = 
 // 51903284510384126512393640998007292375040233478966863102742712281380896609667
 
-// bloq002 = 0x875B5a9CAf188343B3385E4265d4c81617361f8D
+// bloq002 = 0x0ba6Cea0bA7b923E81d711572FD58e5e698aa79F
 
 /*
 
@@ -304,10 +304,24 @@ contract ERC721 is Upgradable
     function transfer(address to, uint id, string optionalResource) public;
 }
 
+contract Items is Upgradable
+{
+    function itemCost(string key) public view returns(uint);
+}
+
+contract Things is Upgradable
+{
+    function getItems1(string key, uint id) public view returns(uint);
+    function getItems2(string key, uint id) public view returns(uint);
+    function getItems3(string key, uint id) public view returns(uint);
+}
+
 contract Corporations is Upgradable
 {
     Proxy db;
     ERC721 assets;
+    Items items;
+    Things things;
     
     using SafeMath for uint;
     
@@ -321,12 +335,16 @@ contract Corporations is Upgradable
     function Corporations
     (
         address proxyAddress,
-        address assetContractAddress
+        address assetContractAddress,
+        address itemContractAddress,
+        address thingContractAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
         assets = ERC721(assetContractAddress);
+        items = Items(itemContractAddress);
+        things = Things(thingContractAddress);
         centralTrustee = proxyAddress;
     }
     
@@ -347,6 +365,24 @@ contract Corporations is Upgradable
     public onlyOwner
     {
         assets = ERC721(assetContractAddress);
+    }
+    
+    function updateItems
+    (
+        address itemContractAddress
+    ) 
+    public onlyOwner
+    {
+        items = Items(itemContractAddress);
+    }
+    
+    function updateThings
+    (
+        address thingContractAddress
+    ) 
+    public onlyOwner
+    {
+        things = Things(thingContractAddress);
     }
     
     function cid
@@ -402,6 +438,7 @@ contract Corporations is Upgradable
         string name,
         string founder,
         string planetOfIncorporation,
+        uint value,
         uint employees,
         uint buildings,
         uint age
@@ -413,6 +450,7 @@ contract Corporations is Upgradable
             bytes32ToString(assets.metabytes(company, 'CORPORATION')),
             getFounder(company),
             bytes32ToString(assets.metabytes(planetID, 'PT')),
+            getValue(company),
             getEmployees(company),
             getBuildings(company),
             getAge(company)
@@ -467,6 +505,23 @@ contract Corporations is Upgradable
         db.SetUint(company, id, building);
     }
     
+    function removeEmployee(uint256 company, uint256 child) public
+    {
+        require(assets.ownerOf(child, 'KID') == tx.origin);
+        db.SetUint(company, 'employees', db.GetUint(company, 'employees').sub(1));
+        string memory id = combine('employee', '_', uintToString(db.GetUint(company, 'employees')), '', '');
+        db.SetUint(company, id, 0); 
+    }
+    
+    function removeBuilding(uint256 company, uint256 building) public
+    {
+        require(assets.ownerOf(building, 'BUILDING') == tx.origin);
+        assets.transfer(centralTrustee, building, 'BUILDING');
+        db.SetUint(company, 'buildings', db.GetUint(company, 'buildings').sub(1));
+        string memory id = combine('building', '_', uintToString(db.GetUint(company, 'buildings')), '', '');
+        db.SetUint(company, id, 0);
+    }
+    
     function unincorporate(uint256 company) public
     {
         require(
@@ -482,6 +537,7 @@ contract Corporations is Upgradable
             bytes32 employeeMeta = assets.metabytes(employeeID, 'KID');
             assets.destroy(employeeID, centralTrustee, 'KID');
             assets.mint(tx.origin, employeeID, bytes32ToString(employeeMeta), 'KID');
+            removeEmployee(company, employeeID);
         }
         for(uint building = 0; building < buildings.length; building++)
         {
@@ -489,6 +545,30 @@ contract Corporations is Upgradable
             bytes32 buildingMeta = assets.metabytes(buildingID, 'BUILDING');
             assets.destroy(buildingID, centralTrustee, 'BUILDING');
             assets.mint(tx.origin, buildingID, bytes32ToString(buildingMeta), 'BUILDING');
+            removeBuilding(company, buildingID);
         }
+        db.SetUint(company, 'location', 0);
+        db.SetUint(company, 'founder', 0);
+        db.SetUint(company, 'bob', 0);
+        assets.destroy(company, tx.origin, 'CORPORATION');
+        require(
+            assets.metabytes(company, 'CORPORATION') 
+            == stringToBytes32('')
+        );
+    }
+    
+    function getValue(uint256 company) public view returns(uint)
+    {
+        uint value;
+        uint[] memory buildings = new uint[](getBuildings(company));
+        for(uint building = 0; building < buildings.length; building++)
+        {
+            uint buildingID = db.GetUint(company, combine('building', '_', uintToString(building.add(1)), '', ''));
+            uint wood = items.itemCost('wood').mul(things.getItems1('BUILDING', buildingID));
+            uint stone = items.itemCost('stone').mul(things.getItems2('BUILDING', buildingID));
+            uint steel = items.itemCost('steel').mul(things.getItems3('BUILDING', buildingID));
+            value = value.add(wood).add(stone).add(steel);
+        }
+        return value;
     }
 }
