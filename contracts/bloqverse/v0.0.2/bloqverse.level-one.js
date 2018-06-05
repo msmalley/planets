@@ -3,7 +3,7 @@ pragma solidity ^0.4.18;
 // Private Floyd = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 // Private FooFoo = 0xA0d2736e921249278dA7E872694Ae25a38FB050f
 
-// bloq002 = 0x827c074ba4F228abDd1c98f5521893c380691EC7
+// bloq002 = 0x834D6CcdE00fC4F66F77893F629DCBB2271F9882
 
 /*
 
@@ -11,81 +11,90 @@ BloqVerse: Intergalactic Construct Framework
 Developer: The Blockchain Embassy
 URI: http://bce.asia
 
-Instructions:
+Setup Instructions:
 
-Bloqverse ...
+Contract 1 = Bloqverse ...
 Step 1 -    Initiate Bloqverse()
 
-Proxy ...
+Contract 2 = Proxy ...
 Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
 
-Assets ...
+Contract 3 = Assets ...
 Step 3 -    Initiate ERC721() -- linking to Proxy Contract Address
 Step 4 -    Add ERC721 to Proxy Whitelist
 Step 5 -    Run updateDefaultSymbol('PT') from ERC721 Contract
 Step 6 -    Run updateSupplyName('PT', 'Planet Tokens') from ERC721 Contract
 
-Planets ...
+Contract 4 = Planets ...
 Step 7 -    Initiate Planets() -- linking to Proxy & ERC721 Contract Addresses
 Step 8 -    Add Planets to Proxy Whitelist
 Step 9 -    Add Planets to ERC721 Write List
-Step 10 -   Generate Planets using Genesis()
+Step 10 -`  Run SetupUniverse()
+Step 11 -   Generate Planets using Genesis()
 
-Tokens ...
-Step 11 -   Initiate ERC20() -- linking to Proxy Contract
-Step 12 -   Add ERC20 to Proxy Whitelist
-Step 13 -   Run updateDefaultSymbol('CT') from ERC20 Contract
-Step 14 -   Run updateSupplyName('CT', 'Credit Tokens') from ERC20 Contract
+Contract 5 = Tokens ...
+Step 12 -   Initiate ERC20() -- linking to Proxy Contract
+Step 13 -   Add ERC20 to Proxy Whitelist
+Step 14 -   Run updateDefaultSymbol('CT') from ERC20 Contract
+Step 15 -   Run updateSupplyName('CT', 'Credit Tokens') from ERC20 Contract
 
-Parents ...
-Step 15 -   Initiate Parents() - linking to Proxy, ERC721, ERC20 & Planets
-Step 16 -   Add Parents to Proxy Whitelist
-Step 17 -   Add Parents to ERC721 Write List
-Step 18 -   Add Parents to ERC20 Write List
-Step 19 -   Run SetupParents()
-Step 20 -   Can then GenerateParents() -- register players
+Contract 6 = Parents ...
+Step 16 -   Initiate Parents() - linking to Proxy, ERC721, ERC20 & Planets
+Step 17 -   Add Parents to Proxy Whitelist
+Step 18 -   Add Parents to ERC721 Write List
+Step 19 -   Add Parents to ERC20 Write List
+Step 20 -   Run SetupParents()
+Step 21 -   Can then GenerateParents() -- register players
 
-Choices ...
-Step 21 -   Initiate Choices() - linking to Parents contract address
-Step 22 -   Add Choices Address to Proxy Whitelist
-Step 23 -   Add Choices Address to Parents Write List
-Step 24 -   Can now form alliances and choose to become rebel ...
+Contract 7 = Choices ...
+Step 22 -   Initiate Choices() - linking to Parents contract address
+Step 23 -   Add Choices Address to Proxy Whitelist
+Step 24 -   Add Choices Address to Parents Write List
+Step 25 -   Can now form alliances and choose to become rebel ...
 
-Families ...
-Step 25 -   Initiate Families() - linking to Proxy, Asset, Planet & Parents
-Step 26 -   Add Families Address to Proxy Whitelist
-Step 27 -   Add Families Address to Assets Write List
-Step 27 -   Add Families Address to Parents Write List
-Step 28 -   Administrators can now use ForcedMarriage() to generate children!
+Contract 8 = Families ...
+Step 26 -   Initiate Families() - linking to Proxy, Asset, Planet & Parents
+Step 27 -   Add Families Address to Proxy Whitelist
+Step 28 -   Add Families Address to Assets Write List
+Step 29 -   Add Families Address to Parents Write List
+Step 30 -   Administrators can now use ForcedMarriage() to generate children!
 
-Atoms ...
-Step 29 -   Initiate Atoms() - linking to Proxy & Token contracts
-Step 30 -   Add Atoms Address to Proxy Whitelist
-Step 31 -   Add Atoms Address to Tokens Write List
-Step 32 -   Can now start adding atomic structure ...
-Step 33 -   Administrators can now GenerateAtoms() for testing ...
-Step 34 -   Players can sell atoms to banks who converts to NRG
-Step 35 -   Players can buy atoms from bank if bank has enough NRG
-Step 36 -   Players can perform atomic swaps (based on weight)
+Contract 9 = Atoms ...
+Step 31 -   Initiate Atoms() - linking to Proxy & Token contracts
+Step 32 -   Add Atoms Address to Proxy Whitelist
+Step 33 -   Add Atoms Address to Tokens Write List
+Step 34 -   Can now start adding atomic structure ...
+Step 35 -   Administrators can now GenerateAtoms() for testing ...
+Step 36 -   Players can sell atoms to banks who converts to NRG
+Step 37 -   Players can buy atoms from bank if bank has enough NRG
+Step 38 -   Players can perform atomic swaps (based on weight)
 
-Items ...
-Step 37 -   Initiate Items() - linking to Proxy, Token & Atom contracts
-Step 38 -   Add Items Address to Proxy Whitelist
-Step 39 -   Add Items Address to Tokens Write List
-Step 40 -   Add Items Address to Atoms Write List
-Step 41 -   Players can now Craft Items (using atoms)
-Step 42 -   Or buy items from bank (if it has enough NRG to re-cycle)
+Contract 10 = Items ...
+Step 39 -   Initiate Items() - linking to Proxy, Token & Atom contracts
+Step 40 -   Add Items Address to Proxy Whitelist
+Step 41 -   Add Items Address to Tokens Write List
+Step 42 -   Add Items Address to Atoms Write List
+Step 43 -   Players can now Craft Items (using atoms)
+Step 44 -   Or buy items from bank (if it has enough NRG to re-cycle)
 
-Things ...
-Step 43 -   Initiate Things() - linking to Proxy, Assets & Tokens contracts
-Step 44 -   Add Things Address to Proxy Whitelist
-Step 45 -   Add Things Address to Assets Write List
-Step 46 -   Add Things Address to Tokens Write List
-Step 47 -   Update Structure to include "BUILDINGS (wood, stone, steel)"
+Contract 11 = Things ...
+Step 45 -   Initiate Things() - linking to Proxy, Assets & Tokens contracts
+Step 46 -   Add Things Address to Proxy Whitelist
+Step 47 -   Add Things Address to Assets Write List
+Step 48 -   Add Things Address to Tokens Write List
+Step 49 -   Update Structure to include "BUILDINGS (wood, stone, steel)"
 
-Inventory (always LAST)
-Step XX -   Initiate Inventory() - linking to Proxy, Tokens & Assets
-Step XX -   Add Inventory Address to Proxy Whitelist
+Contract 12 = Corporations ...
+Step 50 -   Initiate Corporations() - linking to Proxy & Asset Contracts
+Step 51 -   Add Corporations to Proxy Whitelist
+Step 52 -   Add Corporations to Assets Write List
+
+Contract 13 = Level One ...
+Step 53 -   Initiate LevelOne() - linking to Proxy, Tokens, Assets & Choices
+Step 54 -   Add LevelOne Address to Proxy Whitelist
+Step 55 -   Add LevelOne to Tokens Write List
+
+-- What's next ???
 
 */
 
@@ -288,12 +297,15 @@ contract ERC20 is Upgradable
 {
     function balanceOf(address beneficary, string optionalResource) public view returns(uint);
     function totalSupply(string optionalResource) public view returns(uint);
+    function makeTokens(address Address, uint amount, string optionalResource) public;
+    function destroyTokens(address Address, uint amount, string optionalResource) public;
 }
 
 contract ERC721 is Upgradable
 {
     function balanceOf(address beneficary, string optionalResource) public view returns(uint);
     function totalSupply(string optionalResource) public view returns(uint);
+    function ownerOf(uint tokenId, string optionalResource) public view returns (address);
 }
 
 contract Atoms is Upgradable
@@ -302,12 +314,18 @@ contract Atoms is Upgradable
     function atomSymbolBytes(string atomicIndex) public view returns(bytes32);
 }
 
-contract Inventory is Upgradable
+contract Corporations is Upgradable
+{
+    function getValue(uint256 company) public view returns(uint);
+}
+
+contract LevelOne is Upgradable
 {
     Proxy db;
     ERC20 tokens;
     ERC721 assets;
     Atoms atoms;
+    Corporations corporations;
     
     using SafeMath for uint;
     
@@ -318,12 +336,13 @@ contract Inventory is Upgradable
         revert();
     }
     
-    function Inventory
+    function LevelOne
     (
         address proxyAddress,
         address tokenContractAddress,
         address assetContractAddress,
-        address atomContractAddress
+        address atomContractAddress,
+        address corpContractAddress
     ) 
     public onlyOwner
     {
@@ -331,6 +350,7 @@ contract Inventory is Upgradable
         tokens = ERC20(tokenContractAddress);
         assets = ERC721(assetContractAddress);
         atoms = Atoms(atomContractAddress);
+        corporations = Corporations(corpContractAddress);
         centralBank = proxyAddress;
     }
     
@@ -369,6 +389,15 @@ contract Inventory is Upgradable
     public onlyOwner
     {
         atoms = Atoms(atomContractAddress);
+    }
+    
+    function updateCorporations
+    (
+        address corpContractAddress
+    ) 
+    public onlyOwner
+    {
+        corporations = Corporations(corpContractAddress);
     }
     
     function centralSupply() public view returns
@@ -480,5 +509,65 @@ contract Inventory is Upgradable
             results[i] = tokens.balanceOf(Address, name);
         }
         return results;
+    }
+    
+    function breakTheBank(uint256 companyNumber1, uint256 companyNumber2) public
+    {
+        /* 
+        
+        CONDITIONS & ACTIONS OF WINNING LEVEL ONE 
+        
+        -- Combined value of two companies > central reserve
+        -- Families of two company founders must be in an alliance
+        
+        */
+        address partner = assets.ownerOf(companyNumber2, 'CORPORATION');
+        uint centralReserves = tokens.balanceOf(centralBank, 'NRG');
+        uint centralReserve = tokens.balanceOf(centralBank, 'CT');
+        uint value1 = corporations.getValue(companyNumber1);
+        uint value2 = corporations.getValue(companyNumber2);
+        uint combinedValue = value1.add(value2);
+        require(centralReserve > 0);
+        require(centralReserves > 0);
+        require(hasCompletedLevelOne(partner) == false);
+        require(hasCompletedLevelOne(tx.origin) == false);
+        require(assets.ownerOf(companyNumber1, 'CORPORATION') == tx.origin);
+        require(combinedValue > centralReserve);
+        require(choices.areAllied(tx.origin, partner) == true);
+        /* 
+        
+        CENTRAL RESERVES ARE COMPLETELY REMOVED 
+        
+        */
+        tokens.destroyTokens(centralBank, centralReserve, 'CT');
+        tokens.destroyTokens(centralBank, centralReserves, 'NRG');
+        /* 
+        
+        INITIATING PLAYER GETS ALL BANK CREDITS AND ENERGY 
+        
+        */
+        tokens.makeTokens(tx.origin, centralReserve, 'CT');
+        tokens.makeTokens(tx.origin, centralReserves, 'NRG');
+        completeLevelOne(tx.origin, partner);
+    }
+    
+    function hasCompletedLevelOne(address Address) public view returns(bool)
+    {
+        /* CHECKS IF PLAYER HAS BROKEN THE BANK */
+        return db.getsBool(Address, 'level_one');
+    }
+    
+    function completeLevelOne(address Address, address partner) internal
+    {
+        db.setsBool(Address, 'level_one', true);
+        db.setsUint(Address, 'partner', partner);
+        db.setsBool(partner, 'level_one', Address);
+        db.setsUint(partner, 'partner', Address);
+    }
+    
+    function remainingCreditsNeededToBreakTheBank(uint256 companyNumber) public view returns(uint)
+    {
+        uint centralReserve = tokens.balanceOf(centralBank, 'CT');
+        return centralReserve.sub(corporations.getValue(companyNumber));
     }
 }

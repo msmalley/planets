@@ -7,81 +7,34 @@ pragma solidity ^0.4.18;
 
 /*
 
-Instructions:
+Setup Instructions:
 
-Bloqverse ...
+Contract 1 = Bloqverse ...
 Step 1 -    Initiate Bloqverse()
 
-Proxy ...
+Contract 2 = Proxy ...
 Step 2 -    Initiate Proxy() -- linking to Bloqverse Contract Address
 
-Assets ...
+Contract 3 = Assets ...
 Step 3 -    Initiate ERC721() -- linking to Proxy Contract Address
 Step 4 -    Add ERC721 to Proxy Whitelist
 Step 5 -    Run updateDefaultSymbol('PT') from ERC721 Contract
 Step 6 -    Run updateSupplyName('PT', 'Planet Tokens') from ERC721 Contract
 
-Planets ...
+Contract 4 = Planets ...
 Step 7 -    Initiate Planets() -- linking to Proxy & ERC721 Contract Addresses
 Step 8 -    Add Planets to Proxy Whitelist
 Step 9 -    Add Planets to ERC721 Write List
-Step 10 -   Generate Planets using Genesis()
+Step 10 -`  Run SetupUniverse()
+Step 11 -   Generate Planets using Genesis()
 
-Tokens ...
-Step 11 -   Initiate ERC20() -- linking to Proxy Contract
-Step 12 -   Add ERC20 to Proxy Whitelist
-Step 13 -   Run updateDefaultSymbol('CT') from ERC20 Contract
-Step 14 -   Run updateSupplyName('CT', 'Credit Tokens') from ERC20 Contract
+Contract 5 = Tokens ...
+Step 12 -   Initiate ERC20() -- linking to Proxy Contract
+Step 13 -   Add ERC20 to Proxy Whitelist
+Step 14 -   Run updateDefaultSymbol('CT') from ERC20 Contract
+Step 15 -   Run updateSupplyName('CT', 'Credit Tokens') from ERC20 Contract
 
-Parents ...
-Step 15 -   Initiate Parents() - linking to Proxy, ERC721, ERC20 & Planets
-Step 16 -   Add Parents to Proxy Whitelist
-Step 17 -   Add Parents to ERC721 Write List
-Step 18 -   Add Parents to ERC20 Write List
-Step 19 -   Run SetupParents()
-Step 20 -   Can then GenerateParents() -- register players
-
-Choices ...
-Step 21 -   Initiate Choices() - linking to Parents contract address
-Step 22 -   Add Choices Address to Proxy Whitelist
-Step 23 -   Add Choices Address to Parents Write List
-Step 24 -   Can now form alliances and choose to become rebel ...
-
-Families ...
-Step 25 -   Initiate Families() - linking to Proxy, Asset, Planet & Parents
-Step 26 -   Add Families Address to Proxy Whitelist
-Step 27 -   Add Families Address to Assets Write List
-Step 27 -   Add Families Address to Parents Write List
-Step 28 -   Administrators can now use ForcedMarriage() to generate children!
-
-Atoms ...
-Step 29 -   Initiate Atoms() - linking to Proxy & Token contracts
-Step 30 -   Add Atoms Address to Proxy Whitelist
-Step 31 -   Add Atoms Address to Tokens Write List
-Step 32 -   Can now start adding atomic structure ...
-Step 33 -   Administrators can now GenerateAtoms() for testing ...
-Step 34 -   Players can sell atoms to banks who converts to NRG
-Step 35 -   Players can buy atoms from bank if bank has enough NRG
-Step 36 -   Players can perform atomic swaps (based on weight)
-
-Items ...
-Step 37 -   Initiate Items() - linking to Proxy, Token & Atom contracts
-Step 38 -   Add Items Address to Proxy Whitelist
-Step 39 -   Add Items Address to Tokens Write List
-Step 40 -   Add Items Address to Atoms Write List
-Step 41 -   Players can now Craft Items (using atoms)
-Step 42 -   Or buy items from bank (if it has enough NRG to re-cycle)
-
-Things ...
-Step 43 -   Initiate Things() - linking to Proxy, Assets & Tokens contracts
-Step 44 -   Add Things Address to Proxy Whitelist
-Step 45 -   Add Things Address to Assets Write List
-Step 46 -   Add Things Address to Tokens Write List
-Step 47 -   Update Structure to include "BUILDINGS (wood, stone, steel)"
-
-Inventory (always LAST)
-Step XX -   Initiate Inventory() - linking to Proxy, Tokens & Assets
-Step XX -   Add Inventory Address to Proxy Whitelist
+Move to Step 6 - Parents
 
 */
 
