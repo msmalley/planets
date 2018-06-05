@@ -493,4 +493,9 @@ contract Choices is Upgradable
     {
         return bytes32ToString(parents.getParentBytes(Address));
     }
+    
+    function haveChild() public returns(uint256)
+    {
+        
+    }
 }

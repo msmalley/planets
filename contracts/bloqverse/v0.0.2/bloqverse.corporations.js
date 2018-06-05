@@ -6,7 +6,14 @@ pragma solidity ^0.4.18;
 // MegaUberCorp Intergalactic = 
 // 51903284510384126512393640998007292375040233478966863102742712281380896609667
 
-// bloq002 = 0x0ba6Cea0bA7b923E81d711572FD58e5e698aa79F
+// The Foo Bowl =
+// 56233951280438263134293449249286268691915385385200323544533588425545301638212
+
+// Genesis Prime = 111289844878109423708526826116317304238808005787352761159317502897542254661420
+
+// Belly Pop Boo = 94011976869775928030958177182292812687116659522861038973095974402452914434165
+
+// bloq002 = 0x583A0aC9fe2Ce50378677650CFd1581eFCfF7a5d
 
 /*
 
@@ -440,8 +447,7 @@ contract Corporations is Upgradable
         string planetOfIncorporation,
         uint value,
         uint employees,
-        uint buildings,
-        uint age
+        uint buildings
     )
     {
         uint256 planetID = getLocation(company);
@@ -452,8 +458,7 @@ contract Corporations is Upgradable
             bytes32ToString(assets.metabytes(planetID, 'PT')),
             getValue(company),
             getEmployees(company),
-            getBuildings(company),
-            getAge(company)
+            getBuildings(company)
         );
     }
     
@@ -482,11 +487,6 @@ contract Corporations is Upgradable
         return db.GetUint(company, 'buildings');
     }
     
-    function getAge(uint company) public view returns(uint)
-    {
-        return block.number.sub(db.GetUint(company, 'bob'));
-    }
-    
     function addEmployee(uint256 company, uint256 child) public
     {
         require(assets.ownerOf(child, 'KID') == tx.origin);
@@ -494,6 +494,7 @@ contract Corporations is Upgradable
         db.SetUint(company, 'employees', db.GetUint(company, 'employees').add(1));
         string memory id = combine('employee', '_', uintToString(db.GetUint(company, 'employees')), '', '');
         db.SetUint(company, id, child); 
+        db.SetUint(child, 'employed', company);
     }
     
     function addBuilding(uint256 company, uint256 building) public
@@ -511,12 +512,12 @@ contract Corporations is Upgradable
         db.SetUint(company, 'employees', db.GetUint(company, 'employees').sub(1));
         string memory id = combine('employee', '_', uintToString(db.GetUint(company, 'employees')), '', '');
         db.SetUint(company, id, 0); 
+        db.SetUint(child, 'employed', 0);
     }
     
     function removeBuilding(uint256 company, uint256 building) public
     {
         require(assets.ownerOf(building, 'BUILDING') == tx.origin);
-        assets.transfer(centralTrustee, building, 'BUILDING');
         db.SetUint(company, 'buildings', db.GetUint(company, 'buildings').sub(1));
         string memory id = combine('building', '_', uintToString(db.GetUint(company, 'buildings')), '', '');
         db.SetUint(company, id, 0);
@@ -569,6 +570,6 @@ contract Corporations is Upgradable
             uint steel = items.itemCost('steel').mul(things.getItems3('BUILDING', buildingID));
             value = value.add(wood).add(stone).add(steel);
         }
-        return value;
+        return value.mul(getEmployees(company));
     }
 }

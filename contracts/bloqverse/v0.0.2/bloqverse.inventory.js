@@ -3,7 +3,7 @@ pragma solidity ^0.4.18;
 // Private Floyd = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 // Private FooFoo = 0xA0d2736e921249278dA7E872694Ae25a38FB050f
 
-// bloq002 = XXX
+// bloq002 = 0x827c074ba4F228abDd1c98f5521893c380691EC7
 
 /*
 

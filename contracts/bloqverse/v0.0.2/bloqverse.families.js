@@ -3,13 +3,16 @@ pragma solidity ^0.4.18;
 // Private Floyd = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 // Private FooFoo = 0xA0d2736e921249278dA7E872694Ae25a38FB050f
 
-// NOT ME = 0xFC08F50a8B157f26102F1392346D78C4d132af9c
+// Genesis Prime
+// 111289844878109423708526826116317304238808005787352761159317502897542254661420
 
-// Genesis Prime = 111289844878109423708526826116317304238808005787352761159317502897542254661420
+// Belly Pop Boo
+// 94011976869775928030958177182292812687116659522861038973095974402452914434165
 
-// Belly Pop Boo = 94011976869775928030958177182292812687116659522861038973095974402452914434165
+// Smithy Smitherson The Third
+// 51209924265025273315270136721647240845648238365126095795692133168641388244097
 
-// bloq002 = 0xd0F6c5eE251c046D9E729E072Ad605a802360990
+// bloq002 = 0x4b9e77627F6C97a314807703f6C16cc7eb165cf4
 
 /*
 
@@ -525,7 +528,15 @@ contract Families is Upgradable
     
     function getChildGuardian(uint256 dna) public view returns(string)
     {
-        return bytes32ToString(getChildGuardianBytes(dna));
+        if(getChildGuardianBytes(dna) == stringToBytes32(''))
+        {
+            uint id = db.GetUint(dna, 'employed');
+            return bytes32ToString(assets.metabytes(id, 'CORPORATION'));
+        }
+        else
+        {
+            return bytes32ToString(getChildGuardianBytes(dna));
+        }
     }
     
     function getChildGuardianBytes(uint256 dna) public view returns(bytes32)
