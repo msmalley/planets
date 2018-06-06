@@ -9,7 +9,7 @@ pragma solidity ^0.4.18;
 
 // v0.0.2 = 0x377f8Fb89B5b39D204D6C883ceFa607d0Cf8cA36
 
-// bloq002 = 0x35C6DcC0B4394c65387082d84b5b939Bc5268D24
+// bloq002 = 0x7F90dCD026228cAf1e5AA2a2bc9668FeB5A95379
 
 /*
 
@@ -238,6 +238,7 @@ contract Proxy is Upgradable
 
 contract ERC721 is Upgradable
 {
+    function balanceOf(address beneficiary, string optionalResource) public view returns (uint);
     function totalSupply(string optionalResource) public view returns (uint);
     function ownerOf(uint tokenId, string optionalResource) public view returns (address);
     function mint(address beneficiary, uint256 id, string meta, string optionalResource) public;
@@ -245,12 +246,20 @@ contract ERC721 is Upgradable
     function metabytes(uint tokenId, string optionalResource) public view returns(bytes32);
 }
 
+contract ERC20 is Upgradable
+{
+    function makeTokens(address Address, uint amount, string optionalResource) public;
+}
+
 contract Planets is Upgradable
 {
     Proxy db;
     ERC721 assets;
+    ERC20 tokens;
     
     using SafeMath for uint;
+    
+    address public centralBank;
     
     function() public payable
     {
@@ -261,22 +270,31 @@ contract Planets is Upgradable
     function Planets
     (
         address proxyAddress,
-        address assetAddress
+        address assetAddress,
+        address tokenAddress
     ) 
     public onlyOwner
     {
         db = Proxy(proxyAddress);
         assets = ERC721(assetAddress);
+        centralBank = proxyAddress;
+        tokens = ERC20(tokenAddress);
     }
     
     function updateProxy(address proxyAddress) public onlyOwner
     {
         db = Proxy(proxyAddress);
+        centralBank = proxyAddress;
     }
     
     function updateAssets(address assetAddress) public onlyOwner
     {
         assets = ERC721(assetAddress);
+    }
+    
+    function updateTokens(address tokenAddress) public onlyOwner
+    {
+        tokens = ERC20(tokenAddress);
     }
     
     function setupUniverse
@@ -286,6 +304,7 @@ contract Planets is Upgradable
         uint CoordinateLimit, 
         uint BlockIntervals, 
         uint WeiPerPlanet, 
+        uint AtomsPerPlanetMultiplier, 
         address DonationAddress
     ) 
     public onlyOwner
@@ -296,7 +315,17 @@ contract Planets is Upgradable
         db.setUint('planet_block_int', BlockIntervals);
         db.setUint('planet_price', WeiPerPlanet);
         db.setUint('planet_min_don', StartingWeiDonation);
+        db.setUint('planet_atoms', AtomsPerPlanetMultiplier);
         db.setAddress('planet_donation', DonationAddress);
+    }
+    
+    function updateAtoms
+    (
+        uint AtomsPerPlanetMultiplier
+    ) 
+    public onlyOwner
+    {
+        db.setUint('planet_atoms', AtomsPerPlanetMultiplier);
     }
     
     /*
@@ -497,7 +526,11 @@ contract Planets is Upgradable
     
     function generate_token(address beneficiary, uint256 id, string planetName) internal
     {
+        uint children = assets.balanceOf(beneficiary, 'KID');
+        uint atoms_per_planet = db.getUint('planet_atoms').mul(children);
         assets.mint(beneficiary, id, planetName, 'PT');
+        tokens.makeTokens(centralBank, atoms_per_planet.mul(msg.value), 'NRG');
+        tokens.makeTokens(beneficiary, atoms_per_planet, 'NRG');
     }
     
     function generate_planet

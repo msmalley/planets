@@ -3,7 +3,7 @@ pragma solidity ^0.4.18;
 // Private Floyd = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 // Private FooFoo = 0xA0d2736e921249278dA7E872694Ae25a38FB050f
 
-// bloq002 = 0x834D6CcdE00fC4F66F77893F629DCBB2271F9882
+// bloq002 = XXX
 
 /*
 
@@ -319,12 +319,18 @@ contract Corporations is Upgradable
     function getValue(uint256 company) public view returns(uint);
 }
 
+contract Choices is Upgradable
+{
+    function areAllied(address address1, address address2) public view returns(bool);
+}
+
 contract LevelOne is Upgradable
 {
     Proxy db;
     ERC20 tokens;
     ERC721 assets;
     Atoms atoms;
+    Choices choices;
     Corporations corporations;
     
     using SafeMath for uint;
@@ -342,6 +348,7 @@ contract LevelOne is Upgradable
         address tokenContractAddress,
         address assetContractAddress,
         address atomContractAddress,
+        address choicesContractAddress,
         address corpContractAddress
     ) 
     public onlyOwner
@@ -350,6 +357,7 @@ contract LevelOne is Upgradable
         tokens = ERC20(tokenContractAddress);
         assets = ERC721(assetContractAddress);
         atoms = Atoms(atomContractAddress);
+        choices = Choices(choicesContractAddress);
         corporations = Corporations(corpContractAddress);
         centralBank = proxyAddress;
     }
@@ -398,6 +406,15 @@ contract LevelOne is Upgradable
     public onlyOwner
     {
         corporations = Corporations(corpContractAddress);
+    }
+    
+    function updateChoices
+    (
+        address choicesContractAddress
+    ) 
+    public onlyOwner
+    {
+        choices = Choices(choicesContractAddress);
     }
     
     function centralSupply() public view returns
@@ -515,39 +532,40 @@ contract LevelOne is Upgradable
     {
         /* 
         
-        CONDITIONS & ACTIONS OF WINNING LEVEL ONE 
+        LEVEL 01 - Can you break the intergalactic central bank ???
         
-        -- Combined value of two companies > central reserve
-        -- Families of two company founders must be in an alliance
+        -- Combined value of two companies must be more than central reserve
+        -- The families of the two company founders must be in an alliance
         
         */
         address partner = assets.ownerOf(companyNumber2, 'CORPORATION');
-        uint centralReserves = tokens.balanceOf(centralBank, 'NRG');
-        uint centralReserve = tokens.balanceOf(centralBank, 'CT');
+        uint centralReserves = tokens.balanceOf(centralBank, 'ENERGY');
+        uint centralReserve = tokens.balanceOf(centralBank, 'CREDITS');
         uint value1 = corporations.getValue(companyNumber1);
         uint value2 = corporations.getValue(companyNumber2);
         uint combinedValue = value1.add(value2);
+        // Check requirements ...
         require(centralReserve > 0);
         require(centralReserves > 0);
+        require(combinedValue > centralReserve);
         require(hasCompletedLevelOne(partner) == false);
         require(hasCompletedLevelOne(tx.origin) == false);
         require(assets.ownerOf(companyNumber1, 'CORPORATION') == tx.origin);
-        require(combinedValue > centralReserve);
         require(choices.areAllied(tx.origin, partner) == true);
         /* 
         
         CENTRAL RESERVES ARE COMPLETELY REMOVED 
         
         */
-        tokens.destroyTokens(centralBank, centralReserve, 'CT');
-        tokens.destroyTokens(centralBank, centralReserves, 'NRG');
+        tokens.destroyTokens(centralBank, centralReserve, 'CREDITS');
+        tokens.destroyTokens(centralBank, centralReserves, 'ENERGY');
         /* 
         
         INITIATING PLAYER GETS ALL BANK CREDITS AND ENERGY 
         
         */
-        tokens.makeTokens(tx.origin, centralReserve, 'CT');
-        tokens.makeTokens(tx.origin, centralReserves, 'NRG');
+        tokens.makeTokens(tx.origin, centralReserve, 'CREDITS');
+        tokens.makeTokens(tx.origin, centralReserves, 'ENERGY');
         completeLevelOne(tx.origin, partner);
     }
     
@@ -560,9 +578,9 @@ contract LevelOne is Upgradable
     function completeLevelOne(address Address, address partner) internal
     {
         db.setsBool(Address, 'level_one', true);
-        db.setsUint(Address, 'partner', partner);
-        db.setsBool(partner, 'level_one', Address);
-        db.setsUint(partner, 'partner', Address);
+        db.setsAddress(Address, 'partner', partner);
+        db.setsBool(partner, 'level_one', true);
+        db.setsAddress(partner, 'partner', Address);
     }
     
     function remainingCreditsNeededToBreakTheBank(uint256 companyNumber) public view returns(uint)

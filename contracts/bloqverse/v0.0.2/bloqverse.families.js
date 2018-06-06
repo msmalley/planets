@@ -67,6 +67,7 @@ Step 27 -   Add Families Address to Proxy Whitelist
 Step 28 -   Add Families Address to Assets Write List
 Step 29 -   Add Families Address to Parents Write List
 Step 30 -   Administrators can now use ForcedMarriage() to generate children!
+XXXXXXX -   Run UpdateFamilies() in Choices Contract
 
 Move to Step 9 - Atoms
 

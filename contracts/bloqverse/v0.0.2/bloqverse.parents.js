@@ -7,7 +7,7 @@ pragma solidity ^0.4.18;
 // Wei = 10000000000000
 // Ether = 0.00001
 
-// bloq002 = 0x085C438D6BDC3af81B7BdcFDC5C228dc0160E353
+// bloq002 = 0xe12Ca1f9B7054D53cb21d2Ed39f2249233695901
 
 /*
 
@@ -281,6 +281,8 @@ contract Parents is Upgradable
     
     mapping(address => bool) canWriteToParents;
     
+    address public centralBank;
+    
     function() public payable
     {
         address donation_address = planets.donationAddress();
@@ -300,6 +302,7 @@ contract Parents is Upgradable
         assets = ERC721(assetContractAddress);
         tokens = ERC20(tokenContractAddress);
         planets = Planets(planetContractAddress);
+        centralBank = proxyAddress;
     }
     
     function setupParents
@@ -308,7 +311,7 @@ contract Parents is Upgradable
         uint WeiPerParent,
         uint BlockIntervals, 
         uint PlanetSalaryPercentage,
-        uint PlayerStartingCredits
+        uint PlayerStartingCreditMultiplier
     ) 
     public onlyOwner
     {
@@ -317,7 +320,7 @@ contract Parents is Upgradable
         db.setUint('parent_price', WeiPerParent);
         db.setUint('parent_min_don', StartingWeiDonation);
         db.setUint('parent_salary', PlanetSalaryPercentage);
-        db.setUint('parent_start', PlayerStartingCredits);
+        db.setUint('parent_start', PlayerStartingCreditMultiplier);
     }
     
     function updateProxy
@@ -327,6 +330,7 @@ contract Parents is Upgradable
     public onlyOwner
     {
         db = Proxy(proxyAddress);
+        centralBank = proxyAddress;
     }
     
     function updateAssets
@@ -368,18 +372,11 @@ contract Parents is Upgradable
         canWriteToParents[Address] = false;
     }
     
-    function destroyParent() public
+    function updateParent(string name) public
     {
+        require(stringToBytes32(name) != stringToBytes32(''));
         require(db.getsString(tx.origin, 'parent_name') != stringToBytes32(''));
-        uint256 id = db.getsUint(tx.origin, 'parent_pob');
-        db.setsString(tx.origin, 'parent_name', stringToBytes32(''));
-        db.setsUint(tx.origin, 'parent_bob', 0);
-        db.setsUint(tx.origin, 'parent_pob', 0);
-        db.setsUint(tx.origin, 'parent_dna', 0);
-        db.setsUint(tx.origin, 'parent_ally', 0);
-        db.setsAddress(tx.origin, 'parent_spouse', 0);
-        db.setUint('parents', db.getUint('parents').sub(1));
-        db.SetUint(id, 'parents', db.GetUint(id, 'parents').sub(1));
+        db.setsString(tx.origin, 'parent_name', stringToBytes32(name));
     }
     
     function generateParent
@@ -424,7 +421,8 @@ contract Parents is Upgradable
             db.SetUint(id, 'parents', db.GetUint(id, 'parents').add(1));
             bumpParentDonations();
             address planet_address = assets.ownerOf(id, 'PT');
-            tokens.makeTokens(tx.origin, starting_credits, 'CT');
+            tokens.makeTokens(tx.origin, starting_credits.mul(msg.value), 'CT');
+            tokens.makeTokens(centralBank, starting_credits, 'CT');
             uint salary = msg.value.div(db.getUint('planet_salary'));
             uint donation = msg.value.sub(salary);
             planet_address.transfer(salary);

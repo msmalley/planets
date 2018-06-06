@@ -18,6 +18,9 @@ Step 1 -    Initiate Bloqverse()
 
 Move to Step 2 - Proxy
 
+New updates:
+-- Level One
+
 */
 
 library SafeMath 

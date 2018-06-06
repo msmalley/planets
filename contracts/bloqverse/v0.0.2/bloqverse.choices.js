@@ -3,7 +3,7 @@ pragma solidity ^0.4.18;
 // Private Floyd = 0xB7a43A245e12b69Fd035EA95E710d17e71449f96
 // Private FooFoo = 0xA0d2736e921249278dA7E872694Ae25a38FB050f
 
-// bloq002 = 0x34310BDBc8bbD9e383ef21d962A8aD41C7ec2dA0
+// bloq002 = 0xbf9Fb85FaE3E54f7229A6CA09fAA7C6EE9cE0732
 
 /*
 
@@ -257,6 +257,8 @@ contract Parents is Upgradable
     function alliances(address ally1, address ally2) public;
     function getParentBytes(address parentAddress) public view returns(bytes32);
     function getPlanetOfBytes(address Address) public view returns(bytes32);
+    function getParentSpouse(address parentAddress) public view returns(address);
+    function getMarried(address parent1, address parent2) public;
 }
 
 contract Planets is Upgradable
@@ -269,6 +271,12 @@ contract ERC721 is Upgradable
 {
     function ownerOf(uint id, string optionalResource) public view returns (address);
     function metabytes(uint256 id, string optionalResource) public view returns(bytes32);
+    function mint(address beneficiary, uint256 id, string meta, string optionalResource) public;
+}
+
+contract Families is Upgradable
+{
+    function childDNA(address mother, address father, uint256 planetID) public view returns(uint256);
 }
 
 contract Choices is Upgradable
@@ -277,6 +285,7 @@ contract Choices is Upgradable
     Parents parents;
     Planets planets;
     ERC721 assets;
+    Families families;
     
     using SafeMath for uint;
     
@@ -336,6 +345,15 @@ contract Choices is Upgradable
         assets = ERC721(assetContractAddress);
     }
     
+    function updateFamilies
+    (
+        address familyContractAddress
+    ) 
+    public onlyOwner
+    {
+        families = Families(familyContractAddress);
+    }
+    
     function isActivePlayer(address Address) public view returns(bool)
     {
         require(stringToBytes32(getPlayerName(Address)) != stringToBytes32(''));
@@ -393,6 +411,19 @@ contract Choices is Upgradable
         }
     }
     
+    function currentLocation(address playerAddress) public view returns(uint256)
+    {
+        uint256 location = db.getsUint(playerAddress, 'location');
+        if(location > 0)
+        {
+            return location;
+        }
+        else
+        {
+            return db.getsUint(playerAddress, 'parent_pob');
+        }
+    }
+    
     function switchPlanet(uint xCoordinates, uint yCoordinates, uint zCoordinates) public 
     {
         require(isActivePlayer(tx.origin) == true);
@@ -417,6 +448,7 @@ contract Choices is Upgradable
     
     function areAllied(address address1, address address2) public view returns(bool)
     {
+        require(address1 != address2);
         require(parents.getAlly(address1) == address2);
         require(parents.getAlly(address2) == address1);
         return true;
@@ -501,22 +533,23 @@ contract Choices is Upgradable
     function haveChild(string nameOfChild) public returns(uint256)
     {
         address mother = parents.getParentSpouse(tx.origin);
+        uint planet = currentLocation(mother);
         require(mother > 0);
         require(parents.getParentSpouse(mother) == tx.origin);
-        uint child = generateChild(mother, tx.origin, planet, name);
+        uint child = generateChild(mother, tx.origin, planet, nameOfChild);
         require(child > 0);
         return child;
     }
     
-    function hasProposed(address father, address mother) public view returns(bool);
+    function hasProposed(address father, address mother) public view returns(bool)
     {
-        require((db.GetAddress(father, 'proposed') != mother));
+        require((db.getsAddress(father, 'proposed') != mother));
         return true;
     }
     
     function propose(address father, address mother) internal
     {
-        db.SetAddress(father, 'proposed', mother);
+        db.setsAddress(father, 'proposed', mother);
     }
     
     function wed(address mother, address father) internal
